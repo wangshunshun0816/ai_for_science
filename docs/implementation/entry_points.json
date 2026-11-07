@@ -1,0 +1,189 @@
+{
+  "basis": "按固定提交的目录盘点与获准静态阅读登记。子包按关联兼容面分类，粒度更细的采纳以 adoption_map.json 为准。",
+  "entries": [
+    {
+      "path": "bin/danus",
+      "category": "CLI",
+      "kind": "launcher",
+      "adoption": "controlled_migration",
+      "reason": "复用命令组织，项目 CLI 统一调用控制服务。",
+      "status": "planned"
+    },
+    {
+      "path": "bin/danus-mcp",
+      "category": "MCP 服务",
+      "kind": "launcher",
+      "adoption": "controlled_migration",
+      "reason": "复用网关服务入口组织，角色从受控认证取得。",
+      "status": "planned"
+    },
+    {
+      "path": "bin/human-summary-mcp",
+      "category": "MCP 服务",
+      "kind": "launcher",
+      "adoption": "controlled_migration",
+      "reason": "迁移摘要服务结构，读取受控快照并经过报告校验。",
+      "status": "planned"
+    },
+    {
+      "path": "bin/write-paper-mcp",
+      "category": "MCP 服务",
+      "kind": "launcher",
+      "adoption": "controlled_migration",
+      "reason": "迁移论文服务结构，接入签字和隔离编译。",
+      "status": "planned"
+    },
+    {
+      "path": "bin/codex",
+      "category": "兼容入口",
+      "kind": "launcher",
+      "adoption": "closed",
+      "reason": "原脚本直接转发预置 Codex 执行环境，首版关闭该启动路径。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/authoring/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移隔离撰写结构，替换原有启动与联网边界。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/core/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "isolated_preservation",
+      "reason": "数学事实图和模式由独立服务保留，检索文件按采纳映射单独迁移。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/execution/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移轮次与工作目录机制，关闭数学证明 worker 的直接启动。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/gateway/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移 MCP 注册结构，换用服务端身份授权。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/human_summary/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移摘要编排和泄漏检查，输入改为脱敏快照。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/integrations/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "closed",
+      "reason": "Matlas 集成未列入 §3.4 首版采纳项，关闭原接入。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/observability/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移图形展示与组件，读取受控查询 API。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/orchestration/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移 CLI 结构，禁止直接调用上游 worker 或写数据。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/tests/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "closed",
+      "reason": "根级上游测试作为参考，不注册为运行入口或随产品迁移。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/verify/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移冷启动与结构化报告模式，移除沙箱旁路。",
+      "status": "planned"
+    },
+    {
+      "path": "danus/write_paper/",
+      "category": "兼容入口",
+      "kind": "subpackage",
+      "adoption": "controlled_migration",
+      "reason": "迁移隔离撰写、引用与组装流程，接入产物签字。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/contracts/main_agent.md",
+      "category": "角色合同",
+      "kind": "contract",
+      "adoption": "closed",
+      "reason": "原主控合同用于数学证明编排，经验研究使用项目自身角色合同。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/contracts/verifier.md",
+      "category": "角色合同",
+      "kind": "contract",
+      "adoption": "isolated_preservation",
+      "reason": "只作为隔离数学服务的证明核验合同保留。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/contracts/worker.md",
+      "category": "角色合同",
+      "kind": "contract",
+      "adoption": "closed",
+      "reason": "原证明搜索 worker 合同不进入首版。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/skills/human-summary/",
+      "category": "技能包",
+      "kind": "skill_group",
+      "adoption": "controlled_migration",
+      "reason": "择取摘要写作结构，适配脱敏输入与结果校验。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/skills/verify/",
+      "category": "技能包",
+      "kind": "skill_group",
+      "adoption": "isolated_preservation",
+      "reason": "数学证明核验技能仅在固定版本的隔离数学服务范围内保留。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/skills/worker/",
+      "category": "技能包",
+      "kind": "skill_group",
+      "adoption": "closed",
+      "reason": "数学证明搜索技能不进入首版。",
+      "status": "planned"
+    },
+    {
+      "path": "agents/skills/write-paper/",
+      "category": "技能包",
+      "kind": "skill_group",
+      "adoption": "controlled_migration",
+      "reason": "择取论文结构和引用处理材料，按项目出版规则改造。",
+      "status": "planned"
+    }
+  ]
+}

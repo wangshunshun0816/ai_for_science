@@ -1,0 +1,201 @@
+{
+  "basis": "大方案 v1.2 §3.4；reuse_test 为 P1 迁移后的测试意图，本轮未执行。第 9 行的 closed 仅指不采纳上游实现。",
+  "rows": [
+    {
+      "design_row": 1,
+      "upstream_paths": [
+        "danus/core/factgraph.py",
+        "danus/core/schema.py"
+      ],
+      "adoption": "isolated_preservation",
+      "adoption_basis": "大方案 v1.2 §3.4 第 1 行原文：「数学核保留」「不直接改造成经验论断库；加只读引用与撤销同步适配」",
+      "required_changes": [
+        "不直接改造成经验论断库",
+        "加只读引用与撤销同步适配"
+      ],
+      "related_R_modules": [
+        "R04",
+        "R13",
+        "R19"
+      ],
+      "reuse_test": [
+        "同一已验证事实的 ID、前提和状态经只读端口返回一致",
+        "撤销同步后下游引用失效，写请求拒绝"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 2,
+      "upstream_paths": [
+        "danus/core/global_memory.py",
+        "danus/core/bm25.py"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 2 行原文：「复用检索算法与材料分类」「增加项目/角色/族的访问控制；新工作材料迁入统一仓储」",
+      "required_changes": [
+        "增加项目/角色/族的访问控制",
+        "新工作材料迁入统一仓储"
+      ],
+      "related_R_modules": [
+        "R03",
+        "R05"
+      ],
+      "reuse_test": [
+        "相同可见语料、查询及参数下，分词、得分与排序等价",
+        "授权过滤先于检索，越权材料不影响排序或计数"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 3,
+      "upstream_paths": [
+        "danus/gateway/server.py",
+        "danus/gateway/roles.py",
+        "danus/_mcp.py"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 3 行原文：「保留 MCP 包装与工具注册结构」「增加服务端身份授权；禁用生产 `all` 角色和任意项目路径」",
+      "required_changes": [
+        "增加服务端身份授权",
+        "禁用生产 `all` 角色和任意项目路径"
+      ],
+      "related_R_modules": [
+        "R02",
+        "R09"
+      ],
+      "reuse_test": [
+        "合规角色的工具注册、参数序列化与返回形状等价",
+        "伪造角色、all 与越权路径均拒绝"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 4,
+      "upstream_paths": [
+        "danus/execution/loop.py",
+        "danus/execution/scaffold.py"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 4 行原文：「复用轮次、工作目录及停止逻辑」「持久任务、运行挂起、租约、隔离启动、统一计费」",
+      "required_changes": [
+        "持久任务、运行挂起、租约、隔离启动、统一计费"
+      ],
+      "related_R_modules": [
+        "R07",
+        "R08",
+        "R08b",
+        "R14"
+      ],
+      "reuse_test": [
+        "以替身驱动相同轮次和停止条件，核对事件顺序与工作目录边界",
+        "挂起恢复后有效轮次不重复执行或计费"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 5,
+      "upstream_paths": [
+        "danus/orchestration/cli.py"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 5 行原文：「保留 CLI 组织」「通过控制服务调用新功能，不能旁路写数据」",
+      "required_changes": [
+        "通过控制服务调用新功能，不能旁路写数据"
+      ],
+      "related_R_modules": [
+        "R09",
+        "R16"
+      ],
+      "reuse_test": [
+        "同类命令解析、帮助、状态呈现及错误退出行为等价",
+        "替身控制服务收到请求，CLI 不直接写数据"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 6,
+      "upstream_paths": [
+        "danus/verify/launcher.py",
+        "danus/verify/service.py"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 6 行原文：「复用冷启动和结构化报告模式」「移除无条件绕过沙箱的启动方式；经验审计另建合同」",
+      "required_changes": [
+        "移除无条件绕过沙箱的启动方式",
+        "经验审计另建合同"
+      ],
+      "related_R_modules": [
+        "R12",
+        "R14"
+      ],
+      "reuse_test": [
+        "使用替身复核冷启动、报告结构与失败传播",
+        "启动参数无沙箱旁路，经验审计合同与数学报告分离"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 7,
+      "upstream_paths": [
+        "danus/observability/"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 7 行原文：「复用展示框架与部分图形组件」「改读受控查询 API；浏览器第三方脚本本地打包」",
+      "required_changes": [
+        "改读受控查询 API",
+        "浏览器第三方脚本本地打包"
+      ],
+      "related_R_modules": [
+        "R09",
+        "R20"
+      ],
+      "reuse_test": [
+        "相同授权快照映射为等价图节点、边和状态",
+        "界面仅调用受控 API，离线使用已打包脚本"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 8,
+      "upstream_paths": [
+        "danus/authoring/",
+        "danus/write_paper/",
+        "danus/human_summary/"
+      ],
+      "adoption": "controlled_migration",
+      "adoption_basis": "大方案 v1.2 §3.4 第 8 行原文：「复用隔离撰写和引用处理流程」「脱敏快照、数字绑定、范围审计、发布签字及隔离编译」",
+      "required_changes": [
+        "脱敏快照、数字绑定、范围审计、发布签字及隔离编译"
+      ],
+      "related_R_modules": [
+        "R20",
+        "R21"
+      ],
+      "reuse_test": [
+        "相同授权快照下核对引用组装、草稿与汇编的对应关系",
+        "缺失数字绑定或签字时拒绝发布，编译环境保持隔离"
+      ],
+      "status": "planned"
+    },
+    {
+      "design_row": 9,
+      "upstream_paths": [],
+      "adoption": "closed",
+      "adoption_basis": "大方案 v1.2 §3.4 第 9 行原文：「新增」「按第 6 章实现，不计入原仓库已有能力」",
+      "required_changes": [
+        "按第 6 章实现，不计入原仓库已有能力"
+      ],
+      "related_R_modules": [
+        "R05",
+        "R07",
+        "R08",
+        "R08c",
+        "R11"
+      ],
+      "reuse_test": [
+        "无上游等价性目标，后续按第 6 章验收新能力"
+      ],
+      "status": "planned"
+    }
+  ]
+}

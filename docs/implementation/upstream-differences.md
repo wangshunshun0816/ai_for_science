@@ -1,17 +1,27 @@
 # 上游差异与采纳登记
 
-日期：2026-11-07。阶段：P0 准备。此次核查仅限用户允许的路径、行数、LICENSE 和 HEAD。
+日期：2026-11-07。阶段：P0-1。按 A0 当日批准的只读范围核查。
 
 | 项目 | 事实/处置 | 状态 |
 |---|---|---|
 | 上游 HEAD | `6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c`，与大方案 3.4 相同 | 已核对 |
-| MCP 包装路径 | 大方案列 `gateway/_mcp.py`；实际文件盘点发现 `danus/_mcp.py` | 登记路径差异；尚未分析实现 |
+| MCP 包装路径 | 大方案列 `gateway/_mcp.py`；实际文件为 `danus/_mcp.py` | 采纳映射采用实际路径 |
 | 数学核 | `danus/core/factgraph.py`、`danus/core/schema.py` | P1 按隔离保留落地；服务未实现 |
 | 检索、执行、验证和展示组件 | P1 逐项选择具体文件受控迁入 `danus_ai/`，保留版权并登记修改 | 尚未复制或改造 |
-| 数学证明搜索 Agent 主体 | 不作为首版采纳项 | 关闭方向已明确；未开展源码级入口审计 |
-| 工作树与提交一致性 | 本次没有执行源码内容比对、工作树 clean 检查或源码哈希核验 | 未验证；HEAD 一致不等于工作树内容一致 |
+| 数学证明搜索 Agent 主体 | 不作为首版采纳项 | 相关 launcher、角色合同和技能的处置见 `entry_points.json` |
+| 工作树与提交一致性 | `git --no-optional-locks status --porcelain` 输出为空 | Git 工作树状态干净；不含被忽略文件的核验 |
 | 测试与能力 | 本次不执行上游代码/测试 | 未验证 |
 
 源路径与行数见 `reuse_manifest.json`；它是盘点记录，不是源码完整性证明、迁移完成记录或 P0 全量验收报告。
 
 P1 每项实际采纳补充：固定提交、源路径、目标模块/服务端口、采纳方式、版权与许可、修改文件内声明、具体变更、代码提交、测试及残余限制。所有改造只发生在项目副本；原基线始终只读。
+
+## 提交归属和复算
+
+本次 P0-1 交付由 AI 生成、人工审核。提交作者使用命令级 `Codex <codex@localhost>`，人工审核结果由 A0 另行登记。
+
+从项目根目录运行下列命令。脚本保留 manifest 中人工登记字段，重新采集可机器核对的字段，向标准输出写入 UTF-8（无 BOM）和 LF。使用保留原生输出字节的重定向方式保存到临时文件，即可与已提交 manifest 逐字节比较。
+
+```text
+uv run --python 3.12 --no-project --no-sync --offline --no-python-downloads --no-cache python -B scripts/p0_audit_upstream.py
+```

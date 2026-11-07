@@ -6,7 +6,7 @@
 
 - `D:\Danus_Coding\reference\Danus` 是第三方只读源码基线，不是本项目源码或可编辑依赖。
 - 固定上游提交：`6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c`。
-- P0 对该目录仅允许路径盘点、行数统计、LICENSE 阅读和 HEAD 查询，用于 manifest 与差异登记；不执行上游代码或测试。
+- A0 于 2026-11-07 批准扩大 P0-1 的只读范围。在路径盘点、行数统计和 LICENSE 阅读之外，可以阅读 `bin/`、`agents/` 及大方案 3.4 所列文件的内容，可以查询 `git --no-optional-locks status --porcelain`、`git rev-parse`、`git log -1 --format="%H %cI"`，并对单个文件计算 SHA-256。不得执行上游代码或测试。
 - 永远不在该目录改文件、执行 `git pull`、安装依赖或生成缓存；不复制整个目录进入本项目。
 - 禁止 `pip install -e`、`uv pip install -e` 或其他可编辑依赖/路径注入指向该目录。
 - P1 每项复用须显式选择并登记：受控迁移、隔离保留、关闭。
