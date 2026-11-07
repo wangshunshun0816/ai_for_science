@@ -22,11 +22,12 @@
 - Windows Python 用于允许的纯契约/路径兼容检查，不能代替 Linux 运行验收。
 - 正式控制服务运行在 Linux；Windows 开发采用 WSL2 Linux 文件系统。
 - `control.db` 及 WAL/SHM 文件不得位于 Windows 盘、`/mnt/c`、`/mnt/d`、其他 Windows 共享挂载或网络盘；UNC 只作 Windows 编辑访问入口，数据库由 WSL 内的 Linux 进程直接打开。
-- 当前 `D:\AI_for_science` 用于文档与纯契约准备。P1 建库前明确运行 checkout、venv、数据库、制品及备份的实际路径，并验证文件系统；未完成前不在 D 盘创建控制数据库。
-- 推荐将正式开发/运行 checkout 放入 WSL Linux 文件系统；迁移尚未执行，不能把建议写成完成状态。
+- 权威开发 checkout 为 Ubuntu ext4 上的 `/home/wangshunshun/danus-ai`。Windows 可经 `\\wsl.localhost\Ubuntu\home\wangshunshun\danus-ai` 编辑。项目的 Git、uv 和 Python 命令在 WSL 内执行。
+- `D:\AI_for_science` 为只读归档副本，后续提交在 WSL checkout 进行。
+- D-02 已确认本地 SQLite/WAL 为唯一生产后端。数据库尚未创建。建库前核对数据库、WAL/SHM、制品和备份的实际路径、文件系统与权限。
 
 ## 实施与验收
 
 - 按 P0–P6 工作包推进；设计决定、工程完成、效果证据分别记录。
 - 不把文档中的示例预算当实际付费授权，不把脚本或 mock 当真实角色资格。
-- 本次仅初始化仓库及准备文件；不据此声明任何 P 阶段整体通过。
+- 阶段验收按各自交付证据和 A0 记录判断。

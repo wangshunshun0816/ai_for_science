@@ -1,35 +1,28 @@
 # 开发前基线记录
 
-日期：2026-11-07。本记录细化用户本次要求，不改写原设计文档，不表示 P0 或 P1 已整体验收。
+日期：2026-11-07。依据 A0 决定 D-01 至 D-03，见 [决定记录](decisions/A0-P0-6-D01-D03.md)。本记录覆盖环境切换及验证。
 
-## 仓库
+## WSL 恢复与可行性
 
-已在 `D:\AI_for_science` 执行 `git init -b main`。本次未提交、推送或设置 GitHub remote；用户尚未提供目标仓库 URL。
+上轮 Ubuntu 启动时因发行版的 `ext4.vhdx` 缺失，挂载返回 `CreateInstance/MountDisk/HCS/ERROR_FILE_NOT_FOUND`。故障发生在 Linux 命令执行前，与项目配置无关。用户已重建 Ubuntu，新磁盘位于 `D:\wsl\ubuntu\ext4.vhdx`。
 
-## Python
+Ubuntu 以 WSL2 运行。Linux 用户为 `wangshunshun`，家目录为 `/home/wangshunshun`，`findmnt` 核实为 ext4。Git 为 2.53.0。使用 [uv 官方安装器](https://docs.astral.sh/uv/getting-started/installation/)将 uv 0.13.7 安装到 `~/.local/bin`，再通过 `uv python install 3.12` 安装并实际运行 CPython 3.12.16。项目的 `.python-version` 仍为 3.12。
 
-采用大方案 3.3 的 CPython 3.12。Windows 本机 `uv python list --only-installed` 实际列出 3.12.11 和 3.14.5；因此本机已有 Windows 版 3.12，无须为本次准备重复安装。
+| 访问路径 | 测试结果 |
+| --- | --- |
+| `wsl.exe -d Ubuntu -- bash -lc '…'` | 在 `~/danus-ai-probe` 写入并读回 `wsl-exe.txt`。Linux Git 在临时仓库返回 `true`。 |
+| `\\wsl.localhost\Ubuntu\home\wangshunshun\danus-ai-probe` | Windows 读回 Linux 标记文件，写入并读回 `unc.txt`。Windows Git 经 UNC 对临时仓库返回 `true`。 |
 
-`.python-version` 写为 `3.12`，限制所选系列，不代表已固定补丁或完成依赖兼容验收。P1 创建 `pyproject.toml` 时使用 `requires-python = ">=3.12,<3.13"`，安装测试后记录准确解释器版本、生成依赖锁并固定部署镜像。不得使用宽泛 `>=3.12` 来默许未经验证的 3.14。
+从 Linux 读回 UNC 写入的标记后，已删除并确认探测目录不存在。
 
-WSL 中的 Python/uv 尚未检查；Windows 安装不等于 Linux 环境已就绪。在已准备 Linux uv 的 WSL 环境中，缺少解释器时使用 `uv python install 3.12`，随后显式使用 3.12 创建环境。见 [uv 官方说明](https://docs.astral.sh/uv/guides/install-python/)。本次没有安装或升级解释器。
+## 权威开发 checkout
 
-## WSL 与运行目录
+权威 checkout 为 Ubuntu ext4 上的 `/home/wangshunshun/danus-ai`（`~/danus-ai`）。Windows 编辑入口为 `\\wsl.localhost\Ubuntu\home\wangshunshun\danus-ai`。项目的 Git、uv 及 Python 命令在 WSL 内运行。`D:\AI_for_science` 作为只读归档副本，后续开发提交在 WSL checkout 进行。
 
-`wsl --list --verbose` 已确认 Ubuntu 为 WSL2（查询时停止），另有运行中的 docker-desktop。尚未启动 Ubuntu 核查 Linux 用户、挂载和依赖，故不填写虚构的实际 Linux 路径。
+WSL 副本从 [GitHub](https://github.com/wangshunshun0816/ai_for_science) 克隆。迁移记录提交前，`main` 指向 `0659c72e10991473edd4019606b372048a534252`，10 笔可达提交的完整哈希与 D 盘一致。`git fsck --full` 通过，工作区干净。三份设计文档与 `licenses/Danus-LICENSE.txt` 的 SHA-256 均与既有登记值一致。
 
-建议采用 A：正式开发/运行 checkout 位于 WSL Linux 文件系统，例如 `~/danus-ai`；venv、数据库及运行制品位于明确的 Linux 本地目录。Windows 可通过 `\\wsl.localhost\Ubuntu\home\<Linux用户>\danus-ai` 编辑源码。数据库必须由 WSL 内进程以 Linux 路径访问，不经 UNC 打开。
+D-02 确认本地 SQLite/WAL 为唯一生产后端。数据库尚未创建。建库时须在 WSL 中验证数据库及 WAL/SHM 的实际路径和文件系统，并明确运行目录、制品、备份与权限。
 
-代码留在 D 盘并不单独违反“数据库不得放 Windows 挂载”的限制，但仅把数据库移入 WSL，尚不能证明满足大方案 3.2 对控制服务运行位置的完整要求。当前 D 盘工作区只用于文档与纯契约准备；正式运行采用 WSL 本地 checkout 是推荐方案，迁移尚未执行。
+## 上游审计复算
 
-P1 建库前关闭部署/StorageDecision：确认唯一生产后端、唯一权威开发 checkout、Linux 运行目录、venv、数据库（含 WAL/SHM）、制品、备份和权限；在 Linux 中解析真实路径并验证文件系统，拒绝指向 Windows 挂载或网络存储的数据库，包括符号链接绕行。只有路径字符串类似 `/home` 不足以证明底层挂载正确。
-
-不必在当前阅读/文档阶段移动整个仓库。切换时可先保留 D 盘副本，核对 Git 历史和未提交文件后转用 Linux checkout，避免两处同时编辑导致漂移。迁移方案与具体路径仍待落实。
-
-Microsoft 建议 Linux 工具使用 WSL 文件系统以获得较好的性能；本项目还需验证工具链、大小写及权限行为，不预先断言 UNC 编辑必然更慢。参考：[WSL 文件系统说明](https://learn.microsoft.com/en-us/windows/wsl/filesystems)。
-
-## 第三方基线
-
-用户指定的只读范围已写入根目录 `AGENTS.md`。新增 `THIRD_PARTY_NOTICES.md`、LICENSE 原文副本、初始 `reuse_manifest.json` 与差异登记。本次不复制源码、不改上游、不执行 pull 或 editable install。
-
-后续正式实施仍需读取角色规格相关合同、落实首包与独立复核责任。运行预算和资源采购不因本次工程准备自动获批。
+使用 Ubuntu 上的 Python 3.12，从 WSL checkout 运行原脚本，并传入 `--upstream /mnt/d/Danus_Coding/reference/Danus`。输出与已提交 manifest 未达到逐字节一致。Windows Git 使用 `core.autocrlf=true`，Linux Git 默认检查时将 Windows checkout 中 213 个 CRLF 路径报告为修改，因此输出的工作树匹配标记和状态列表发生变化。对同一 checkout 仅在单次诊断命令中传入 `-c core.autocrlf=true` 后，Git 状态报告恢复为空。原脚本、manifest 内的 Windows 路径和上游 checkout 均保留原状。
