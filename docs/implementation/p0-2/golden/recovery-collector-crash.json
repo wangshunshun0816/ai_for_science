@@ -13,6 +13,7 @@
     "run_ref": "fixture:run-method",
     "attempt_ref": "fixture:attempt-method-1",
     "start_new_run": false,
-    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 已完成节点的 evaluator_only_rows 足以核对原结果。崩溃发生在收集阶段，恢复原尝试的收集和对账，无需再次运行。"
+    "stats_available_before_recovery": false,
+    "expected_derivation": "先恢复原尝试的收集并与节点侧对账，制品与原尝试一致后才可计算统计"
   }
 }
