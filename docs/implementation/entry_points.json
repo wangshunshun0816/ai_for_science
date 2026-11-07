@@ -1,5 +1,5 @@
 {
-  "basis": "按固定提交的目录盘点与获准静态阅读登记。子包按关联兼容面分类，粒度更细的采纳以 adoption_map.json 为准。",
+  "basis": "按固定提交的目录盘点与获准静态阅读登记。源码子包的细粒度采纳方式以 adoption_map.json 为准。",
   "entries": [
     {
       "path": "bin/danus",
@@ -51,7 +51,7 @@
     },
     {
       "path": "danus/authoring/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移隔离撰写结构，替换原有启动与联网边界。",
@@ -59,7 +59,7 @@
     },
     {
       "path": "danus/core/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "isolated_preservation",
       "reason": "数学事实图和模式由独立服务保留，检索文件按采纳映射单独迁移。",
@@ -67,7 +67,7 @@
     },
     {
       "path": "danus/execution/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移轮次与工作目录机制，关闭数学证明 worker 的直接启动。",
@@ -75,7 +75,7 @@
     },
     {
       "path": "danus/gateway/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移 MCP 注册结构，换用服务端身份授权。",
@@ -83,7 +83,7 @@
     },
     {
       "path": "danus/human_summary/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移摘要编排和泄漏检查，输入改为脱敏快照。",
@@ -91,7 +91,7 @@
     },
     {
       "path": "danus/integrations/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "closed",
       "reason": "Matlas 集成未列入 §3.4 首版采纳项，关闭原接入。",
@@ -99,7 +99,7 @@
     },
     {
       "path": "danus/observability/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移图形展示与组件，读取受控查询 API。",
@@ -107,7 +107,7 @@
     },
     {
       "path": "danus/orchestration/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移 CLI 结构，禁止直接调用上游 worker 或写数据。",
@@ -115,7 +115,7 @@
     },
     {
       "path": "danus/tests/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "closed",
       "reason": "根级上游测试作为参考，不注册为运行入口或随产品迁移。",
@@ -123,7 +123,7 @@
     },
     {
       "path": "danus/verify/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移冷启动与结构化报告模式，移除沙箱旁路。",
@@ -131,7 +131,7 @@
     },
     {
       "path": "danus/write_paper/",
-      "category": "兼容入口",
+      "category": "源码子包",
       "kind": "subpackage",
       "adoption": "controlled_migration",
       "reason": "迁移隔离撰写、引用与组装流程，接入产物签字。",
