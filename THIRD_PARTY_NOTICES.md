@@ -6,7 +6,7 @@
 
 - 上游项目：https://github.com/frenzymath/Danus
 - 固定提交：`6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c`
-- 本地只读基线：`D:\Danus_Coding\reference\Danus`
+- 本地只读基线：`~/upstream/Danus`（WSL 原生克隆）。项目许可证副本取自固定提交的 LICENSE 原始字节。
 - 上游 LICENSE 中的版权声明：Copyright 2026 FrenzyMath
 - 许可证：Apache License, Version 2.0，SPDX `Apache-2.0`。
 - 上游 LICENSE 原文副本：[licenses/Danus-LICENSE.txt](licenses/Danus-LICENSE.txt)。

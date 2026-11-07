@@ -3,7 +3,7 @@
   "observed_date": "2026-11-07",
   "status": "inventory_only_not_stage_acceptance",
   "baseline": {
-    "local_path": "D:\\Danus_Coding\\reference\\Danus",
+    "local_path": "/home/wangshunshun/upstream/Danus",
     "repository_url": "https://github.com/frenzymath/Danus",
     "repository_url_basis": "architecture_document_3.4",
     "expected_commit": "6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c",
@@ -17,7 +17,7 @@
   "license": {
     "spdx": "Apache-2.0",
     "source_path": "LICENSE",
-    "sha256": "61bd88cc691cd7683d203a92c8b8b2934bab9fd5f102fdd115ae3d5f261717a8",
+    "sha256": "d51dbb6676bff13e23abd800608ec96bd6e637fd5b5194ef9ea8d848416d8ef3",
     "notice": "Copyright 2026 FrenzyMath",
     "project_copy": "licenses/Danus-LICENSE.txt",
     "notice_candidate_paths": []

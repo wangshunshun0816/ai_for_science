@@ -4,10 +4,10 @@
 
 ## 上游基线
 
-- `D:\Danus_Coding\reference\Danus` 是第三方只读源码基线，不是本项目源码或可编辑依赖。
+- `~/upstream/Danus`（`/home/wangshunshun/upstream/Danus`）是 U-01 的 WSL 原生第三方只读源码基线。该克隆已移除写权限，作为项目审计输入。`D:\Danus_Coding\reference\Danus` 保留为历史副本，停止用于日常审计。
 - 固定上游提交：`6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c`。
 - A0 于 2026-11-07 批准扩大 P0-1 的只读范围。在路径盘点、行数统计和 LICENSE 阅读之外，可以阅读 `bin/`、`agents/` 及大方案 3.4 所列文件的内容，可以查询 `git --no-optional-locks status --porcelain`、`git rev-parse`、`git log -1 --format="%H %cI"`，并对单个文件计算 SHA-256。不得执行上游代码或测试。
-- 永远不在该目录改文件、执行 `git pull`、安装依赖或生成缓存；不复制整个目录进入本项目。
+- 两份上游副本均保持只读。不得改文件、执行 `git pull`、执行上游代码或测试、安装依赖或生成缓存。不得把整个目录复制进本项目。
 - 禁止 `pip install -e`、`uv pip install -e` 或其他可编辑依赖/路径注入指向该目录。
 - P1 每项复用须显式选择并登记：受控迁移、隔离保留、关闭。
 - 受控迁移：选择具体文件迁入 `danus_ai/` 后改造，保留版权/许可声明，在修改文件中显著标注修改，登记来源提交、源路径、目标路径及变更。
