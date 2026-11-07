@@ -6,3 +6,4 @@
 
 docs/Danus-AI*.md -text
 docs/*.html -text
+licenses/** -text
