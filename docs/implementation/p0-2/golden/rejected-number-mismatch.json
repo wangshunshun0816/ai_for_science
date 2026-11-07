@@ -1,0 +1,18 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-rejected-number-mismatch",
+  "category": "拒绝",
+  "source": "大方案 C.5 数字被改成 0.50",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "report_override": {
+      "effect": "0.50"
+    }
+  },
+  "expected": {
+    "gate": "G0",
+    "submission_status": "rejected",
+    "accepted": false,
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 只将报告效应改为 0.50，与按原预测所得的 0.25 不符，G0 拒绝。"
+  }
+}

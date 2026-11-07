@@ -1,0 +1,45 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-recovery-idempotent-submission",
+  "category": "恢复",
+  "source": "大方案 C.5 重复提交相同幂等键",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "original_submission_ref": "fixture:submission-01",
+    "first_request": {
+      "idempotency_key": "fixture:submission-key-01",
+      "submission": {
+        "submission_id": "fixture:submission-01",
+        "statement_template": "在指定固定集合上，方法准确率相对基线增加 {{effect}}。",
+        "scope_ref": "fixture:scope-four-items",
+        "protocol_ref": "fixture:protocol-v1",
+        "prereg_ref": "fixture:prereg-v1",
+        "run_refs": [
+          "fixture:run-baseline",
+          "fixture:run-method"
+        ],
+        "required_premises": []
+      }
+    },
+    "repeated_request": {
+      "idempotency_key": "fixture:submission-key-01",
+      "submission": {
+        "submission_id": "fixture:submission-01",
+        "statement_template": "在指定固定集合上，方法准确率相对基线增加 {{effect}}。",
+        "scope_ref": "fixture:scope-four-items",
+        "protocol_ref": "fixture:protocol-v1",
+        "prereg_ref": "fixture:prereg-v1",
+        "run_refs": [
+          "fixture:run-baseline",
+          "fixture:run-method"
+        ],
+        "required_premises": []
+      }
+    }
+  },
+  "expected": {
+    "returned_submission_ref": "fixture:submission-01",
+    "create_new_claim_node": false,
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 两次请求的幂等键和提交内容一致，第二次返回原 submission，不为相同证据重复建图。"
+  }
+}

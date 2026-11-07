@@ -1,0 +1,17 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-error-audit-timeout",
+  "category": "未决",
+  "source": "大方案 C.5 审计超时，角色规格 §4.6、§3.7、TC-A7-03",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "audit_observation": "G0 和 G1 正常，G2 审计请求超时，未取得有效报告。"
+  },
+  "expected": {
+    "g0": "pass",
+    "g1": "supports_exact_scoped_statement",
+    "submission_status": "error",
+    "accepted": false,
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 四题结果不变。G2 超时属于审计服务错误，由服务标记 error，不能默认通过。"
+  }
+}

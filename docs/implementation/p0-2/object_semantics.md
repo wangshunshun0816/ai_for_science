@@ -74,11 +74,11 @@
 | EvidenceEvent | R13 是唯一提交入口。随有效证据维护论断历史，复现、撤销等变化保留原记录。 | §5.3 未列独立状态机。关联论断状态与历史变化按 §5.4–5.5 记录。 | §3.9、§5.1、§5.4–5.5 |
 | GateExecution | R12/R13 写入关口事件，记录关口类型、尝试、结果、trace、调用与用量引用。费用金额引用 R07。 | §5.3 未列独立状态机。关口尝试结果与提交状态分别记录。 | §5.1、§6.19、§6.29 |
 
-提交状态为 `received → checking → accepted/rejected/needs_evidence/error`。`error` 表示处理或验证出错，不是科学否定。C.5 中审计超时可能对应 error 或 needs_evidence，均不产生 accepted。重复提交相同幂等键且内容相同，返回原 submission，不重复建图。依据 §5.3、C.5。
+提交状态为 `received → checking → accepted/rejected/needs_evidence/error`。按角色规格 v0.2 §4.6、§3.7 及 TC-A7-03，审计超时或解析失败由服务标记为 `error`，缺少关键材料标记为 `needs_evidence` 并指出缺项。两者均不产生 `accepted`。`error` 表示处理或验证出错，不是科学否定。此区分细化了大方案 C.5 的概括表述。重复提交相同幂等键且内容相同，返回原 submission，不重复建图。另见大方案 §5.3、C.5。
 
 ## 待决问题
 
 1. **对象状态与写入归属。** §5.3 没有给批准记录、RunRequest、RunRecord 聚合、InvocationRecord、EvidenceReport、ClaimNode、EvidenceEvent、GateExecution 各自的独立状态机，也未指定三维工程状态记录的统一写入接口。需明确哪些仅保存事实或投影，哪些确实需要独立转换规则。
-2. **提交失败分类。** C.5 允许审计超时落入 `error` 或 `needs_evidence`，未指定两者的判定边界及恢复路径。附录 C 的 `run_refs` 与 §5.1 的 `run_ids` 也需在 R02 定稿时明确字段名和引用类型。
+2. **运行引用命名（R02 待定）。** 附录 C 的 `run_refs` 与 §5.1 的 `run_ids` 仍需在 R02 定稿时明确字段名和引用类型。原待决项中的审计失败分类已按上节关闭。
 3. **逐对象哈希投影。** 审批引用如何进入锁定设计、论断维度及证据记录如何参与内容标识，详见 [哈希字段](hash_fields.md#待决问题)。
 4. **重复与缺失的适用范围。** 固定枚举和一般评测的边界见 [分母定义](denominators.md#待决问题)。

@@ -1,0 +1,59 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-bounded-negative",
+  "category": "有限否定",
+  "source": "大方案 C.5 结果差值为 0",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "evaluator_only_rows": [
+      {
+        "sample_id": "q1",
+        "label": 1,
+        "baseline": 1,
+        "method": 1
+      },
+      {
+        "sample_id": "q2",
+        "label": 0,
+        "baseline": 0,
+        "method": 0
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 0
+      },
+      {
+        "sample_id": "q4",
+        "label": 0,
+        "baseline": 1,
+        "method": 1
+      }
+    ],
+    "submission": {
+      "submission_id": "fixture:submission-01",
+      "statement_template": "在指定的四题固定集合上，两臂准确率差为 {{effect}}，未达到锁定的意义阈值。",
+      "scope_ref": "fixture:scope-four-items",
+      "protocol_ref": "fixture:protocol-v1",
+      "prereg_ref": "fixture:prereg-v1",
+      "run_refs": [
+        "fixture:run-baseline",
+        "fixture:run-method"
+      ],
+      "required_premises": []
+    }
+  },
+  "expected": {
+    "expected_stats": {
+      "baseline_accuracy": "0.5",
+      "method_accuracy": "0.5",
+      "effect": "0",
+      "outcome": "bounded_no_meaningful_gain",
+      "interval": null,
+      "p_value": null
+    },
+    "scope_ref": "fixture:scope-four-items",
+    "expected_derivation": "逐题核对替换后的 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，两臂均预测 0，均错；q4 标签 0，两臂均预测 1，均错。两臂均答对 q1、q2，准确率各为 2/4 = 0.5，差值为 0，低于锁定阈值 0.1。有限否定仅适用于完整枚举的四题。"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-recovery-collector-crash",
+  "category": "恢复",
+  "source": "大方案 C.5 收集进程崩溃",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "interrupted_attempt_ref": "fixture:attempt-method-1",
+    "observation": "节点已执行完毕，收集进程崩溃，节点已有原预测输出。"
+  },
+  "expected": {
+    "action": "恢复原尝试的制品收集与对账",
+    "run_ref": "fixture:run-method",
+    "attempt_ref": "fixture:attempt-method-1",
+    "start_new_run": false,
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 已完成节点的 evaluator_only_rows 足以核对原结果。崩溃发生在收集阶段，恢复原尝试的收集和对账，无需再次运行。"
+  }
+}

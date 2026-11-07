@@ -1,0 +1,180 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-positive",
+  "category": "正面",
+  "source": "大方案 C.2–C.4",
+  "input": {
+    "task": {
+      "task_id": "fixture:task-01",
+      "mode": "full_research",
+      "question": "在固定的四题集合上，方法准确率是否比基线高超过 0.1？",
+      "budget_ref": "fixture:budget-01"
+    },
+    "candidate": {
+      "candidate_id": "fixture:candidate-01",
+      "version_ref": "fixture:candidate-v1",
+      "source_kind": "synthetic_design",
+      "prediction": "固定集合准确率差大于 0.1",
+      "scope_ref": "fixture:scope-four-items"
+    },
+    "selection": {
+      "decision_id": "fixture:selection-01",
+      "candidate_version_ref": "fixture:candidate-v1",
+      "ideation_report_ref": "fixture:ideation-ready-01",
+      "decision": "approve",
+      "meaningful_delta": "0.1"
+    },
+    "protocol": {
+      "protocol_id": "fixture:protocol-v1",
+      "approval_ref": "fixture:protocol-approval-01",
+      "design_type": "finite_population_enumeration",
+      "dataset_ref": "fixture:data-four-items",
+      "metric": "accuracy",
+      "evaluation_unit": "unique_item",
+      "required_items": [
+        "q1",
+        "q2",
+        "q3",
+        "q4"
+      ],
+      "sanity_suite_ref": "fixture:sanity-suite-v1"
+    },
+    "prereg": {
+      "prereg_id": "fixture:prereg-v1",
+      "selection_ref": "fixture:selection-01",
+      "protocol_ref": "fixture:protocol-v1",
+      "family_id": "fixture:family-01",
+      "question_ref": "fixture:question-v1",
+      "threshold_decision_ref": "fixture:threshold-01",
+      "family_declaration_ref": "fixture:family-declaration-v1",
+      "selection_history_ref": "fixture:selection-history-v1",
+      "randomness_plan": {
+        "seed_generalization_target": "not_applicable",
+        "reason": "deterministic_classifiers_and_complete_fixed_set"
+      },
+      "discrimination_plan": {
+        "applicability": "not_applicable",
+        "reason": "finite_set_performance_comparison_without_mechanism_claim"
+      },
+      "family_alpha": null,
+      "family_alpha_reason": "no_sampling_inference_in_finite_enumeration",
+      "arms": [
+        {
+          "arm_id": "baseline",
+          "role": "reference"
+        },
+        {
+          "arm_id": "method",
+          "role": "candidate"
+        }
+      ],
+      "estimand": "method_accuracy_minus_baseline_accuracy_on_exact_four_items",
+      "analysis_ref": "fixture:analysis-exact-accuracy-v1",
+      "effect_threshold": "0.1",
+      "inference": "exact_finite_population_only",
+      "missing_policy": "incomplete_if_any_item_missing",
+      "selection_feedback_policy": "one_locked_evaluation",
+      "stop_rule": "evaluate_all_four_items"
+    },
+    "runs": [
+      {
+        "run_id": "fixture:run-baseline",
+        "attempt_id": "fixture:attempt-baseline-1",
+        "mode": "confirmation",
+        "prereg_ref": "fixture:prereg-v1",
+        "arm_id": "baseline",
+        "code_ref": "fixture:code-baseline-v1",
+        "image_ref": "fixture:image-v1",
+        "data_ref": "fixture:data-four-items",
+        "sanity_ref": "fixture:sanity-baseline-pass",
+        "deterministic": true,
+        "seed": null,
+        "status": "succeeded",
+        "scientific_validity": "valid",
+        "predictions_ref": "fixture:predictions-baseline"
+      },
+      {
+        "run_id": "fixture:run-method",
+        "attempt_id": "fixture:attempt-method-1",
+        "mode": "confirmation",
+        "prereg_ref": "fixture:prereg-v1",
+        "arm_id": "method",
+        "code_ref": "fixture:code-method-v1",
+        "image_ref": "fixture:image-v1",
+        "data_ref": "fixture:data-four-items",
+        "sanity_ref": "fixture:sanity-method-pass",
+        "deterministic": true,
+        "seed": null,
+        "status": "succeeded",
+        "scientific_validity": "valid",
+        "predictions_ref": "fixture:predictions-method"
+      }
+    ],
+    "evaluator_only_rows": [
+      {
+        "sample_id": "q1",
+        "label": 1,
+        "baseline": 1,
+        "method": 1
+      },
+      {
+        "sample_id": "q2",
+        "label": 0,
+        "baseline": 0,
+        "method": 0
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q4",
+        "label": 0,
+        "baseline": 1,
+        "method": 1
+      }
+    ],
+    "submission": {
+      "submission_id": "fixture:submission-01",
+      "statement_template": "在指定固定集合上，方法准确率相对基线增加 {{effect}}。",
+      "scope_ref": "fixture:scope-four-items",
+      "protocol_ref": "fixture:protocol-v1",
+      "prereg_ref": "fixture:prereg-v1",
+      "run_refs": [
+        "fixture:run-baseline",
+        "fixture:run-method"
+      ],
+      "required_premises": []
+    }
+  },
+  "expected": {
+    "expected_stats": {
+      "baseline_accuracy": "0.5",
+      "method_accuracy": "0.75",
+      "effect": "0.25",
+      "interval": null,
+      "p_value": null,
+      "not_applicable_reason": "complete_enumeration_of_declared_finite_population",
+      "outcome": "improvement",
+      "provenance": "gate_computed"
+    },
+    "expected_gate": {
+      "g0": "pass",
+      "g1": "supports_exact_scoped_statement",
+      "g2_required": true,
+      "accept_if_g2": "no_blocking_issue_found"
+    },
+    "expected_claim_if_all_pass": {
+      "claim_id": "fixture:claim-01",
+      "kind": "empirical",
+      "outcome": "improvement",
+      "strength": "supported",
+      "logical_level": "L2",
+      "scope_ref": "fixture:scope-four-items",
+      "source_submission_ref": "fixture:submission-01"
+    },
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 0.25 大于锁定意义阈值 0.1，因此四题范围内为 improvement。有限总体枚举不计算区间和 p 值。G0、G1 满足后仍须 G2 返回 no_blocking_issue_found 才能接受。"
+  }
+}

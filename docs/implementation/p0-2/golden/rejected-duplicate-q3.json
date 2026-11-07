@@ -1,0 +1,78 @@
+{
+  "fixture_only": true,
+  "fixture_id": "fixture:golden-rejected-duplicate-q3",
+  "category": "拒绝",
+  "source": "大方案 C.5 复制 q3 十次",
+  "input": {
+    "base_fixture_ref": "fixture:golden-positive",
+    "append_evaluator_only_rows": [
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      },
+      {
+        "sample_id": "q3",
+        "label": 1,
+        "baseline": 0,
+        "method": 1
+      }
+    ],
+    "reported_evaluation_unit_count": 14
+  },
+  "expected": {
+    "evaluation_unit": "unique_item",
+    "unique_item_count": 4,
+    "pseudo_sample_count_accepted": false,
+    "expected_derivation": "逐题核对 evaluator_only_rows：q1 标签 1，两臂均对；q2 标签 0，两臂均对；q3 标签 1，baseline 错、method 对；q4 标签 0，两臂均错。baseline 为 2/4 = 0.5，method 为 3/4 = 0.75，method − baseline = 0.25。 十个附加行都标记为同一个 q3。原四个唯一题目各计一次，重复行不能增加独立样本量；拒绝把 14 行声称为 14 个评价单位。"
+  }
+}
