@@ -1,5 +1,5 @@
 {
-  "basis": "大方案 v1.2 §3.4；reuse_test 为 P1 迁移后的测试意图，本轮未执行。第 9 行的 closed 仅指不采纳上游实现。",
+  "basis": "依据大方案 v1.2 §3.4。reuse_test 记录后续测试意图，本轮未执行。new_implementation 表示上游没有对应代码，属于新增实现。closed 仅用于上游有代码但明确不采用的情况。",
   "rows": [
     {
       "design_row": 1,
@@ -180,7 +180,7 @@
     {
       "design_row": 9,
       "upstream_paths": [],
-      "adoption": "closed",
+      "adoption": "new_implementation",
       "adoption_basis": "大方案 v1.2 §3.4 第 9 行原文：「新增」「按第 6 章实现，不计入原仓库已有能力」",
       "required_changes": [
         "按第 6 章实现，不计入原仓库已有能力"

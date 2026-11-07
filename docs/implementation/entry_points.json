@@ -42,6 +42,14 @@
       "status": "planned"
     },
     {
+      "path": "danus/codex.py",
+      "category": "兼容入口",
+      "kind": "compatibility_module",
+      "adoption": "closed",
+      "reason": "与 bin/codex 同属预置 Codex 执行环境的兼容路径，首版关闭。",
+      "status": "planned"
+    },
+    {
       "path": "danus/authoring/",
       "category": "兼容入口",
       "kind": "subpackage",
