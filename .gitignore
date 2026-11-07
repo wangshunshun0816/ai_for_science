@@ -1,0 +1,44 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.uv-cache/
+*.egg-info/
+build/
+dist/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local credentials and runtime state; not a substitute for path validation
+.env
+.env.*
+!.env.example
+!.env.template
+*.key
+*.pem
+control.db
+control.db-wal
+control.db-shm
+control.db-journal
+*.db
+*.db-wal
+*.db-shm
+/reference/
+/data/
+/artifacts/
+runtime/
+secrets/
+backups/
+logs/
+
+# OS/editor local files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/

@@ -1,0 +1,596 @@
+{
+  "manifest_version": "p0-inventory-v1",
+  "observed_date": "2026-11-07",
+  "status": "inventory_only_not_stage_acceptance",
+  "baseline": {
+    "local_path": "D:\\Danus_Coding\\reference\\Danus",
+    "repository_url": "https://github.com/frenzymath/Danus",
+    "repository_url_basis": "architecture_document_3.4",
+    "expected_commit": "6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c",
+    "observed_head": "6d92e8d415933ca2ef52fd1a4da73fdfcd418f1c",
+    "head_matches_design": true,
+    "working_tree_matches_head": "not_verified",
+    "source_content_hashes": "not_collected_under_p0_read_scope"
+  },
+  "license": {
+    "spdx": "Apache-2.0",
+    "source_path": "LICENSE",
+    "sha256": "61bd88cc691cd7683d203a92c8b8b2934bab9fd5f102fdd115ae3d5f261717a8",
+    "notice": "Copyright 2026 FrenzyMath",
+    "project_copy": "licenses/Danus-LICENSE.txt",
+    "notice_candidate_paths": []
+  },
+  "allowed_observations": [
+    "file_paths",
+    "line_counts",
+    "LICENSE",
+    "git_HEAD"
+  ],
+  "inventory_scope": "Python file paths under danus/; includes ignored/hidden paths visible to rg; not an entry-point or content audit",
+  "source_files": [
+    {
+      "path": "danus/__init__.py",
+      "lines": 8,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/_mcp.py",
+      "lines": 20,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/__init__.py",
+      "lines": 22,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/common.py",
+      "lines": 159,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/driver.py",
+      "lines": 142,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/tests/__init__.py",
+      "lines": 1,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/tests/_fixtures.py",
+      "lines": 25,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/tests/fake_codex.py",
+      "lines": 61,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/tests/test_common.py",
+      "lines": 175,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/authoring/tests/test_driver.py",
+      "lines": 163,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/codex.py",
+      "lines": 220,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/__init__.py",
+      "lines": 45,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/_util.py",
+      "lines": 41,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/bm25.py",
+      "lines": 58,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/factgraph.py",
+      "lines": 316,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/global_memory.py",
+      "lines": 134,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/glossary.py",
+      "lines": 119,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/local_memory.py",
+      "lines": 69,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/schema.py",
+      "lines": 130,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/core/tests/test_core.py",
+      "lines": 420,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/__init__.py",
+      "lines": 76,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/__main__.py",
+      "lines": 16,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/layout.py",
+      "lines": 235,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/loop.py",
+      "lines": 255,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/scaffold.py",
+      "lines": 175,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/tests/conftest.py",
+      "lines": 16,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/tests/test_execution.py",
+      "lines": 213,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/execution/tests/test_loop.py",
+      "lines": 528,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/__init__.py",
+      "lines": 12,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/__main__.py",
+      "lines": 10,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/roles.py",
+      "lines": 45,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/server.py",
+      "lines": 304,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/gateway/tests/test_gateway.py",
+      "lines": 346,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/__init__.py",
+      "lines": 20,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/__main__.py",
+      "lines": 11,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/assemble.py",
+      "lines": 182,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/server.py",
+      "lines": 188,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/tests/__init__.py",
+      "lines": 1,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/tests/_fixtures.py",
+      "lines": 47,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/tests/test_assemble.py",
+      "lines": 148,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/human_summary/tests/test_server.py",
+      "lines": 255,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/integrations/__init__.py",
+      "lines": 12,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/integrations/matlas.py",
+      "lines": 98,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/integrations/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/integrations/tests/test_integrations.py",
+      "lines": 174,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/__init__.py",
+      "lines": 32,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/__main__.py",
+      "lines": 8,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/app.py",
+      "lines": 350,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/tests/test_observability_main.py",
+      "lines": 176,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/observability/tests/test_observability.py",
+      "lines": 234,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/__init__.py",
+      "lines": 35,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/__main__.py",
+      "lines": 10,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/cli.py",
+      "lines": 414,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/tests/conftest.py",
+      "lines": 15,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/tests/test_cli_verbs.py",
+      "lines": 784,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/orchestration/tests/test_orchestration.py",
+      "lines": 241,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/tests/__init__.py",
+      "lines": 1,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/tests/test_codex_env.py",
+      "lines": 82,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/tests/test_codex.py",
+      "lines": 255,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/__init__.py",
+      "lines": 13,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/__main__.py",
+      "lines": 18,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/launcher.py",
+      "lines": 213,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/prechecks.py",
+      "lines": 208,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/service.py",
+      "lines": 50,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/fake_codex.py",
+      "lines": 67,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/test_launcher.py",
+      "lines": 291,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/test_prechecks.py",
+      "lines": 296,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/test_service.py",
+      "lines": 218,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/verify/tests/test_verify.py",
+      "lines": 118,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/__init__.py",
+      "lines": 21,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/__main__.py",
+      "lines": 11,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/assemble.py",
+      "lines": 1142,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/paper_chunked.py",
+      "lines": 462,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/paper_math_verify.py",
+      "lines": 206,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/server.py",
+      "lines": 1832,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/__init__.py",
+      "lines": 0,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/_fixtures.py",
+      "lines": 100,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_assemble_edge.py",
+      "lines": 98,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_assemble.py",
+      "lines": 399,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_chunked.py",
+      "lines": 420,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_multi_paper.py",
+      "lines": 331,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_paper_math_verify.py",
+      "lines": 359,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_reform.py",
+      "lines": 324,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_server.py",
+      "lines": 1289,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    },
+    {
+      "path": "danus/write_paper/tests/test_subgraph.py",
+      "lines": 255,
+      "adoption_status": "not_adopted",
+      "content_review": "not_performed"
+    }
+  ],
+  "adopted_source_files": [],
+  "modified_upstream_files_by_this_task": [],
+  "tests": "not_run",
+  "planned_adoption": {
+    "controlled_migration": "Specific files only into danus_ai, with attribution and modification registration in P1",
+    "isolated_preservation": [
+      "danus/core/factgraph.py",
+      "danus/core/schema.py"
+    ],
+    "excluded": "Mathematical proof-search agent body; concrete entry points not audited"
+  },
+  "difference_register": "docs/implementation/upstream-differences.md",
+  "limitations": [
+    "HEAD and line counts do not prove working-tree integrity",
+    "No upstream code or tests executed",
+    "Per-component license and implementation review remains pending",
+    "P1 adoption must be explicitly registered before reuse"
+  ]
+}

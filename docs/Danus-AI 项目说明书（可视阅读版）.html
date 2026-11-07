@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Danus-AI 项目说明书 · 阅读版</title>
+<style>
+:root{--ink:#23394d;--muted:#61758a;--blue:#245e97;--rule:#dce5ec;--size:17px;scroll-behavior:smooth;scroll-padding-top:28px}*{box-sizing:border-box}body{margin:0;background:#f1f5f9;color:var(--ink);font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif;font-size:var(--size);line-height:1.9}aside{position:fixed;inset:0 auto 0 0;width:270px;background:#132c43;color:white;padding:30px 18px;overflow:auto}aside strong{font-size:24px;display:block;padding:0 10px}aside small{display:block;color:#b3c7d8;margin:4px 10px 20px}nav a{display:block;padding:8px 10px;color:#e1ebf3;text-decoration:none;border-radius:6px;font-size:14px;line-height:1.6}nav a:hover,nav a:focus{background:#29475f;color:#fff}nav a.sub{padding-left:26px;color:#adc5d8;font-size:12px;padding-top:4px;padding-bottom:4px}.tools{border-top:1px solid #466176;margin-top:20px;padding:18px 10px;display:flex;flex-wrap:wrap;gap:8px}button{cursor:pointer;border:1px solid #bacbd8;border-radius:6px;background:#fff;color:#23394d;padding:7px 10px;font:inherit;font-size:13px}main{margin-left:270px;padding:44px 45px 90px}article{max-width:1060px;margin:auto;background:white;padding:52px 56px;box-shadow:0 4px 25px #18354f0a;border-radius:10px}h1{font-size:38px;letter-spacing:.02em;line-height:1.35;margin:0 0 18px;color:#173b5c}h2{font-size:28px;color:#173b5c;border-top:1px solid var(--rule);padding-top:30px;margin-top:58px;line-height:1.5}h3{font-size:22px;margin-top:34px;line-height:1.5;color:#245e79}h4{font-size:19px;margin-top:30px;padding:12px 16px;background:#edf4fa;border-left:4px solid #387eac;line-height:1.6;border-radius:0 5px 5px 0}p{margin:14px 0}a{color:#236aa0;text-underline-offset:3px}strong{color:#173b5c}blockquote{margin:24px 0;padding:14px 20px;background:#f0f7f6;border-left:4px solid #278e8b;color:#325b5d}blockquote p{margin:0}.table-wrap{overflow-x:auto;margin:24px 0;border:1px solid var(--rule);border-radius:7px}table{border-collapse:collapse;width:100%;font-size:.88em;line-height:1.75}th{background:#eaf1f7;color:#1c4668;text-align:left}td,th{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:95px}tr:last-child td{border-bottom:0}tr:nth-child(even) td{background:#fafcfe}figure.diagram{margin:28px 0;padding:8px;border:1px solid #dce6ed;border-radius:9px;background:#f8fafc;cursor:zoom-in}figure svg{display:block;width:100%;height:auto}figcaption{text-align:center;font-size:12px;color:var(--muted);padding:9px}.diagram:focus{outline:3px solid #72a5cb}ol,ul{padding-left:1.6em}code{background:#f1f5f8;border-radius:4px;padding:2px 4px;font-size:.9em}dialog{border:0;border-radius:10px;padding:20px;background:#f8fafc;width:96vw;max-width:1700px;height:94vh}dialog::backdrop{background:#0b2134bb}.zoom-head{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:10px}.zoom-content{height:calc(100% - 60px);overflow:auto}.zoom-content svg{display:block;width:100%;min-width:1050px;height:auto}.cover-meta{font-size:13px;color:var(--muted);margin-bottom:25px}.toplink{position:fixed;bottom:20px;right:20px;background:#173b5c;color:white;text-decoration:none;border-radius:20px;padding:6px 16px;font-size:13px}.mobile-nav{display:none}
+@media(max-width:1050px){aside{width:225px;padding:25px 12px}main{margin-left:225px;padding:25px 20px}article{padding:34px 28px}h1{font-size:32px}}
+@media(max-width:760px){aside{position:static;width:auto;max-height:none;padding:20px}aside nav{display:none}aside.open nav{display:block}aside small{margin-bottom:8px}.tools{padding:10px 0 0;margin-top:8px}.mobile-nav{display:inline-block}main{margin-left:0;padding:14px 10px}article{padding:25px 18px}h1{font-size:29px}h2{font-size:25px}.table-wrap{font-size:15px}.zoom-content svg{min-width:1050px}}
+@media print{aside,.toplink,dialog{display:none}body{background:white;font-size:11pt;line-height:1.65}main{margin:0;padding:0}article{max-width:none;box-shadow:none;padding:0}h2{break-before:page;border-top:0;margin-top:0;padding-top:0}h3,h4{break-after:avoid}figure,blockquote,tr{break-inside:avoid}.diagram{max-width:150mm;margin:12px auto!important}table{font-size:9pt}.table-wrap{overflow:visible}a{color:inherit;text-decoration:none}@page{size:A4;margin:18mm}}
+</style></head><body id="top"><aside><strong>Danus-AI</strong><small>项目说明书 · 阅读版 1.1<br>2026-11-05</small><button class="mobile-nav" onclick="document.querySelector('aside').classList.toggle('open')">展开 / 收起目录</button><nav><a href="#chapter-1">01 产品定位与范围</a><a href="#chapter-2">02 一次研究的过程</a><a href="#chapter-3">03 整体架构与部署</a><a href="#chapter-4">04 全部功能模块</a><a class="sub" href="#section-4-1">交互与成果 · 2</a><a class="sub" href="#section-4-2">规划与设计 · 8</a><a class="sub" href="#section-4-3">角色与执行 · 4</a><a class="sub" href="#section-4-4">证据生命周期 · 7</a><a class="sub" href="#section-4-5">契约与资产 · 3</a><a class="sub" href="#section-4-6">贯穿治理 · 3</a><a class="sub" href="#section-4-7">工程与评测 · 3</a><a href="#chapter-5">05 角色与资料流转</a><a href="#chapter-6">06 可靠性与运行控制</a><a href="#chapter-7">07 成果与能力验证</a><a href="#chapter-8">08 开发实施路线</a><a href="#reference">术语与原规格索引</a></nav><div class="tools"><button id="smaller">字号 −</button><button id="larger">字号 ＋</button><button onclick="window.print()">打印 / 保存 PDF</button></div></aside><main><article><div class="cover-meta">工程规格 v1.2 · 30 个模块 · 4 张可放大架构图 · 离线阅读</div><h1>Danus-AI 项目说明书</h1>
+<p><strong>从研究问题到可核查成果：功能、架构与实施路线</strong></p>
+<p>阅读版 1.1 · 2026-11-05<br />
+依据：《Danus-AI 科研智能体产品架构与落地执行方案 v1.2 最终确认稿》</p>
+<blockquote>
+<p>本说明书解释同一套产品设计，不新增功能承诺、不替代工程规格。文中的功能与流程是拟实施方案；“已确定设计”“待验证参数”“实际通过验收”是不同状态。所有案例均为演示，不是已有实验成绩。</p>
+</blockquote>
+<h2>一页总览</h2>
+<p><strong>Danus-AI 帮助研究者把一个问题推进成有明确依据、范围与限制的研究成果。</strong> 它串联文献、选题、实验设计、代码实现、运行、证据审核、复现和报告；人负责选题、协议、价值判断和发布。</p>
+<p>首版交付给单名研究操作者，一个个人租户可管理多个项目；数据和权限从第一版按租户划分，并用两个测试租户验隔离。首个完整场景是智能体/API 实验。使用现成模型承担理解与生成，使用程序控制权限、费用、数据、计算和状态。运行形态为一台 Linux 控制主机、按需启动的角色会话，以及本地或远程的隔离执行节点；Windows 用户通过 WSL2 使用。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>读者最关心的问题</th>
+<th>本项目的回答</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户怎样进入？</td>
+<td>完整科研任务、生成研究候选、评审已有课题三个入口；后两者停在人工选题之前</td>
+</tr>
+<tr>
+<td>系统怎么组成？</td>
+<td>五个功能层，加贯穿各层的预算/数据/权限控制，以及工程与评测基础，共 30 个主线模块</td>
+</tr>
+<tr>
+<td>多 Agent 是什么？</td>
+<td>13 个责任角色：1 个人、7 类模型角色、5 类程序角色；不是 13 个模型持续对话</td>
+</tr>
+<tr>
+<td>谁判断结果？</td>
+<td>程序重算与统计、模型方法学审计共同提供依据；唯一提交门决定能否进入正式论断库</td>
+</tr>
+<tr>
+<td>最终得到什么？</td>
+<td>候选与选择记录、锁定实验方案、运行台账、证据报告、复现记录、报告及可核查制品包</td>
+</tr>
+<tr>
+<td>能否保证发现？</td>
+<td>不保证。有效负面结果、证据不足和无可推进候选都是必须诚实交付的结果</td>
+</tr>
+<tr>
+<td>当前怎么开发？</td>
+<td>先做人工可运行的完整证据闭环，再接入角色自动化、产品界面和扩展能力</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>建议阅读顺序：</strong> 第 1—3 章建立整体认识；第 4 章按层查看模块；第 5—7 章理解协作、可信边界和验收；第 8 章查看开发安排。末尾附术语表及原规格定位索引。</p>
+<h2>目录</h2>
+<ol>
+<li><a href="#chapter-1">产品定位与首版范围</a></li>
+<li><a href="#chapter-2">用户如何完成一次研究</a></li>
+<li><a href="#chapter-3">系统整体架构</a></li>
+<li><a href="#chapter-4">各层模块如何工作</a></li>
+<li><a href="#chapter-5">角色协作与研究资料流转</a></li>
+<li><a href="#chapter-6">科研可靠性与运行控制</a></li>
+<li><a href="#chapter-7">成果交付与能力验证</a></li>
+<li><a href="#chapter-8">开发实施路线</a></li>
+</ol>
+<p>附录：<a href="#reference">术语速查与原规格索引</a></p>
+<p><a id="chapter-1"></a></p>
+<h2>1. 产品定位与首版范围</h2>
+<h3 id="section-1-1">1.1 为谁解决什么问题</h3>
+<p>Danus-AI 面向需要实际开展研究、同时愿意审核关键决定的科研工作者。研究者常常需要在文献、脚本、模型调用、数据、实验记录和论文草稿之间反复转移信息。仅得到一个回答或一段代码，还无法判断它是否真正解决问题、比较是否公平、结果能否重算。</p>
+<p>产品把这些工作接成有记录的研究过程。每个候选有来源和验证草案；每个实验有事先锁定的条件；每个结果能追到原始运行；每项正式结论都有范围和证据状态。失败、修改和人工干预也进入记录，便于继续研究和复核。</p>
+<p>人承担四类科研决定：批准测量协议、选择具体课题、评价成果价值并定稿、签署最终发布物。系统在已批准范围内执行，不为每一次工具调用重新请求人工许可；超出预算、数据用途或科学设计时进入对应变更流程。</p>
+<h3 id="section-1-2">1.2 首版做什么，后续再做什么</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>范围</th>
+<th>交付内容</th>
+<th>边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>首版完整能力</td>
+<td>智能体/API 研究的文献—选题—实验—证据—复现—报告闭环</td>
+<td>任务须有可用协议、基线、数据和评测方法</td>
+</tr>
+<tr>
+<td>首版独立功能</td>
+<td>生成研究候选、评审已有课题</td>
+<td>复用主流程，不自动进入确认实验</td>
+</tr>
+<tr>
+<td>首版兼容能力</td>
+<td>引用现有 Danus 数学记录，保留隔离后的原验证路径</td>
+<td>原有非形式审核不能被标成 Lean 形式证明</td>
+</tr>
+<tr>
+<td>后续研究轨道</td>
+<td>训练方法、模型架构及适用的其他学科</td>
+<td>各自补齐任务模板、验证方法、基线和算力控制后开放</td>
+</tr>
+<tr>
+<td>后续模型优化</td>
+<td>某个窄任务的微调或独立强化学习试验</td>
+<td>根据任务收益和完整成本立项，不是首版必经步骤</td>
+</tr>
+</tbody>
+</table></div>
+<p>首版采用自托管、本地工作台与 CLI，不承诺多租户公共云、任意平台自动购买算力、所有科研领域通用或无人值守地保证发现。用户应具备运行 Linux/WSL2、管理模型账户和审核研究材料的能力。</p>
+<p>后续市场形态面向多个个人研究者，每人拥有独立租户，并非多人团队。首版铺好账户/租户/项目、数据/凭证/费用和异步任务边界；未来托管仍需公网安全、强隔离、容量、备份和运营专项验收，不能承诺零改造。完整自主数学研究与 Lean 新能力后续建设，首版只保留受控兼容和引用。</p>
+<h3 id="section-1-3">1.3 怎样理解项目的三个目标</h3>
+<p>第一层是<strong>工程可执行</strong>：有权限边界，能限额运行、暂停、恢复和追溯。第二层是<strong>科研可靠性</strong>：在明确任务上，错误确认、有效发现和成本达到预先规定的标准。第三层是<strong>实际研究价值</strong>：结果是否帮助用户推进、调整或停止一项研究。</p>
+<p>这三层分别验证。跑通流程不能证明更少犯错；通过受控评测不能保证每个新课题有价值；用户采用一项结果也不反过来证明它科学正确。工作台和成绩单会分开展示这些状态。</p>
+<p><a id="chapter-2"></a></p>
+<h2>2. 用户如何完成一次研究</h2>
+<h3 id="section-2-1">2.1 三个入口与固定出口</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>入口</th>
+<th>用户提供</th>
+<th>系统交付与停止位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>完整科研任务</td>
+<td>问题、范围、已有材料、数据权限、资源上限和目标成果</td>
+<td>推进完整流程；在人工关口等待，最后交付待签字成果</td>
+</tr>
+<tr>
+<td>生成研究候选</td>
+<td>背景问题、约束与候选上限</td>
+<td>已检查的候选、排序理由和验证草案；停在人工选择前</td>
+</tr>
+<tr>
+<td>评审已有课题</td>
+<td>原始想法、相关材料与约束</td>
+<td>保留原意的结构化课题、问题清单和改进建议；停在人工选择前</td>
+</tr>
+</tbody>
+</table></div>
+<p>两个独立入口与完整流程使用同一套实现。用户决定继续时，沿用原任务、候选及版本，不重新生成一份脱离之前审核的课题。单个已有课题无需制造多个候选来做无意义排名。</p>
+<h3 id="section-2-2">2.2 贯穿案例：一种智能体策略是否值得采用</h3>
+<p>以下案例用于说明工作方式：研究者希望比较“带任务分解的执行策略”与现有基线，在受控工具任务中是否提高合规完成率，并满足预先约定的资源条件。</p>
+<p>初始问题还不够精确。系统需要明确任务集合、质量指标、比较的模型版本、可用工具、可信终态与约束、方法和基线各自能用多少资源，以及什么程度的改善才值得采用。这里不预填一个看似通用的样本数或收益阈值，它们属于具体研究设计。</p>
+<figure class="diagram" tabindex="0" role="button" aria-label="放大：图 1：一次研究的主流程与返回路径"><svg xmlns="http://www.w3.org/2000/svg" width="1450" height="1510" viewBox="0 0 1450 1510" role="img"><title>科研流程｜从问题到有范围的成果</title><desc>固定科研依赖，内部任务可动态组合；人工决定绑定具体版本。</desc><defs><marker id="arrow-02" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#52768d"/></marker></defs><rect width="1450" height="1510" fill="#f8fafc"/><text x="48" y="68.88" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="36" font-weight="700" fill="#17324d">科研流程｜从问题到有范围的成果</text><text x="48" y="110.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">固定科研依赖，内部任务可动态组合；人工决定绑定具体版本。</text><rect x="365" y="140" width="720" height="120" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="181.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">01  建立任务</text><text x="385" y="215.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">问题、范围、数据权限、资源上限</text><text x="385" y="248.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">R09 接收；R16 建立研究任务</text><path d="M 725,263 L 725,293" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="300" width="720" height="120" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="341.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">02  生成与检查候选</text><text x="385" y="375.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">文献 → 候选 → 最小验证草案 → 检查 → 排序</text><text x="385" y="408.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">R03 / R15c / R15b / R17 / R16</text><path d="M 725,423 L 725,453" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="460" width="720" height="120" rx="16" fill="#eef5fc" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="501.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">03  人工选择候选版本</text><text x="385" y="535.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">A0 选择、退回或放弃；批准范围与意义阈值</text><text x="385" y="568.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">独立候选入口在此决定之前停止</text><path d="M 725,583 L 725,613" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="620" width="720" height="120" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="661.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">04  正式设计与锁定</text><text x="385" y="695.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">协议批准 / 适用性 → A4 正式核对与校准</text><text x="385" y="728.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">审核通过后由 R06 锁定预注册</text><path d="M 725,743 L 725,773" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="780" width="720" height="120" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="821.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">05  实现与正式运行</text><text x="385" y="855.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">A5 开发调试 → R10a 健全性 → R08 确认运行</text><text x="385" y="888.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">数据授权、预算预占、代码与环境全部绑定</text><path d="M 725,903 L 725,933" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="940" width="720" height="120" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="981.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">06  形成证据判定</text><text x="385" y="1015.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">G0 记录检查 → G1 统计 → G2 方法学审计</text><text x="385" y="1048.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">R13 汇总；只有合格陈述进入正式论断库</text><path d="M 725,1063 L 725,1093" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="1100" width="720" height="120" rx="16" fill="#eef5fc" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="1141.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">07  复现与价值评审</text><text x="385" y="1175.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">R18 按适用计划复核；R19 更新证据状态</text><text x="385" y="1208.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">A0 决定定稿、补实验或停止投入</text><path d="M 725,1223 L 725,1253" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)"/><rect x="365" y="1260" width="720" height="120" rx="16" fill="#eef5fc" stroke="#d9e3ec" stroke-width="2"/><text x="385" y="1301.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">08  成果包与发布决定</text><text x="385" y="1335.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">R21 生成报告、图表、代码与证据清单</text><text x="385" y="1368.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">A0 对最终版本签字；下载交付或批准发布</text><rect x="40" y="300" width="280" height="154" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="60" y="341.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">两个独立入口</text><text x="60" y="374.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">生成研究候选</text><text x="60" y="406.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">评审已有课题</text><text x="60" y="437.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">均复用步骤 01—02</text><path d="M 320,362 L 360,362" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><rect x="1130" y="300" width="280" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1150" y="341.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#976314">无可推进候选</text><text x="1150" y="374.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">有限补充或结束本轮</text><text x="1150" y="406.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">保存候选与失败理由</text><path d="M 1090,362 L 1125,362" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><rect x="1130" y="620" width="280" height="154" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1150" y="661.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">没有适用协议</text><text x="1150" y="694.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">建设 / 适配及独立参考</text><text x="1150" y="726.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">A7 审核；A0 批准</text><text x="1150" y="757.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">返回 A4 正式核对</text><path d="M 1090,682 L 1125,682" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><rect x="40" y="780" width="280" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="60" y="821.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#976314">健全性未通过</text><text x="60" y="854.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">开发修复后重新检查</text><text x="60" y="886.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">设计变化须另走变更</text><path d="M 360,842 L 325,842" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><rect x="1130" y="940" width="280" height="190" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1150" y="981.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#976314">拒绝 / 出错 / 待补证</text><text x="1150" y="1014.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">返回相应责任环节</text><text x="1150" y="1046.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">保留记录与已花费用</text><text x="1150" y="1077.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">已见确认结果后</text><text x="1150" y="1109.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">不得沿用旧条件择优</text><path d="M 1090,1002 L 1125,1002" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><rect x="40" y="940" width="280" height="190" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="60" y="981.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">科学结果分别报告</text><text x="60" y="1014.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">支持限定范围的改善</text><text x="60" y="1046.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">支持有限否定</text><text x="60" y="1077.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">证据不足保持未决</text><text x="60" y="1109.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">失败不自动证明无效</text><path d="M 360,1002 L 325,1002" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-02)" stroke-dasharray="9 9"/><text x="48" y="1477.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">运行失败不进入成功入图分支；诚实负面与不确定报告仍可作为项目交付。</text></svg><figcaption>图 1：一次研究的主流程与返回路径 · 点击放大查看</figcaption></figure>
+<p><em>图 1：箭头表示研究推进与退回方向。协议已经批准且适用时可复用；证据不足、失败或没有候选均有合法出口。</em></p>
+<h3 id="section-2-3">2.3 从问题到候选：先把研究理由说清楚</h3>
+<p>系统先检索文献，把原文已有结果、存在的冲突和本次新推断分开。候选可以是“改变任务分解策略”，也可以是“减少无效工具调用”。每个候选附相关工作、可测预测、关键对照、可能失败的条件和最小验证草案。</p>
+<p>候选检查回答的是：是否具备交给人选题的材料和可行路径。检索不到完全相同的论文，不足以证明全球首创；找到相似思路，也不能直接断言没有研究价值。数据接口、实现或费用不确定时，先用开发数据做小试点，确认能否开展实验。</p>
+<p>通过检查后才排序。系统展示候选之间的取舍，保留未入选方案和理由。人批准的是一个具体候选版本及其研究范围。全部候选都不合适时，系统返回“没有可推进候选”，保存材料并结束本轮，不强行凑出课题。</p>
+<h3 id="section-2-4">2.4 从候选到正式实验：先决定怎么判断，再看结果</h3>
+<p>选题后，协议作者定义任务的测量方法、标准基线、数据切分和基本检查；分析设计者选择比较对象、主次指标和统计单位，引用人批准的最小有意义收益，并确定失败处理和停止规则。已有合格模板先检查适用条件；超出条件或科学影响不明时重新审核。</p>
+<p>这些设计通过审核和必要批准后，形成锁定的预注册。方法实现者再开发代码，在允许的开发/验证数据上调试。正式运行前绑定代码、镜像、配置、数据版本及通过的健全性报告，不能在看到结果后再换一套更容易通过的规则。</p>
+<p>案例中，如果任务分解策略使用了更多 token，协议就必须事先决定：比较相同预算下的质量，还是测量质量—成本关系。单看准确率提高，不能自动得出“策略更高效”的结论。</p>
+<p>协议设计依靠有来源的组件、可信计分、独立参考和方法复核，再经 A7/A0 审核批准；不是通用模型凭提示词自写自评。既检查“算分是否正确”，也检查“指标是否回答问题”。无信息基线查异常，主要基线支持比较，消融分析组件贡献，三者不能混用。切分按实体、时间或模板及泛化目标设计，A9 保管隐藏数据。</p>
+<p>协议确定后，A4 必须完成正式分析的跨字段核对和校准，再由 R06 锁定；模板超范围或缺独立参考时停在设计/探索，不能先确认再补依据。</p>
+<h3 id="section-2-5">2.5 从运行到成果：分别处理三类科学结果</h3>
+<p>可信执行程序收集原始输出，重算指标，保存全部尝试和费用。提交后依次检查记录与资格、统计支持、方法学问题。系统只有在全部条件满足时，才把限定范围的论断写入正式证据库。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>案例结果</th>
+<th>系统应怎样处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>有证据支持改善</td>
+<td>写明任务、模型、资源与数据范围；不能扩大成“所有智能体任务都更好”</td>
+</tr>
+<tr>
+<td>有证据排除达到目标的改善</td>
+<td>形成有限否定，说明在已测条件下排除了多大收益；负结果同样可以有价值</td>
+</tr>
+<tr>
+<td>样本、精度或设计不足</td>
+<td>保留证据不足报告和下一步选项；不能改写成“已证明无效”</td>
+</tr>
+</tbody>
+</table></div>
+<p>后续复现按事前规定的条件进行。重新运行相同代码、使用新独立数据、独立重新实现解决的问题不同，报告分别说明。人据证据、成本和实际用途决定定稿、补充实验或停止投入。</p>
+<p>最终交付报告与制品包。任务完成不等于成果已经公开；只有人对具体最终版本签字后，才进入发布。用户也可以只下载成果自行保存。</p>
+<p><a id="chapter-3"></a></p>
+<h2>3. 系统整体架构</h2>
+<h3 id="section-3-1">3.1 五个功能层与两类贯穿支撑</h3>
+<p>下图按功能组织全部主线模块。功能层帮助理解职责，并不是固定执行顺序：例如健全性检查属于证据层，却在正式实验之前执行；数据层持续支撑所有过程。</p>
+<figure class="diagram" tabindex="0" role="button" aria-label="放大：图 2：Danus-AI 功能架构总图"><svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1300" viewBox="0 0 1500 1300" role="img"><title>功能架构｜五个功能层，贯穿治理与工程基础</title><desc>功能归属图：位置不表示执行先后；模块不是独立微服务。</desc><defs><marker id="arrow-01" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#52768d"/></marker></defs><rect width="1500" height="1300" fill="#f8fafc"/><text x="48" y="68.88" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="36" font-weight="700" fill="#17324d">功能架构｜五个功能层，贯穿治理与工程基础</text><text x="48" y="110.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">功能归属图：位置不表示执行先后；模块不是独立微服务。</text><rect x="48" y="145" width="1040" height="125" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="186.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2563a6">01  用户交互与成果层</text><rect x="68.0" y="205" width="485.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="231.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R20 工作台与进展报告</text><rect x="568.0" y="205" width="485.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="231.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R21 报告与制品发布</text><rect x="48" y="290" width="1040" height="185" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="331.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2563a6">02  研究规划与设计层</text><rect x="68.0" y="350" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="376.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R03 文献检索</text><rect x="318.0" y="350" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="328.0" y="376.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R15c 探索与实现</text><rect x="568.0" y="350" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="376.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R15b 分析设计</text><rect x="818.0" y="350" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="828.0" y="376.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R17 候选检查</text><rect x="68.0" y="402" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="428.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R16 编排与策略</text><rect x="318.0" y="402" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="328.0" y="428.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R15a 协议作者</text><rect x="568.0" y="402" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="428.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R04b 协议库</text><rect x="818.0" y="402" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="828.0" y="428.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R06 预注册</text><rect x="48" y="495" width="1040" height="125" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="536.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2563a6">03  角色与实验执行层</text><rect x="68.0" y="555" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="581.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R14 角色运行时</text><rect x="318.0" y="555" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="328.0" y="581.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R08b 持久调度</text><rect x="568.0" y="555" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="581.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R08 执行与台账</text><rect x="818.0" y="555" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="828.0" y="581.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R24a 算力接入</text><rect x="48" y="640" width="1040" height="185" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="681.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2563a6">04  证据验证与生命周期层</text><rect x="68.0" y="700" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="726.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R10a 健全性检查</text><rect x="318.0" y="700" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="328.0" y="726.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R10 确定性预检</text><rect x="568.0" y="700" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="726.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R11 统计与措辞</text><rect x="818.0" y="700" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="828.0" y="726.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R12 方法学审计</text><rect x="68.0" y="752" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="778.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R13 唯一提交门</text><rect x="318.0" y="752" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="328.0" y="778.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R18 复现与规模</text><rect x="568.0" y="752" width="235.0" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="578.0" y="778.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R19 证据传播</text><rect x="48" y="845" width="1040" height="125" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="886.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#2563a6">05  数据契约与研究资产层</text><rect x="68.0" y="905" width="318.3333333333333" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="78.0" y="931.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R02 契约与金样例</text><rect x="401.3333333333333" y="905" width="318.3333333333333" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="411.3333333333333" y="931.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R05 工作材料与记忆</text><rect x="734.6666666666666" y="905" width="318.3333333333333" height="40" rx="8" fill="#edf4fb" stroke="#edf4fb" stroke-width="2"/><text x="744.6666666666666" y="931.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">R04 经验论断存储</text><rect x="1120" y="145" width="332" height="825" rx="16" fill="#eaf7f5" stroke="#b8dcd6" stroke-width="2"/><text x="1140" y="196.32" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" fill="#177f80">贯穿治理</text><text x="1140" y="232.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52677a">租户边界贯穿各层</text><rect x="1140" y="273" width="292" height="155" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1160" y="314.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">R07 预算与费用</text><text x="1160" y="347.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">调用前预占、事后结算</text><text x="1160" y="379.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">租户凭证与用途保护</text><rect x="1140" y="468" width="292" height="155" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1160" y="509.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">R08c 数据守门</text><text x="1160" y="542.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">切分、暴露、外发授权</text><text x="1160" y="574.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">许可与地域条件</text><rect x="1140" y="663" width="292" height="155" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1160" y="704.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">R09 角色网关</text><text x="1160" y="737.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">租户、角色与对象授权</text><text x="1160" y="769.18" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">人工管理及模块装配</text><path d="M 1120,208 L 1090,208" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-01)"/><path d="M 1120,382 L 1090,382" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-01)"/><path d="M 1120,557 L 1090,557" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-01)"/><path d="M 1120,732 L 1090,732" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-01)"/><path d="M 1120,907 L 1090,907" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-01)"/><rect x="48" y="1010" width="1404" height="175" rx="16" fill="#fff7e9" stroke="#e9d6b1" stroke-width="2"/><text x="68" y="1057.16" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="700" fill="#976314">工程与评测基础｜持续支撑整套系统</text><text x="68" y="1106.92" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" fill="#17324d">R00 能力与成本探针</text><text x="68" y="1148.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#52677a">验证模型、资源与费用路径</text><text x="530" y="1106.92" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" fill="#17324d">R01 工程骨架与 CI</text><text x="530" y="1148.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#52677a">依赖、契约、故障与版本检查</text><text x="990" y="1106.92" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" fill="#17324d">R22 系统评测与运维</text><text x="990" y="1148.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#52677a">独立题库、成绩单、恢复验收</text><text x="48" y="1246.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">共 30 个主线模块。阅读第 4 章可查每个模块的输入、产物、技术与交接关系。</text></svg><figcaption>图 2：Danus-AI 功能架构总图 · 点击放大查看</figcaption></figure>
+<p><em>图 2：每个模块只列一个主要归属。右侧治理能力约束各业务层，下方工程基础支撑整套系统；图中分层不代表每层都是独立服务。</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>组成</th>
+<th>主要回答的问题</th>
+<th style="text-align:right">模块数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户交互与成果层</td>
+<td>用户怎么看进展、怎样获得成果？</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>研究规划与设计层</td>
+<td>做什么研究、依据什么设计实验？</td>
+<td style="text-align:right">8</td>
+</tr>
+<tr>
+<td>角色与实验执行层</td>
+<td>谁在执行、怎样运行和恢复？</td>
+<td style="text-align:right">4</td>
+</tr>
+<tr>
+<td>证据验证与生命周期层</td>
+<td>结果支持什么，后续如何复核和更新？</td>
+<td style="text-align:right">7</td>
+</tr>
+<tr>
+<td>数据契约与研究资产层</td>
+<td>各环节交换什么，哪份记录权威？</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td>贯穿治理</td>
+<td>钱、数据和权限怎样受控？</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td>工程与评测基础</td>
+<td>怎样搭建、测量并验收系统？</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>第 4 章逐一解释</strong></td>
+<td style="text-align:right"><strong>30</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>编号 R 代表模块，A 代表责任角色，P 代表开发阶段。编号用于准确定位，不表示重要程度，也不表示开发顺序。</p>
+<h3 id="section-3-2">3.2 实际部署：控制集中，执行隔离</h3>
+<p>部署基线是 <strong>Python 模块化单体控制服务＋独立角色会话＋隔离实验节点</strong>。控制服务统一处理权限、预算、业务状态和证据提交；耗时的模型请求、实验、分析和文稿编译由受限进程执行，网页请求不一直等待实验完成。</p>
+<figure class="diagram" tabindex="0" role="button" aria-label="放大：图 3：部署位置、访问方向与隔离边界"><svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1300" viewBox="0 0 1500 1300" role="img"><title>部署与隔离｜控制集中，模型与实验受限执行</title><desc>通信图：只有 control 写业务数据库；计算节点与角色不能任意读取控制面资料。</desc><defs><marker id="arrow-03" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#52768d"/></marker></defs><rect width="1500" height="1300" fill="#f8fafc"/><text x="48" y="68.88" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="36" font-weight="700" fill="#17324d">部署与隔离｜控制集中，模型与实验受限执行</text><text x="48" y="110.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">通信图：只有 control 写业务数据库；计算节点与角色不能任意读取控制面资料。</text><rect x="48" y="140" width="1404" height="108" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="181.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">用户入口｜本地浏览器 / CLI</text><text x="68" y="217.92000000000002" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400" fill="#17324d">Windows 使用 WSL2；远程管理经 SSH 隧道；A0 在管理入口批准具体对象。</text><path d="M 490,252 L 490,300" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><rect x="48" y="310" width="902" height="650" rx="16" fill="#edf4fb" stroke="#b8cfe6" stroke-width="2"/><text x="70" y="354.24" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700" fill="#2563a6">Linux 控制主机｜模块化服务与受限子进程</text><rect x="72" y="385" width="402" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="92" y="426.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">control 控制服务</text><text x="92" y="460.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">管理 API、授权、业务状态</text><text x="92" y="493.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">唯一数据库写入进程</text><rect x="500" y="385" width="426" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="520" y="426.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">supervisor 调度与宿主</text><text x="520" y="460.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">任务租约、角色生命周期</text><text x="520" y="493.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">通过内部 API 更新状态</text><rect x="72" y="555" width="402" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="92" y="596.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">model-broker 模型代理</text><text x="92" y="630.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">持有提供商密钥</text><text x="92" y="663.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">授权外发、用量与费用记录</text><rect x="500" y="555" width="426" height="142" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="520" y="596.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">role-session 角色会话</text><text x="520" y="630.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">独立工作区、短期任务令牌</text><text x="520" y="663.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">没有数据库凭证与 API 密钥</text><path d="M 500,456 L 479,456" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><path d="M 710,550 L 710,532" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><path d="M 500,625 L 479,625" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><rect x="72" y="760" width="854" height="122" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="94" y="802.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#17324d">本地存储基线｜SQLite WAL + 租户制品目录</text><text x="94" y="844.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52677a">按租户隔离记录与引用；P0 锁定后端，托管迁移另行验收。</text><path d="M 72,490 L 58,490 L 58,820 L 67,820" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><text x="72" y="929.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52677a">图内各进程均通过受控接口交接；长任务不阻塞网页请求。</text><rect x="1010" y="385" width="442" height="180" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1030" y="426.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">合格模型 API</text><text x="1030" y="461.84000000000003" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">自研运行时经代理调用</text><text x="1030" y="496.34000000000003" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">租户凭证、用途及地域获准</text><text x="1030" y="530.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">版本、响应、用量与费用留档</text><path d="M 954,475 L 1004,475" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><rect x="1010" y="610" width="442" height="350" rx="16" fill="#f0f8f5" stroke="#bfdcd1" stroke-width="2"/><text x="1030" y="653.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#177f80">本地 / 远程专用隔离节点</text><rect x="1030" y="680" width="402" height="110" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1050" y="721.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">可信 runner / 评测协调</text><text x="1050" y="754.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">接收具名授权任务，回传制品</text><path d="M 1228,794 L 1228,817" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><rect x="1030" y="825" width="402" height="110" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1050" y="866.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">隔离 job-container</text><text x="1050" y="899.68" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" fill="#17324d">方法 / 基线 / 分析；分阶段挂载</text><path d="M 954,800 L 1004,800" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><rect x="48" y="1040" width="675" height="154" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="1081.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#976314">隔离 publisher 发布容器</text><text x="68" y="1117.92" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400" fill="#17324d">读取脱敏证据快照；编译与制品检查</text><text x="68" y="1153.92" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="400" fill="#17324d">无网络、无密钥；签字由操作者控制</text><rect x="758" y="1040" width="694" height="154" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="778" y="1081.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">legacy-math 数学兼容服务</text><text x="778" y="1116.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">原数学路径维护数学库，向经验库提供只读引用</text><text x="778" y="1151.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">非形式审核与 Lean 形式检查分别标记</text><path d="M 385,965 L 385,1034" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><path d="M 855,965 L 855,1034" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-03)"/><text x="48" y="1258.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#52677a">未来托管须验收租户 VM 等强隔离、公网安全和容量；普通共享容器不等于安全边界。</text></svg><figcaption>图 3：部署位置、访问方向与隔离边界 · 点击放大查看</figcaption></figure>
+<p><em>图 3：箭头表示受控通信。只有控制服务写业务数据库；模型角色和实验代码都不能直接访问数据库或提供商密钥。</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>部署单元</th>
+<th>运行什么</th>
+<th>最重要的边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>控制服务</td>
+<td>管理 API、授权、对象状态、仓储与提交决策</td>
+<td>唯一业务数据库写入进程</td>
+</tr>
+<tr>
+<td>调度与角色宿主</td>
+<td>任务领取、会话启动、挂起与恢复</td>
+<td>通过服务接口更新状态，角色工作区相互隔离</td>
+</tr>
+<tr>
+<td>模型调用代理</td>
+<td>提供商适配、预算检查、调用与费用记录</td>
+<td>集中保管 API 密钥；模型上下文看不到密钥</td>
+</tr>
+<tr>
+<td>执行节点与任务容器</td>
+<td>方法、基线、健全性和分析程序</td>
+<td>容器只能看到被授权的数据与资源；不能控制宿主或任意联网</td>
+</tr>
+<tr>
+<td>发布容器</td>
+<td>报告整理、图表与 LaTeX 编译</td>
+<td>只读脱敏快照，没有密钥与网络</td>
+</tr>
+<tr>
+<td>数学兼容服务</td>
+<td>原有数学记录及其验证路径</td>
+<td>数学库仍由原数学路径管理，经验库只作受控引用</td>
+</tr>
+</tbody>
+</table></div>
+<p>控制主机使用 Linux，Windows 通过 WSL2 的 Linux 文件系统运行；SQLite 数据库不放在 Windows 共享挂载或网络盘。远程管理走 SSH 隧道，首版不直接开放公网管理入口。执行节点可以本地部署，也可以是远程专用虚拟机，GPU 只在实际实验需要时接入。</p>
+<p>初始控制面以 4 vCPU、8 GB 内存及适当 SSD 为测量起点。模型会话先并发 1，P2 真实负载通过后再启用最多 3；确认对照包初始并发 1。这些是待验证配置，不是吞吐承诺。</p>
+<p>未来托管由浏览器访问，用户无需 WSL2。不可信租户的代码采用专属 VM 或同等已验证强隔离，再配任务容器；不能只用普通共享 Docker 容器声称租户安全。平台运维与租户科研审批分权，资源回收检查磁盘、日志和凭证残留。</p>
+<h3 id="section-3-3">3.3 技术选择的整体理由</h3>
+<p>Python 3.12 统一后端、实验和统计生态；FastAPI 提供管理接口，Pydantic 2 定义严格数据对象。SQLite WAL 适合首版单控制主机，配合事务减少状态与账本分裂；大文件使用按 SHA-256 摘要定位的制品目录，数据库保存引用和权限。</p>
+<p>模型工具接口封装官方 MCP Python SDK，模型请求通过 HTTPX 和提供商适配器统一管理。接口协议负责传递调用，真正的权限由项目网关检查。实验用 Docker 隔离，远程传输用 OpenSSH/SFTP；统计使用经过独立校准的 NumPy/SciPy 算子。</p>
+<p>界面采用本地打包的 HTML/CSS、原生 JavaScript、ECharts、KaTeX 和 Markdown 渲染组件。首版不额外引入向量数据库、Redis/Celery 或常驻前端服务。依赖选择围绕明确的使用规模，未来确有容量或能力证据时再调整。</p>
+<p>代码与依赖、容器、提示词、模型配置、数据和分析脚本分别锁定版本。复用原 Danus 的检索、角色管理、隔离写作及数学适配经验；经验统计、预算、数据隔离和证据流水线按本项目要求实现。原仓库存在某个相似名称，不代表本项目功能已经具备。</p>
+<p>SQLite 是本地交付基线，P0 在正式仓储开发前锁定后端。若明确纳入共享托管建设，优先评估 PostgreSQL 后再批准投入，不要求首版维护两套生产后端。迁移须验证事务、租约、幂等、归属和恢复，不能只换驱动。模型生产主线是自研薄循环加统一 API 代理，可使用合格的 DeepSeek/千问/Kimi/智普配置；不依赖 GPT 或 Codex CLI。</p>
+<p><a id="chapter-4"></a></p>
+<h2>4. 各层模块如何工作</h2>
+<p>本章覆盖全部 30 个模块。“交接”描述业务上的提供与消费关系，不表示两个模块可以直接导入对方实现或绕过授权。代码统一依赖契约和接口，由装配入口连接；模型调用工具还要经过网关。</p>
+<h3 id="section-4-1">4.1 用户交互与成果层：看见过程，取得成果</h3>
+<h4 id="module-R20">R20｜工作台与进展报告</h4>
+<p><strong>工作与产物：</strong> 读取项目、候选、运行、证据、费用和审批状态，提供六类页面与进展报告。用户看到任务停在哪里、由谁处理、花了多少钱，而不是一个容易误导的“科研完成百分比”。</p>
+<p><strong>技术与交接：</strong> HTML/CSS、原生 JavaScript 和本地图表组件，通过只读查询接口展示 R05、R07、R08、R13/R19 的记录。批准等写操作转到 R09，报告可继续进入 R21。人工等待、机器运行和主动审核时间分开显示。</p>
+<h4 id="module-R21">R21｜报告与制品发布</h4>
+<p><strong>工作与产物：</strong> 从冻结的有效证据快照生成研究报告、论文草稿、图表和制品包，核查数字、引用、适用范围与脱敏，再形成待签署发布清单。</p>
+<p><strong>技术与交接：</strong> 隔离作者生成文字，程序生成可信数值和图表；LaTeX/latexmk 在无网络、无密钥容器中编译。接收 R19 的有效状态和 R13/R04 的证据；最终经 A0 签字后交付。内容改动使原签字失效，不能沿用旧批准发布新版本。</p>
+<h3 id="section-4-2">4.2 研究规划与设计层：确定值得怎样研究</h3>
+<h4 id="module-R03">R03｜文献检索与论断卡片</h4>
+<p><strong>工作与产物：</strong> 将研究问题转成可追溯的检索记录和文献卡片。卡片区分原文主张、实验条件、限制与本系统的推断，保留可定位出处。</p>
+<p><strong>技术与交接：</strong> 使用 BM25、Unicode 规范化及中英文分词；模型可辅助提取，输出经契约校验。向 R15c 提供背景，向 R17 提供相关工作，向 R21 提供引用。模型提取需要 R08 的统一计费路径；P1 先交付人工/规则卡片，不提前开付费旁路。</p>
+<h4 id="module-R15c">R15c｜探索者与方法实现者运行合同</h4>
+<p><strong>工作与产物：</strong> 承载两个不同阶段的角色：A2 用文献与开发数据生成候选、试点及探索记录；A5 根据批准设计实现正式方法、请求运行并提交证据材料。</p>
+<p><strong>技术与交接：</strong> 使用 R14 受控角色循环、受限工作区和结构化工具调用。A2 的候选交给 R15b；A5 读取 R04b/R06 的锁定设计，通过 R08 执行后向 R13 提交。共享模块不等于共享身份或数据权限，探索结果不能由模型自行升级为确认结果。</p>
+<h4 id="module-R15b">R15b｜分析设计者运行合同</h4>
+<p><strong>工作与产物：</strong> 选题前为候选补充最小验证草案，选题后形成正式分析计划：比较目标、统计单位、阈值、随机性、缺失与失败处理、选择历史及停止规则。</p>
+<p><strong>技术与交接：</strong> A4 通过模型与严格对象契约提出设计，并使用合成/开发数据校准分析。草案送 R17，正式计划送 R06，统计算子由 R11 提供。它不读取实现者私有工作区或确认结果，不能根据已见结果偷偷修改原检验。</p>
+<h4 id="module-R17">R17｜候选新颖性、可检验性与可行性检查</h4>
+<p><strong>工作与产物：</strong> 检查候选的来源、差异、可测预测、关键对照、数据许可、算力与费用依据，返回“可推进、需修订、阻塞”及具体理由。</p>
+<p><strong>技术与交接：</strong> 确定性材料检查结合 R12 的候选语义审核，读取 R03/R05 的材料、R07 报价及必要试点记录。由 R16 经网关调用；通过后才进入排序和人工选题。机制问题要求可区分解释，普通性能比较不必虚构竞争机制。</p>
+<h4 id="module-R16">R16｜主编排与研究策略</h4>
+<p><strong>工作与产物：</strong> 按任务状态安排下一步，生成指派建议、候选排序、阻塞处理和策略摘要。它保留完整候选池与选择理由，帮助人决定做什么。</p>
+<p><strong>技术与交接：</strong> Python 确定性事件驱动器结合 A1 模型策略会话；借助 R09 调用 R17、R18 等能力，R08b 接受合法调度。它不能自己写方法代码、运行实验或绕过证据门。排序是决策建议，不能被当成科学可信度分数。</p>
+<p><strong>实现边界：</strong> 动态工作由结构化 TaskPlan 组织：A1 提案，程序查依赖/权限/资格，A8 调度，R14 执行。可拆分、并行、重排和重规划；科学关口、根预算和暴露历史不变。版本冲突及取消中任务需明确对账，旧结果不能自动移入新计划。</p>
+<h4 id="module-R15a">R15a｜协议作者运行合同</h4>
+<p><strong>工作与产物：</strong> 独立 A3 为一类任务定义怎么测量：指标代码、标准基线、调参空间、切分规则、已知答案和健全性套件，连同适用条件一起交付。</p>
+<p><strong>技术与交接：</strong> 模型辅助设计，Python 实现可执行测量与参考检查；开发数据上的基线验证经 R08 运行。产物进入 R04b，再经 R12 和 A0 审核批准。协议作者不能在使用该协议的同族研究中兼任分析或方法实现。</p>
+<p><strong>实现边界：</strong> 自主范围分复用、适配和新协议建设；每类单独验资格。缺独立参考或适用性依据时诚实阻塞。首包由人工先建，P4 再接合格 A3，不把模型自评当测量有效性。</p>
+<h4 id="module-R04b">R04b｜评测协议库</h4>
+<p><strong>工作与产物：</strong> 保存协议草案、审核记录、批准版本与变更谱系。复用协议时检查任务、总体、指标、数据、模型和环境是否适用。</p>
+<p><strong>技术与交接：</strong> SQLite 保存状态与引用，制品目录保存不可变协议内容和测量代码。接收 R15a 的产物，为 R06、R10a、R08 和评测 R22 提供测量依据。文字澄清与科学变更走不同路径；影响无法确定时转完整审核。</p>
+<p><strong>实现边界：</strong> 协议包一并保存适用条件、来源/许可、可执行计分、三类基线、切分、正反样例、独立参考、环境和批准。首包集中在受控工具环境的智能体/API 比较；外部基准只作为候选组件，需准入与本地验证。</p>
+<h4 id="module-R06">R06｜预注册与统计计划</h4>
+<p><strong>工作与产物：</strong> 把已选候选、批准协议、分析计划、问题与阈值历史、假设族、数据暴露及随机性目标绑定并锁定，形成正式实验的判断依据。</p>
+<p><strong>技术与交接：</strong> Pydantic 跨对象校验、数据库事务与内容哈希；读取 R05/R04b/R08c、审核及预算条件，向 R08 和 R11 提供锁定计划。已见确认反馈后的修改形成新设计与相应新数据安排，不覆盖旧记录。</p>
+<h3 id="section-4-3">4.3 角色与实验执行层：让计划变成可信运行</h3>
+<h4 id="module-R14">R14｜Agent 角色运行时：执行、状态保存与暂停恢复</h4>
+<p><strong>工作与产物：</strong> 启动单次角色会话，控制消息、工具调用、轮次、超时和交接；中断后能从已记录状态继续，而不是丢失上下文后重新付费执行。</p>
+<p><strong>技术与交接：</strong> 首版默认薄循环宿主，模型请求经 R08、工具经 R09，身份任务由 R08b 分配，为 R15a/b/c、R16 和审计/写作角色提供运行能力。决策轮、调用数、工具数和实验次数分开计数；长实验等待不等同于持续占用模型会话。</p>
+<p><strong>实现边界：</strong> “持久”指任务、轮次、工具请求、运行引用和停止原因可保存恢复，不是模型常驻。脚本化角色是预设动作的工程测试替身，不证明模型能力。上下文先保关键批准/状态/停止，再装授权证据，最后压缩历史；额度与输出预留按任务和模型实测。</p>
+<h4 id="module-R08b">R08b｜持久调度与角色互斥</h4>
+<p><strong>工作与产物：</strong> 保存任务队列，分派有效租约，执行同族角色互斥和各实验组的可比额度；处理过期工作者、排队与重新领取。</p>
+<p><strong>技术与交接：</strong> SQLite job 表、租约与递增执行令牌，不另建消息队列平台。接收 R16/R14/R08 的任务，经 R07/R08c 条件检查后调度。已启动且不能中断的对照包优先；其余探索、确认、复现按份额轮转并提升等待任务优先级，不能因此挪用保护预算。</p>
+<p><strong>实现边界：</strong> 外层按租户与全局容量分配，内层保持科研队列和 Arm 公平。计划节点由服务分配身份，A1 不直接启动实例；换计划或会话不重置根任务额度。</p>
+<h4 id="module-R08">R08｜执行器、模型调用代理与运行台账</h4>
+<p><strong>工作与产物：</strong> 协调科研实验和角色模型请求，收集原始输出、计算标准指标、记录尝试与用量。进程退出正常但制品缺失，不能登记为有效成功。</p>
+<p><strong>技术与交接：</strong> Python 协调器、HTTPX 提供商适配、可信评测程序、Docker 节点客户端和制品收集器。科研运行先核对 R06 计划、R08c 数据授权、R08b 配额、R07 预占和 R10a 报告，再经 R24a 取得资源；输出交 R13，费用交 R07。标签与计分在可信路径处理，方法自报的准确率不具权威性。</p>
+<h4 id="module-R24a">R24a｜最小算力接入</h4>
+<p><strong>工作与产物：</strong> 接入已准入的本地或远程执行节点，核对硬件、镜像与资源上限，完成运行、制品传输、停止及释放状态核查。</p>
+<p><strong>技术与交接：</strong> OpenSSH/SFTP、固定主机密钥、节点代理及容器配置。受 R08 调用，费用与租约回到 R07。首版只实现可核验的资源接入，不建设任意云平台自动采购系统；无法确认费用停止时仍保留计费待核状态。</p>
+<h3 id="section-4-4">4.4 证据验证与生命周期层：判断结果并持续维护</h3>
+<h4 id="module-R10a">R10a｜健全性检查</h4>
+<p><strong>工作与产物：</strong> 在正式运行前，检查输出解析、标签映射、重复关系、指标边界、token 计数及已知答案等基本性质，给出绑定代码、镜像和协议的报告。</p>
+<p><strong>技术与交接：</strong> Python 测试和小型参考任务，通过 R08 在合成/开发数据上运行；套件来自 R04b，报告是确认实验的前置。影响结果的代码或配置变化使报告失效。通过只表示已覆盖检查项合格，不证明没有任何 bug。</p>
+<p><strong>实现边界：</strong> 套件分通用、协议专属和轨道专属。重复试验不一律删除；不适用要有合同依据。每项记录通过、缺陷、执行错误、不适用或未覆盖；确认必需项出错/缺口不能过门。报告绑定准确协议、套件、数据、代码、环境和配置，变化后核验失效。</p>
+<h4 id="module-R10">R10｜G0 确定性预检</h4>
+<p><strong>工作与产物：</strong> 重建提交所引用的版本、运行和样本，检查批准、时间、哈希、全量尝试、预算公平及暴露记录，并重算可确定的指标。</p>
+<p><strong>技术与交接：</strong> 严格契约、哈希与确定性检查器；由 R13 调用，读取权威运行和锁定对象，输出逐项处置。探索与确认共享检查实现但使用不同配置，探索通过不能冒充正式通过；语义未知项转补证或审核，不自动当作符合。</p>
+<h4 id="module-R11">R11｜G1 统计与允许措辞</h4>
+<p><strong>工作与产物：</strong> 根据事先锁定的统计目标，计算效应、区间、多重比较和适用条件，给出能否支持改善、有限否定或其他限定陈述的依据。</p>
+<p><strong>技术与交接：</strong> NumPy/SciPy 与受信算子注册表；分析以版本化纯函数运行，读取 R06 计划和 R08 可信数据，向 R13 输出统计报告。A4 选择方法，不自行提交一个 p 值充当计算结果；新增分析方法先经独立参考与校准，条件不满足则报告无法可靠推断。</p>
+<h4 id="module-R12">R12｜G2 方法学审计</h4>
+<p><strong>工作与产物：</strong> 检查机械核验难以覆盖的设计、混杂、解释、范围和引用问题，返回阻塞问题、需补证或未发现阻塞问题，并给出依据。</p>
+<p><strong>技术与交接：</strong> 冷启动模型会话、严格审核契约与冻结材料包。候选检查允许同供应商的独立上下文；正式协议/分析和经验提交按规定保持供应商及底座独立。服务 R17、R04b、R06 与 R13；审计模型不能运行送审代码、改变数据或单独接受论断。</p>
+<h4 id="module-R13">R13｜提交门与证据事务</h4>
+<p><strong>工作与产物：</strong> 汇总 G0/G1/G2、版本与资格条件，决定接受、拒绝、补证或系统错误，并保存完整报告。它是经验论断和后续证据事件的唯一业务提交入口。</p>
+<p><strong>技术与交接：</strong> Python 确定性状态机和 SQLite 事务；通过后调用 R04 仓储，触发 R19 传播及后续复现。A6 是运行这条程序流水线的服务身份，不能另开写入路径。被拒提交仍有报告；模型“认为合理”不能覆盖硬性拒绝。</p>
+<h4 id="module-R18">R18｜复现与适用的规模验证</h4>
+<p><strong>工作与产物：</strong> 按锁定计划安排新运行随机性、新独立样本或独立实现的复核，记录每种复现的实际边界；有规模主张时验证事先指定的额外规模点。</p>
+<p><strong>技术与交接：</strong> 程序化计划执行器，调用 R08/R10a/R11，经 R13 提交新证据。它接收已接受论断及批准预算，不搜索有利种子，也不统一要求“再显著一次”。资源不足为复现待完成，不等于原主张已被推翻。</p>
+<h4 id="module-R19">R19｜证据传播、矛盾与复审计</h4>
+<p><strong>工作与产物：</strong> 维护依赖关系与当前有效状态。前提失效时找出受影响后继，限制新的使用，并建立有负责人、下一动作、预算和截止时间的复审计任务。</p>
+<p><strong>技术与交接：</strong> Python 图遍历、事件消费与数据库派生视图，读取 R04/R13 事件，将状态呈现给 R16/R20/R21。比较两项研究先判断目标与范围是否可比；新样本可以可比，样本不必重叠。状态变更仍经 R13，不直接改掉历史论断。</p>
+<h3 id="section-4-5">4.5 数据契约与研究资产层：保持统一事实来源</h3>
+<h4 id="module-R02">R02｜契约与金样例</h4>
+<p><strong>工作与产物：</strong> 定义任务、候选、协议、运行、提交等对象必须包含什么，字段的单位、权限、锁定和状态转换如何约束；给出预期已知的正确与错误样例。</p>
+<p><strong>技术与交接：</strong> Pydantic 2 严格模型、JSON Schema、Python 接口和内容规范化。所有模块依赖它交换数据；契约本身不依赖业务实现。样例的正确答案先由独立依据确定，不能让待测系统生成自己的金标准。</p>
+<p><strong>实现边界：</strong> 新增租户/委派、任务计划/版本、检查报告和上下文/资格引用。服务端身份不由模型填写；科研哈希和访问权限分开，两个租户相同内容也不能互读。</p>
+<h4 id="module-R05">R05｜工作材料与全局记忆</h4>
+<p><strong>工作与产物：</strong> 保存背景、候选、设计草稿、选择历史、失败经验和用户使用记录，让后续任务能够在授权范围内复用已有工作。</p>
+<p><strong>技术与交接：</strong> SQLite 索引、版本化文件和制品引用；向 R03、R15、R16、R17 提供材料。事实、原因假设、可排除事项和验证状态分开。记忆查询也执行数据隔离，不能把当前确认结果换个名字送回分析者。这里的“全局”不表示所有角色都能读取全部内容。</p>
+<p><strong>实现边界：</strong> R14 保存执行状态，R05 保存工作记忆，R03 保存来源，协议/运行/论断等仍由各自服务负责。摘要有来源、版本和失效规则；授权撤销、删除与恢复联动索引/缓存/备份。失败解释不能直接当科学否定，记忆保存不自动允许模型训练。</p>
+<h4 id="module-R04">R04｜经验论断存储</h4>
+<p><strong>工作与产物：</strong> 保存正式接受的陈述、适用范围、证据强度及后续事件，支持有效论断查询；工作草稿和文献记载不自动进入这一层。</p>
+<p><strong>技术与交接：</strong> SQLite 事务仓储与不可变制品引用。只接受 R13 内部合法命令，为 R19、R20、R21 提供证据；数学记录通过只读引用保持来源权威。结果被撤销时保留历史与事件，不通过删除旧记录掩盖变化。</p>
+<h3 id="section-4-6">4.6 贯穿治理：预算、数据和权限</h3>
+<h4 id="module-R07">R07｜预算与费用账本</h4>
+<p><strong>工作与产物：</strong> 在调用和租赁之前报价与预占，完成后结算，未知账单进入对账；按项目、月份、用途和任务控制额度，保存失败与重试费用。</p>
+<p><strong>技术与交接：</strong> SQLite 原子事务、整数微货币单位与唯一用量键。R08、调度和选题报价都依赖它，R20/R22 读取费用。关口成本是账本派生视图，一次调用支撑多个关口时按预先规则分摊，不能生成第二份费用真账。</p>
+<p><strong>实现边界：</strong> 凭证、付款账户和费用绑定租户，BYOK 故障不能自动换平台密钥。真实成本、研究预算和未来客户售价分开；300 美元是单租户试运行预算示例。</p>
+<h4 id="module-R08c">R08c｜数据守门与暴露台账</h4>
+<p><strong>工作与产物：</strong> 管理开发、验证、确认数据的读取、挂载、反馈和外发授权，记录谁接触过哪些材料及其用途；维护许可、敏感性、伦理适用性和地域要求。</p>
+<p><strong>技术与交接：</strong> 版本化清单、Python 属性策略、访问/暴露事务和隔离挂载。为 R08、R09、R05 和 R06 提供授权依据。能读取不代表能发给外部模型；内容扫描只作辅助，分类或授权未知时停止相应发送。</p>
+<h4 id="module-R09">R09｜角色网关与管理入口</h4>
+<p><strong>工作与产物：</strong> 统一接收用户管理动作和角色工具请求，校验真实身份、项目、对象版本、用途及批准，将请求交给相应模块。</p>
+<p><strong>技术与交接：</strong> FastAPI 管理 API、官方 MCP SDK 兼容层、短期令牌和装配入口。连接模型角色与全部受控业务能力；批准、增加预算和发布使用独立的人类管理接口。身份来自令牌而不是模型填写的角色名，隐藏工具菜单也不能代替服务端授权。</p>
+<p><strong>实现边界：</strong> 租户、代行账户、角色、项目和租约从可信会话解析；查询、下载、后台任务都检查。A2 无提交工具且直接请求仍被服务拒绝，R13/R04 再守权威写入边界。</p>
+<h3 id="section-4-7">4.7 工程与评测基础：让系统可建设、可验收</h3>
+<h4 id="module-R00">R00｜能力、成本与环境探针</h4>
+<p><strong>工作与产物：</strong> 小规模测量候选模型的工具调用、结构化输出、角色任务表现及延迟费用，核查执行节点、容器和计费能力，形成准入依据。</p>
+<p><strong>技术与交接：</strong> Python、HTTPX 和固定小任务。P0 用人工限额、单并发脚本启动；R07/R08 完成后接入正式路径，早期账单导入。结果用于角色配置、预算和容量估算；缺少合格独立审计配置会阻塞正式确认，但不阻止低风险候选准备。</p>
+<h4 id="module-R01">R01｜工程骨架、依赖与持续检查</h4>
+<p><strong>工作与产物：</strong> 建立模块边界、安装与配置、依赖锁文件、数据库迁移、容器构建及自动检查，使后续功能按同一规则集成。</p>
+<p><strong>技术与交接：</strong> pytest、Ruff、mypy、GitHub Actions、Hypothesis 状态机测试；用 SBOM、镜像摘要和签名记录交付版本。它支撑全部模块，默认 CI 无真实付费凭证；真实资源测试走独立授权作业。检查代码依赖、并发竞态和故障恢复，而不只验证顺利路径。</p>
+<h4 id="module-R22">R22｜系统评测与运维验收</h4>
+<p><strong>工作与产物：</strong> 维护独立答案的评测驱动，开展缺陷包、协作、选题、产品效用和可验证性评价，输出可重算成绩单；同时执行健康检查、恢复与泄露演练。</p>
+<p><strong>技术与交接：</strong> Python 评测器、独立参考计算、统计校准和版本化逐题记录；调用已建业务模块，接收 R07 全部成本。P0 就开始准备，P6 汇总交付。被测系统看不到答案，不能用“系统自己接受了多少条”当作正确产出数。</p>
+<p><strong>实现边界：</strong> 除科研收益，逐角色、动态计划、协议有效性、双租户及上下文恢复分项验收；真实模型主/回退配置按任务类型登记资格。脚本通过与模型能力通过分开。</p>
+<p><a id="chapter-5"></a></p>
+<h2>5. 角色协作与研究资料流转</h2>
+<h3 id="section-5-1">5.1 人、模型和程序各承担什么</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>角色</th>
+<th>核心责任</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>人</td>
+<td>A0 操作者</td>
+<td>问题与资源授权、协议/选题批准、价值定稿、发布签字</td>
+</tr>
+<tr>
+<td>模型</td>
+<td>A1 编排器、A2 探索者</td>
+<td>提出下一步与候选，组织有依据的探索</td>
+</tr>
+<tr>
+<td>模型</td>
+<td>A3 协议作者、A4 分析设计者、A5 实现者</td>
+<td>分别定义怎么测、怎么判断、怎么实现</td>
+</tr>
+<tr>
+<td>模型</td>
+<td>A7 审计者、A12 隔离作者</td>
+<td>审查方法学问题；按脱敏证据写作</td>
+</tr>
+<tr>
+<td>程序</td>
+<td>A6 证据流水线、A8 调度器、A9 数据守门人</td>
+<td>执行计算与规则、任务租约、数据授权</td>
+</tr>
+<tr>
+<td>程序</td>
+<td>A10 复现器、A11 发布闸门</td>
+<td>按锁定计划复核；检查签字后交付</td>
+</tr>
+</tbody>
+</table></div>
+<p>角色是责任身份，不是永久占用的一台模型服务。模型会话按需启动，可使用同一类模型，但工作区、可见材料和工具权限必须满足任务规则。A4 与 A5 在同族任务中分开，A3 不参与其协议所服务的同族分析或实现；A7 冷启动审查，不继承作者的私有对话。</p>
+<p>候选审核可以同厂商独立会话；正式协议/分析审核相对作者、经验提交审核相对实现者及被测模型，须满足规定的供应商与底座分离。缺少合格配置时暂停相应确认，不能用“换了一个提示词”冒充独立审查。跨厂商本身也不证明判断统计独立，实际效果仍由评测检验。</p>
+<p>单操作者可以兼做问题提出与批准，但必须如实标记单人模式。另建一个账号不等于外部独立审核。人若读取隐藏测试材料，同样记录暴露并限制其后续确认用途。</p>
+<p>详细开发与测试按<a href="./Danus-AI%20Agent%20%E8%A7%92%E8%89%B2%E5%AE%9E%E7%8E%B0%E4%B8%8E%E9%AA%8C%E6%94%B6%E8%A7%84%E6%A0%BC.md">《Agent 角色实现与验收规格》v0.2</a>执行。角色、任务实例、程序服务和共享运行时分别建模；每类角色交付合同、上下文、输出校验、异常处理和资格证据。</p>
+<h3 id="section-5-2">5.2 资料沿着什么链条流动</h3>
+<p>研究资料的主链为：<strong>任务 → 候选及版本 → 选择决定 → 协议与预注册 → 运行及全部尝试 → 提交与审核报告 → 有效论断及证据事件 → 发布快照</strong>。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>资料区</th>
+<th>存放什么</th>
+<th>能否作为已验证结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>工作材料</td>
+<td>文献、候选、草稿、探索结果、失败原因假设</td>
+<td>不能自动视为真值，必须保留来源和状态</td>
+</tr>
+<tr>
+<td>运行制品</td>
+<td>代码、镜像引用、配置、原始输出、日志和分析输入</td>
+<td>是可检查证据，进程成功不等于科学合格</td>
+</tr>
+<tr>
+<td>正式证据库</td>
+<td>通过提交门的限定陈述、证据与后续状态</td>
+<td>按当前有效状态和范围使用</td>
+</tr>
+<tr>
+<td>发布快照</td>
+<td>某次定稿采用的证据、表图、披露和制品清单</td>
+<td>对应具体版本，变化后重新检查和签字</td>
+</tr>
+</tbody>
+</table></div>
+<p>内容摘要识别的是“这一份具体内容”，版本和引用保留其前后关系。科学语义变化形成新对象；撤销、降级等是追加事件，不原地改掉历史。模型只提交允许的字段，身份、费用和测量来源由可信服务补齐。</p>
+<h3 id="section-5-3">5.3 权威写入链为什么必须固定</h3>
+<p>经验论断的链条固定为 <strong>A6 服务身份 → R13 提交决策 → R04 存储</strong>。R13 综合检查后决定是否接受，R04 负责保存，不另设一套通过标准。写作、编排、审计模型都没有直接把自己的判断写成正式结论的权限。</p>
+<p>大文件先校验并落到制品目录，业务引用与事件再通过事务提交；外部调用请求也留下可靠的待发送/回执记录。进程崩溃后依据这些记录恢复，而不是猜测调用有没有执行。重复请求凭幂等键识别；远端状态不明时先对账，避免重复购买或付费。</p>
+<h3 id="section-5-4">5.4 三种状态不能混用</h3>
+<p>一个任务可以按约定交付结束，但没有科学正结果；一个论断可以曾被支持，后来因错误被标记待复核；一个报告可以已经签署，但尚未公开。任务、证据和发布状态分别展示，避免“任务完成”被理解为“发现成立”。</p>
+<p>项目自身的变更也分三维：决定是否批准、功能是否实现并验收、效果是否有证据。当前说明书解释的是设计；后续开发完成和正式成绩必须通过各自记录证明。</p>
+<h3 id="section-5-5">5.5 固定关口中的动态调用</h3>
+<p>任务完成或阻塞触发程序检查。下一步已确定时直接创建合法任务；需要研究判断时才调用 A1。A1 给出带版本、输入输出合同和依赖的计划，程序检查后由 A8 分配角色实例。可以并行检索和候选检查，也可以结束无结果分支；正式确认的指标、样本和停止规则不允许临时改动。</p>
+<p>取消或改计划时，排队任务撤销，运行中任务明确继续/取消并核对费用；旧结果保留原历史，重新使用需验证资格。它既不是所有 Agent 固定串行一遍，也不是模型任意调工具。</p>
+<p><a id="chapter-6"></a></p>
+<h2>6. 科研可靠性与运行控制</h2>
+<h3 id="section-6-1">6.1 证据检查各管一件事</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>环节</th>
+<th>要回答的问题</th>
+<th>不能扩大成什么保证</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>健全性前置</td>
+<td>指标、解析和基线等基本实现是否通过已知检查？</td>
+<td>方法完全没有 bug</td>
+</tr>
+<tr>
+<td>G0 确定性检查</td>
+<td>来源、版本、数据、全量尝试与数字是否一致合规？</td>
+<td>设计在科学上一定有效</td>
+</tr>
+<tr>
+<td>G1 统计</td>
+<td>在锁定目标与假设下，数据支持多大效应和范围？</td>
+<td>未测场景也成立</td>
+</tr>
+<tr>
+<td>G2 方法学审计</td>
+<td>是否存在尚未解决的混杂、解释或范围问题？</td>
+<td>模型没有发现问题就是证明</td>
+</tr>
+<tr>
+<td>后续复现</td>
+<td>在声明的新运行或新数据条件下能否支持结果？</td>
+<td>同实现重跑已经排除共同实现错误</td>
+</tr>
+</tbody>
+</table></div>
+<p>前三个提交后关口与健全性报告共同支撑首次接受；后续复现增强或限制结论，不是每条首次提交必须先支付的重复实验。必要检查不能因为单次费用高就被删除；额外可选检查才按价值与预算排序。</p>
+<h3 id="section-6-2">6.2 怎样避免试到满意为止</h3>
+<p>开发数据用于探索，验证数据用于获准的实现调试，确认数据用于锁定后的检验。角色只获得相应材料；方法容器不直接读取隐藏答案，分析者不借失败记忆绕回当前确认结果。</p>
+<p>系统同时记录“哪些尝试共同支持同一科学主张”和“为了选择方案看过哪些结果”。前者形成假设族，后者形成选择与暴露历史。换名字、换月份或换数据池不能自动清除同一主张的连续尝试；一般背景阅读也不意味着所有课题永久并成一族。</p>
+<p>首版默认每族总 α=0.05、最多 3 个确认分析槽位，事前分配，槽位内处理多个主比较。后续尝试若受前次反馈影响，还要有符合要求的新确认数据。该规则不承诺所有未来项目合起来永远只有 5% 错误，也不把 3 个槽位解释为系统只能发现 3 项成果。</p>
+<p>重复题目、同模板变体和同一数据上的多种子不能简单相乘成为独立样本。预注册必须说明结论针对指定随机实现、新随机性还是确定性任务；固定种子上的平均成绩不自动代表普遍平均表现。</p>
+<h3 id="section-6-3">6.3 正确结果、正确理由和失败经验</h3>
+<p>在案例中，策略提高了答案质量，仍可能因为增加了预算、使用了不同信息或其他未控制因素。性能结论与机制解释要分开验证。对机制研究，确认前列出竞争解释各自的预测或分布、能区分它们的观察或干预，以及什么结果仍然无法区分。</p>
+<p>搜索得到一个有效配置可以是有限成果，不能直接写成理解了规律。解释锁定后，应在同一规律下的新隐藏样本中检验其预测；改变了世界规则的实例不适合作为同一公式的泛化测试。均值相同但分布不同也可能有区分价值，不能粗略判定“没有信息”。</p>
+<p>失败记录保存事实与待验证原因。例如“运行超时”是工程事实，“方案复杂度过高”可能只是原因假设，“该科学方法无效”更不是自动结论。记录允许没有可排除的科学假设；需要复用为研究前提时，仍须有独立证据支持。</p>
+<h3 id="section-6-4">6.4 什么时候用 API，什么时候微调</h3>
+<p>首版需要语言能力的任务优先使用经过角色测试的现成模型 API，业务规则和统计算法由程序执行。选择具体模型由能力、费用、数据条件和独立性共同决定，业务代码不锁死品牌。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>决策</th>
+<th>必要条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>继续 API</td>
+<td>质量和成本可接受，或尚未确定瓶颈来自模型；先处理工具、材料与流程问题</td>
+</tr>
+<tr>
+<td>开展窄任务微调试验</td>
+<td>稳定任务、明确质量/成本问题、合法且可核验的数据、独立留出及批准预算</td>
+</tr>
+<tr>
+<td>替换生产模型</td>
+<td>与当前配置及未微调底座比较后质量和关键错误合格；完整成本、时延、权限及旁路测试合格，有回退路径</td>
+</tr>
+<tr>
+<td>开展强化学习</td>
+<td>可验证奖励、可重复环境、多步目标与强基线，且能控制奖励漏洞、泄漏和总投入</td>
+</tr>
+</tbody>
+</table></div>
+<p>完整成本包括数据整理、训练试错、验收、推理部署、运维更新和回退，按同一周期与 API 比较。“月费超过某个数”不足以自动触发微调。优先候选是卡片提取等窄任务，不能把健全性程序或证据核心交给未经验证的模型替代。</p>
+<p>科研轨迹先按审计发现、工程错误、文献报告和独立核验结果分级积累。几十条确认轨迹不能宣称形成数据壁垒；API 输出能保存也不代表获准训练，使用前逐家核对条款。用户研究训练方法和 Agent 自身优化是两种项目，费用与排期分开。</p>
+<h3 id="section-6-5">6.5 预算如何进入每一步</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>初始月度用途</th>
+<th style="text-align:right">等值美元</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>研究控制与文献</td>
+<td style="text-align:right">60</td>
+</tr>
+<tr>
+<td>确认性实验</td>
+<td style="text-align:right">90</td>
+</tr>
+<tr>
+<td>探索与选题</td>
+<td style="text-align:right">45</td>
+</tr>
+<tr>
+<td>复现与规模验证</td>
+<td style="text-align:right">30</td>
+</tr>
+<tr>
+<td>系统评测专项</td>
+<td style="text-align:right">45</td>
+</tr>
+<tr>
+<td>平台运行与应急保留</td>
+<td style="text-align:right">30</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td style="text-align:right"><strong>300</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>这是初始运行配置，未被证明最优，也不是开发人工或正式大样本评测的总报价。所有角色、失败、重试、空闲资源和释放滞后费用必须归集，同一笔只算一次。探索、评测与应急额度不能由编排模型擅自挪用；人的重编保留总额、理由和影响。</p>
+<p>启动前预占保守费用，返回后结算；账单延迟则保留待核。达到上限停止新增负债并按策略停资源，无法控制的实际超额如实记为事故，不能把账单截断成预算值。正式评测可跨月或另行批准，投入不足不允许悄悄降低验收标准。</p>
+<h3 id="section-6-6">6.6 失败、暂停与恢复的固定处置</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>情况</th>
+<th>系统动作</th>
+<th>恢复条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无合格候选</td>
+<td>有限补充后返回无可推进候选，保存依据</td>
+<td>用户调整问题或材料后继续原版本链</td>
+</tr>
+<tr>
+<td>预算不足</td>
+<td>排队或停止新增运行，保留已有制品</td>
+<td>合法调额或缩小尚未锁定的任务范围</td>
+</tr>
+<tr>
+<td>模型不可用</td>
+<td>尝试预先验证且仍满足约束的回退；否则暂停</td>
+<td>合格配置恢复，不破坏被测条件</td>
+</tr>
+<tr>
+<td>节点掉线或费用未知</td>
+<td>查询任务与账单，禁止盲目重复启动</td>
+<td>外部状态核实、制品完整、费用可对账</td>
+</tr>
+<tr>
+<td>实现或健全性失败</td>
+<td>保留记录，在允许范围内修复并重测</td>
+<td>新代码绑定有效检查；设计改变另走变更</td>
+</tr>
+<tr>
+<td>审核拒绝或证据不足</td>
+<td>给出明确问题、有效范围与下一步</td>
+<td>取得所需证据；不按模型意见直接放行</td>
+</tr>
+<tr>
+<td>前提失效或复现异常</td>
+<td>限制受影响的新引用，进入复审计队列</td>
+<td>有依据的维持、收窄、降级或撤销事件</td>
+</tr>
+<tr>
+<td>用户暂停</td>
+<td>阻止新调用，按选择等待当前任务结束或立即停止</td>
+<td>重新检查预算、批准、版本及数据资格</td>
+</tr>
+</tbody>
+</table></div>
+<p>基础设施失败的默认自动重试最多 2 次，不依据结果好坏决定重试。已返回完整有效结果不能因为不理想就重跑挑最好一次。系统中断后依靠持久任务、有效租约和幂等记录恢复；旧工作者迟到回传不能覆盖新执行者状态。</p>
+<h3 id="section-6-7">6.7 数据与发布的安全边界</h3>
+<p>外发前按数据分类、角色、用途、目标提供商和地域授权，再检查实际文本及附件；未知或过期则阻止。容器默认不能任意联网，模型上下文没有 API 密钥；外部文献中的指令只是待处理内容，不改变系统权限。</p>
+<p>关键事件有连续哈希与操作者控制的签名检查点，发布清单绑定代码、依赖清单、镜像和证据摘要。使用 Ed25519 签名、SBOM 和镜像核验帮助发现变更，但不宣称可以对抗同时控制应用、私钥和全部备份的攻击者。</p>
+<p>SQLite 使用在线备份，每日及发布前保存适当快照；密钥泄露时撤销受影响凭证，停止新暴露与负债，再核对仍在运行的任务和未结账费用。恢复不仅是复制数据库，还包括外部资源、账单和证据资格检查。</p>
+<p>原始输入依许可和保留策略保存，不承诺永久保留。租户数据删除要联动摘要、缓存、索引和备份策略；证据删除影响可复核性时限制依赖结论并保留必要受限审计信息。恢复不能让已撤销授权或已删除资料重新可见。</p>
+<p><a id="chapter-7"></a></p>
+<h2>7. 成果交付与能力验证</h2>
+<h3 id="section-7-1">7.1 用户最终拿到什么</h3>
+<p>一份完整项目交付包含研究问题和选择过程、正式协议与预注册、代码与环境清单、所有运行与费用摘要、主要结果与证据报告、复现类型、限制及可下载报告。制品包提供从报告数字追到运行和分析的对应关系，以及授权范围内的重算步骤。</p>
+<p>没有正面发现，也应交付有限否定或不确定报告。受限数据不为满足“可复现”而违规公开，而是提供合法授权核验路径，并说明条件。任务结果与发布版本分别保存；旧发布发现问题后可撤回，历史证据仍可查。</p>
+<h3 id="section-7-2">7.2 五类评测分别回答什么</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>评测</th>
+<th>核心问题</th>
+<th>不能代替的东西</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>证据门校准</td>
+<td>固定证据包中的缺陷能否拦住，合格包会不会误拒？</td>
+<td>整个系统的科研发现能力</td>
+</tr>
+<tr>
+<td>a/b/c 协作比较</td>
+<td>分权和约束的组合是否降低错误确认，并保持召回与成本？</td>
+<td>单个组件的独立因果贡献</td>
+</tr>
+<tr>
+<td>选题能力</td>
+<td>候选能否提出可检验思路，排序是否优于基线？</td>
+<td>新课题已被证明有科学价值</td>
+</tr>
+<tr>
+<td>产品效用</td>
+<td>对真实用户，完整流程是否改善质量、时间与投入？</td>
+<td>受控真值下的正确性评测</td>
+</tr>
+<tr>
+<td>可验证性</td>
+<td>发布材料能否定位、重算并在授权范围内核查？</td>
+<td>所有科学主张必然为真</td>
+</tr>
+</tbody>
+</table></div>
+<p>参考证据包从已知机制、解析解或独立核查的实验建立；缺陷包在其上做明确修改。数字错配可以改报告，数据泄漏或不公平调参必须真的改变过程并留可信记录。真实论文的发表状态不能直接当金标准；有争议的参考单列。</p>
+<h3 id="section-7-3">7.3 假阳性、未确认与成本怎样比较</h3>
+<p>a 是单工作者，b 是协议、分析、实现分权且有健全性前置与对等预算，c 保留分权但不强制后两项。三组使用相同预分配任务、可用工具和总资源上限，由共同独立评分器评价；不能因 a/c 缺少 b 的程序步骤就预判其科学失败。</p>
+<p>固定真/假命题和隐藏真值后，<strong>FPR 是全部假命题中被最终错误确认成立的比例；Recall 是全部真命题中被最终确认成立的比例。</strong> 未确认率为 1−Recall，包含错误否定、证据不足、超时、执行失败和预算耗尽；这些原因分开报告，主分母不删除系统自身失败。</p>
+<p>b 对 a 的拟定正式成功条件要求同时满足：FPR 改善超过 2 个百分点的置信界限；Recall 的非劣界限为 5 个百分点；每项独立核验有效产出的成本比置信上界不超过 1.5。5 个百分点是明确的容许界限，不能宣传为已证明假阴性完全不增加。具体不等式和统计合同见原规格 10.6。</p>
+<p>费用包含全部失败、重试和审核；有效产出由独立评测判定，不能把系统 accepted 数直接作为正确数。零有效产出不产生有限单位成本。费用与产出共同进入不确定性分析；首版使用有适用条件的保守方法，条件不满足只报实际账单与描述性结果，不强造区间。</p>
+<p>样本设计针对三条件同时通过的目标联合功效，在事先声明的替代效应下争取至少 80%。小试跑用于估算成本和设计能力，不等于正式证明。成绩区分达标、证据不足与明确不利结果；低功效不自动判失败，也不豁免负面证据。</p>
+<h3 id="section-7-4">7.4 选题、产品价值和可验证性的独立检查</h3>
+<p>再发现评测给定背景和受控语料，隐藏目标论文及近重复答案，比较直接提问与结构化流程。MOOSE-Chem 提供这种构造思路；相似度反映再发现程度，不等于原创性或真实性。训练截止不明时披露污染风险，不假定论文较新就一定未见。</p>
+<p>排序在冻结的完整候选池上独立盲评，再比较系统、简单规则和随机排序。只观察被选课题的后续结果会产生选择性观测，不能据此证明所有候选排得正确。DiscoveryWorld 可作为补充环境，但任务成功与解释评分分开；二者均分之差不能直接当 FPR，也不能凭均分差证明暴力搜索原因。</p>
+<p>产品效用首选强基线 d2：研究者＋通用 Agent＋人工预注册与留出隔离，比较质量、人工分钟、总历时、费用和采用理由。无强制预注册的 d1 仅在另有问题和预算时增加。控制或记录任务难度、人员经验和重复做题的学习影响，不能刻意削弱基线。</p>
+<p>可验证性由未参与原任务的人，按预先抽样规则使用正常发布物和授权材料核查。确定性分析按容差重算，随机模型按复现标准检查；临时作者帮助、缺失材料、失败、时间和费用都记录，不承诺任何研究都能在十分钟内完成科学核验。</p>
+<p><a id="chapter-8"></a></p>
+<h2>8. 开发实施路线</h2>
+<h3 id="section-8-1">8.1 为什么按这个顺序建设</h3>
+<p>先统一数据对象和权威记录，再建立受控执行，才有条件验证结果；证据闭环具备之后，再把多角色自动化接入完整流程。界面可以提前做原型，真正的写操作仍要等权限和底座验收。评测从 P0 开始准备，不等产品完成才临时寻找题目。</p>
+<figure class="diagram" tabindex="0" role="button" aria-label="放大：图 4：开发阶段、前置条件与可交付能力"><svg xmlns="http://www.w3.org/2000/svg" width="1450" height="1370" viewBox="0 0 1450 1370" role="img"><title>开发路线｜先证据闭环，再角色自动化</title><desc>实线表示主要前置关系；右侧评测持续贯穿，不等产品完成后才启动。</desc><defs><marker id="arrow-04" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#52768d"/></marker></defs><rect width="1450" height="1370" fill="#f8fafc"/><text x="48" y="68.88" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="36" font-weight="700" fill="#17324d">开发路线｜先证据闭环，再角色自动化</text><text x="48" y="110.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">实线表示主要前置关系；右侧评测持续贯穿，不等产品完成后才启动。</text><rect x="48" y="142" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="183.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P0  基线与人工试跑</text><text x="68" y="218.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R00；首包、存储决策、参考及复核责任</text><text x="68" y="253.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：可核算的小试跑和完整工作包估算</text><path d="M 488,272 L 488,286" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="290" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="331.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P1  契约、存储与文献</text><text x="68" y="366.84000000000003" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R01 / R02 / R03 / R04 / R05</text><text x="68" y="401.34000000000003" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：租户 / 计划合同、首包参考与工程骨架</text><path d="M 488,420 L 488,434" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="438" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="479.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P2  身份、预算与可恢复执行</text><text x="68" y="514.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R07 / R08 / R08b / R08c / R09 / R24a</text><text x="68" y="549.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：一次真实限额运行、隔离与恢复</text><path d="M 488,568 L 488,582" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="586" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="627.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P3  人工驱动证据闭环</text><text x="68" y="662.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R04b / R06 / R10a / R10 / R11 / R12 / R13</text><text x="68" y="697.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：首包、最小审计资格及完整证据分支</text><path d="M 488,716 L 488,730" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="734" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="775.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P4  多角色与三入口</text><text x="68" y="810.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R14 / R15a / R15b / R15c / R16 / R17</text><text x="68" y="845.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：真实角色资格、上下文策略与动态计划</text><path d="M 488,864 L 488,878" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="882" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="923.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P5  复现与证据传播</text><text x="68" y="958.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R18 / R19</text><text x="68" y="993.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：复现类型、范围变化与复审计</text><path d="M 488,1012 L 488,1026" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)"/><rect x="48" y="1030" width="880" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="68" y="1071.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#2563a6">P6  产品与运维交付</text><text x="68" y="1106.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">R20 / R21 / R22 完整装配</text><text x="68" y="1141.34" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#17324d">交付：工作台、成果包、恢复演练和成绩单</text><rect x="980" y="142" width="422" height="1014" rx="16" fill="#eaf7f5" stroke="#b8dcd6" stroke-width="2"/><text x="1002" y="193.24" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700" fill="#177f80">W-EVAL 持续评测</text><rect x="1000" y="245" width="382" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1020" y="286.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">P0—P1</text><text x="1020" y="320.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">题库、隐藏真值、独立参考</text><text x="1020" y="353.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">冻结与泄漏管理</text><rect x="1000" y="429" width="382" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1020" y="470.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">P1—P3</text><text x="1020" y="504.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">统计与成本方法校准</text><text x="1020" y="537.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">缺陷包和协作小试跑</text><rect x="1000" y="613" width="382" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1020" y="654.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">P3—P4</text><text x="1020" y="688.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">再发现与排序基线</text><text x="1020" y="721.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">正式协作评测按预算启动</text><rect x="1000" y="797" width="382" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1020" y="838.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">P4—P6</text><text x="1020" y="872.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">d2 强工作流效用对照</text><text x="1020" y="905.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">可验证性抽查与恢复</text><rect x="1000" y="981" width="382" height="126" rx="16" fill="white" stroke="#d9e3ec" stroke-width="2"/><text x="1020" y="1022.0" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" fill="#177f80">每次版本发布</text><text x="1020" y="1056.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">受影响能力回归</text><text x="1020" y="1089.76" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" fill="#17324d">实际结果决定可宣称范围</text><path d="M 932,205 L 975,205" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)" stroke-dasharray="9 9"/><path d="M 932,501 L 975,501" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)" stroke-dasharray="9 9"/><path d="M 932,797 L 975,797" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)" stroke-dasharray="9 9"/><path d="M 932,1093 L 975,1093" fill="none" stroke="#52768d" stroke-width="3" marker-end="url(#arrow-04)" stroke-dasharray="9 9"/><rect x="48" y="1200" width="1354" height="110" rx="16" fill="#fff7e9" stroke="#e9d6b1" stroke-width="2"/><text x="70" y="1245.08" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" fill="#976314">阶段通过看真实产物与验收，不按“代码写完”自动升级能力。</text><text x="70" y="1285.84" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" fill="#52677a">工程合格但科研收益证据不足时，交付受监督验证版；扩展轨道随后按条件准入。</text></svg><figcaption>图 4：开发阶段、前置条件与可交付能力 · 点击放大查看</figcaption></figure>
+<p><em>图 4：实线表示主要开发前置关系，评测工作持续贯穿。阶段产物通过验收后才能作为下一阶段的真实能力，模拟接口不进入生产路由。</em></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>主要工作及模块</th>
+<th>用户或项目得到什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0 基线与试跑</td>
+<td>R00；固定源码、环境、角色探针及评测设计</td>
+<td>限额人工试跑、费用依据、对象草案与实际任务拆解</td>
+</tr>
+<tr>
+<td>P1 数据与文献</td>
+<td>R01/R02/R03/R04/R05；协议与预注册存储先行</td>
+<td>可安装工程、统一对象、可追溯文献卡片和资料库</td>
+</tr>
+<tr>
+<td>P2 可控执行</td>
+<td>R07/R08/R08b/R08c/R09/R24a；R14 脚本循环</td>
+<td>能限额运行、隔离数据、核对费用并在故障后恢复</td>
+</tr>
+<tr>
+<td>P3 证据闭环</td>
+<td>R04b/R06/R10a/R10/R11/R12/R13；R22 原型</td>
+<td>人工组织的完整研究证据链，正负/未决/拒绝分支可验收</td>
+</tr>
+<tr>
+<td>P4 多角色协作</td>
+<td>R14/R15a/R15b/R15c/R16/R17</td>
+<td>三入口共用的选题与完整编排、角色交接和协作评测</td>
+</tr>
+<tr>
+<td>P5 复现与传播</td>
+<td>R18/R19</td>
+<td>复现报告、范围变化、前提失效传播与复审计</td>
+</tr>
+<tr>
+<td>P6 产品交付</td>
+<td>R20/R21/R22 完整装配</td>
+<td>工作台、成果包、恢复演练、真实课题试点与成绩单</td>
+</tr>
+</tbody>
+</table></div>
+<p>模块会跨阶段完善。例如 R22 从早期设计题库到最后汇总验收，R20 在 P2 就有最小状态页面；表中是首次主要交付位置，不表示此前完全没有相关工作。</p>
+<p>P1 建立双测试租户、角色/计划/检查合同与人工参考；P2 验脚本循环和隔离；P3 先完成首包及最小 A7 审计资格；P4 再启用动态编排与真实角色。A12 若提前承担进展写作，提前验对应窄任务；自主数学及公网托管不与 AI 首版并行宣称完成。</p>
+<h3 id="section-8-2">8.2 首轮 P0 怎样启动</h3>
+<p>首轮按最多 10 个工作日安排：先登记实际负责人、投入工时、首个问题和资源；固定参考源码与复用边界；制作合成案例和独立答案；在已批准额度内开展至多 3 例人工试跑；最后整理失败路径、成本与工程任务。</p>
+<p>三例用于诊断接口、信息隔离和记录是否可执行，不用于估计稳定产能或证明协作收益。付费条件不足时先完成本地合成工件，实际调用保持未启动。P0 不要求尚未开发的完整平台，但最小限额、数据边界和全部记录必须存在。</p>
+<p>确认后需要落实四项责任：产品负责人、实现集成负责人、统计/评测复核、部署/安全复核。可以兼任，但自审不称为外部独立验证。AI 辅助编写和检查，不能替代实际授权、科学判断与验收责任。</p>
+<h3 id="section-8-3">8.3 工期、投入与调整规则</h3>
+<p>完整范围的总工时在 P0 按工作包重新估算，纳入逐角色资格、动态计划、双租户隔离、首包独立参考及上下文治理；不沿用未覆盖这些增量的总数。工程工时、方法复核、机器历时、审批等待与正式评测费用分别计算，再由实际人员投入确定日期。</p>
+<p>A0 暂按每周 2—4 小时预留，统计与安全复核各暂列 16—32 小时规划预留。不存在已经落实的免费人力假设；现实投入不同就重算排期。开发工时、机器运行、人工审核和日历等待分别记录，不能把模型生成很快等同于整个工程已经完成。</p>
+<p>候选上限、角色轮次、并发、队列份额和预算分配进入参数台账，带负责人、观察窗口、预算与决策点。诊断在独立开发任务上进行，不能拿正式留出反复调到通过。资源不足时延期扩展轨道、自有模型训练、额外规模点和界面美化，保留权限、预算、隔离及必要证据检查。</p>
+<h3 id="section-8-4">8.4 最终怎样决定可以交付</h3>
+<p>工程交付需验证正常路径，也要验证并发抢预算、旧租约回传、进程崩溃、外发越权、密钥撤销、孤儿资源、恢复对账和发布制品变化。科学组件需要独立参考和校准，用户还应能完成三个入口及必要审批。</p>
+<p>工程通过但协作收益证据不足时，可以交付清楚标记的受监督验证版；不能因此宣称已经达到科研收益目标。真实试点没有正结果仍可交付诚实报告；正式公开发布由人对具体版本签字。</p>
+<p>首版之后，再按每条轨道的任务模板、测量与分析、健全性、基线、数据许可和算力阶梯接入训练、架构等研究。API、微调和强化学习继续按任务准入；数学形式验证另经 Lean/Mathlib 的实际检查，不把经验统计与形式证明硬套成同一证据标准。</p>
+<p><a id="reference"></a></p>
+<h2>附录：术语速查与原规格索引</h2>
+<h3>常用术语</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>本说明书中的意思</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>协议</td>
+<td>对一类任务“怎样测量”的标准规则：指标、基线、数据切分和检查</td>
+</tr>
+<tr>
+<td>预注册</td>
+<td>本次研究在看确认结果前锁定的假设、分析、阈值和停止规则</td>
+</tr>
+<tr>
+<td>候选</td>
+<td>有来源、预测和验证草案的待选研究方向，尚未被科学证实</td>
+</tr>
+<tr>
+<td>制品</td>
+<td>代码、数据引用、原始输出、日志、图表等可保存与校验的研究材料</td>
+</tr>
+<tr>
+<td>论断与范围</td>
+<td>一项明确陈述及其适用模型、任务、总体、硬件和条件</td>
+</tr>
+<tr>
+<td>假设族</td>
+<td>围绕共同科学主张的一组确认推断，用于管理多重尝试</td>
+</tr>
+<tr>
+<td>暴露记录</td>
+<td>谁在什么时候、为哪种用途看过哪些数据或结果</td>
+</tr>
+<tr>
+<td>冷启动审计</td>
+<td>审计者从规定材料开始，不继承作者的私有对话</td>
+</tr>
+<tr>
+<td>可信评测程序</td>
+<td>受系统控制、独立收集预测并计算指标的执行路径</td>
+</tr>
+<tr>
+<td>内容哈希</td>
+<td>标识具体内容的摘要；内容变化后原引用或批准不能无条件沿用</td>
+</tr>
+<tr>
+<td>幂等与租约</td>
+<td>重复请求不重复产生副作用；工作者在有效期限和身份内执行</td>
+</tr>
+<tr>
+<td>留出评测</td>
+<td>开发调试不能接触的独立验证任务，用来检查实际泛化表现</td>
+</tr>
+</tbody>
+</table></div>
+<h3>按阅读问题查工程规格</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>想进一步核查</th>
+<th>v1.2 工程规格位置</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>产品范围、入口、四个人工关口</td>
+<td>第 1—2 章</td>
+</tr>
+<tr>
+<td>进程部署、技术栈、隔离与一致性</td>
+<td>第 3 章</td>
+</tr>
+<tr>
+<td>A0—A12 权限、数据可见性与独立性</td>
+<td>第 4 章</td>
+</tr>
+<tr>
+<td>数据对象、哈希、状态、范围与权威存储</td>
+<td>第 5 章</td>
+</tr>
+<tr>
+<td>业务接口、调用链、代码依赖与开发依赖</td>
+<td>第 7 章，附录 A</td>
+</tr>
+<tr>
+<td>统计、假设族、复现与状态传播</td>
+<td>第 8 章</td>
+</tr>
+<tr>
+<td>模型策略、费用、算力与默认参数</td>
+<td>第 9 章，附录 B</td>
+</tr>
+<tr>
+<td>评测定义、正式判据、成本推断</td>
+<td>第 10 章</td>
+</tr>
+<tr>
+<td>开发阶段、工时与 W-EVAL</td>
+<td>第 11 章</td>
+</tr>
+<tr>
+<td>运维、发布、升级与轨道扩展</td>
+<td>第 12 章，附录 D</td>
+</tr>
+<tr>
+<td>完整对象样例、实施检查与技术依据</td>
+<td>附录 C、E、F</td>
+</tr>
+</tbody>
+</table></div>
+<h3>全部模块定位</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>说明书层级</th>
+<th>模块 → 原规格节号</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>用户交互与成果</td>
+<td>R20 → 6.29；R21 → 6.30</td>
+</tr>
+<tr>
+<td>研究规划与设计</td>
+<td>R03 → 6.5；R15c → 6.24；R15b → 6.23；R17 → 6.26；R16 → 6.25；R15a → 6.22；R04b → 6.7；R06 → 6.9</td>
+</tr>
+<tr>
+<td>角色与实验执行</td>
+<td>R14 → 6.21；R08b → 6.12；R08 → 6.11；R24a → 6.14</td>
+</tr>
+<tr>
+<td>证据验证与生命周期</td>
+<td>R10a → 6.16；R10 → 6.17；R11 → 6.18；R12 → 6.19；R13 → 6.20；R18 → 6.27；R19 → 6.28</td>
+</tr>
+<tr>
+<td>数据契约与研究资产</td>
+<td>R02 → 6.4；R05 → 6.8；R04 → 6.6</td>
+</tr>
+<tr>
+<td>贯穿治理</td>
+<td>R07 → 6.10；R08c → 6.13；R09 → 6.15</td>
+</tr>
+<tr>
+<td>工程与评测基础</td>
+<td>R00 → 6.2；R01 → 6.3；R22 → 6.31</td>
+</tr>
+</tbody>
+</table></div>
+<p>原始依据：<a href="Danus-AI%20%E7%A7%91%E7%A0%94%E6%99%BA%E8%83%BD%E4%BD%93%E4%BA%A7%E5%93%81%E6%9E%B6%E6%9E%84%E4%B8%8E%E8%90%BD%E5%9C%B0%E6%89%A7%E8%A1%8C%E6%96%B9%E6%A1%88%20v1.2%20%E6%9C%80%E7%BB%88%E7%A1%AE%E8%AE%A4%E7%A8%BF.md">v1.2 最终确认稿</a>。本阅读版与 v1.2 工程规格同步；发生实现歧义时回到工程规格及配套角色规格核查，不能以阅读版的省略放宽控制条件。</p>
+</article></main><a class="toplink" href="#top">回到顶部</a><dialog id="zoom"><div class="zoom-head"><strong>图示详情 · 可横向滚动查看</strong><button id="close-zoom">关闭 ×</button></div><div class="zoom-content"></div></dialog><script>
+const z=document.getElementById('zoom');document.querySelectorAll('figure.diagram').forEach(f=>{const open=()=>{z.querySelector('.zoom-content').innerHTML=f.querySelector('svg').outerHTML;z.showModal()};f.addEventListener('click',open);f.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}})});document.getElementById('close-zoom').onclick=()=>z.close();z.addEventListener('click',e=>{if(e.target===z)z.close()});let size=17;document.getElementById('smaller').onclick=()=>{size=Math.max(15,size-1);document.documentElement.style.setProperty('--size',size+'px')};document.getElementById('larger').onclick=()=>{size=Math.min(22,size+1);document.documentElement.style.setProperty('--size',size+'px')};
+</script></body></html>
