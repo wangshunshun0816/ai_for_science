@@ -6,7 +6,7 @@
 
 起点为 058606736b2fb2b572c9cfba41485f87e874e423；Ubuntu 根目录 /home/wangshunshun/danus-ai，工作区干净。git ls-remote origin refs/heads/main 返回同一完整哈希，已确认起点同步 GitHub；未读取令牌。
 
-设计／授权：首次交付范围已获本轮用户授权。工程：下列本地首次交付已实现。验证：本地实际验证通过，远端 CI 未运行，人工验收待登记。P0 整体和 R01 全模块仍不声明通过。
+设计／授权：首次交付范围已获本轮用户授权。工程：下列本地首次交付已实现。验证：本地实际验证通过，远端 CI 因认证不可用未运行，人工验收待 A0 填写。P0 整体和 R01 全模块仍不声明通过。
 
 ## 交付与依赖
 
@@ -42,7 +42,7 @@
 
 ## CI
 
-.github/workflows/ci.yml 仅 workflow_dispatch，无 push／PR 自动触发。当前无法确认账户免费额度／runner 资格，因此未触发远端执行，无运行链接或远端成功声明。免费执行条件确认后可手动触发并补最终运行证据。
+.github/workflows/ci.yml 仅 workflow_dispatch，无 push／PR 自动触发。2026-11-11 已核实公开仓库与标准 ubuntu-24.04 runner 的免费执行条件，见下方核对记录。当前认证／浏览器控制不可用，尚未触发远端执行，无实际运行链接或远端成功声明。恢复认证或由 A0 手动触发后，再跟踪并补齐证据。
 
 权限仅 contents: read；checkout 固定提交、persist-credentials: false；不注入自定义密钥或生产凭证；固定 uv 和 Python，15 分钟上限，无 GPU／模型调用。uv 在独立工具 venv 安装以避免系统 Python 的 externally-managed 限制；随后执行与本地相同的 verify.sh。本地通过不能代替 GitHub 托管执行通过。
 
@@ -58,6 +58,15 @@
 | Linux 容器运行 | 未运行容器；拟在首个可运行镜像及 R01 跨模块验收前完成 |
 | 签名校验 | 未建立签名载荷或密钥；责任／信任配置待决，首次正式制品及 R01 跨模块验收前完成 |
 | 真实事务／隔离故障测试 | 无事务、角色或数据库；在 P1-3／P2 对应能力形成后验证，不能以 AST 替代 |
-| 远端 CI | 免费条件待确认；首次手动运行后跟踪到完成，记录链接、命令与结果 |
+| 远端 CI | 免费条件已核实；当前阻塞于触发认证，首次手动运行后跟踪到完成，记录链接、命令与结果 |
 
 A0 尚需落实范围记录所列责任人、首包／独立复核及投入。工程侧后续需审查模块映射、动态导入策略及工具／镜像方案；科学资格、付费调用和正式 campaign 按原批准边界执行。本轮未修改设计基线、上游只读目录或 D 盘归档，未创建数据库或发起模型付费调用。
+
+## 远端 CI 收尾核对（2026-11-11）
+
+- git ls-remote origin refs/heads/main 返回 30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3，与目标提交及本地起点一致，已同步。
+- 未登录访问 [仓库网页](https://github.com/wangshunshun0816/ai_for_science)，页面标记 Public 且数据字段 isPrivate=false。工作流只用标准 ubuntu-24.04 runner、15 分钟上限，没有 upload-artifact 或 cache 步骤，也没有模型／采购步骤。
+- [GitHub Actions 计费规则](https://docs.github.com/en/actions/concepts/billing-and-usage)说明公开仓库的标准 GitHub-hosted runner 免费；[runner 标签表](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)将 ubuntu-24.04 列为标准 runner。因此本次运行的免费条件已核实，无需依赖私有仓库的剩余额度。若仓库可见性、runner 或工作流改变，应重新核实。
+- 触发阻塞：Ubuntu 和 Windows 未发现 gh；Ubuntu 未配置 Git credential.helper；匿名 REST API 返回限流 403；浏览器控制和 Windows 自动化均在初始化时报告 sandbox helper_unknown_error。未读取、输出或导出令牌，未尝试匿名写操作。
+- 实际运行链接：无（尚未触发）。目标代码提交：30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3。运行结果：未运行／触发认证阻塞，不记为 CI 通过或 CI 失败。
+- 后续：在已登录的 [工作流页面](https://github.com/wangshunshun0816/ai_for_science/actions/workflows/ci.yml)手动触发 main，核对运行的完整 head SHA；若 main 已追加仅证据文档的提交，应明确登记实际运行 SHA，不能冒充本目标提交的精确运行。跟踪到结束后补入实际 run URL 和结果；人工验收由 A0 填写。

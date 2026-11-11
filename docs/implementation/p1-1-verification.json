@@ -28,8 +28,18 @@
     "verified_by": "tests/test_foundation.py::test_fixture_cli"
   },
   "remote_ci": {
-    "status": "not_run",
-    "reason": "free runner eligibility not confirmed; workflow_dispatch only"
+    "status": "blocked_authentication",
+    "run_url": null,
+    "conclusion": null,
+    "target_commit": "30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3",
+    "checked_date": "2026-11-11",
+    "repository_visibility": "public",
+    "visibility_evidence": "Unauthenticated GitHub repository HTML contains isPrivate=false and Public; git ls-remote main matches target commit",
+    "runner": "ubuntu-24.04",
+    "free_execution_confirmed": true,
+    "billing_source": "https://docs.github.com/en/actions/concepts/billing-and-usage",
+    "runner_source": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job",
+    "reason": "No gh on Ubuntu or Windows; no configured Ubuntu Git credential helper; unauthenticated REST API rate-limited; browser automation failed sandbox initialization. No workflow dispatched and no actual run URL exists."
   },
   "direct_tools": {
     "pytest": {
