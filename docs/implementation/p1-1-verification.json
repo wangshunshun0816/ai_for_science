@@ -28,9 +28,9 @@
     "verified_by": "tests/test_foundation.py::test_fixture_cli"
   },
   "remote_ci": {
-    "status": "blocked_authentication",
-    "run_url": null,
-    "conclusion": null,
+    "status": "completed",
+    "run_url": "https://github.com/wangshunshun0816/ai_for_science/actions/runs/43036783370",
+    "conclusion": "success",
     "target_commit": "30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3",
     "checked_date": "2026-11-11",
     "repository_visibility": "public",
@@ -39,7 +39,17 @@
     "free_execution_confirmed": true,
     "billing_source": "https://docs.github.com/en/actions/concepts/billing-and-usage",
     "runner_source": "https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job",
-    "reason": "No gh on Ubuntu or Windows; no configured Ubuntu Git credential helper; unauthenticated REST API rate-limited; browser automation failed sandbox initialization. No workflow dispatched and no actual run URL exists."
+    "run_id": 43036783370,
+    "run_number": 1,
+    "event": "workflow_dispatch",
+    "head_sha": "30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3",
+    "duration_seconds": 24,
+    "job": "foundation",
+    "triggered_by": "user",
+    "evidence": "User screenshot and independently fetched public GitHub run summary: Success, exact commit link, 24s.",
+    "warnings": [
+      "Pinned actions/checkout targets deprecated Node.js 20; GitHub forced execution on Node.js 24. Non-failing warning; action version upgrade remains a maintenance follow-up."
+    ]
   },
   "direct_tools": {
     "pytest": {
