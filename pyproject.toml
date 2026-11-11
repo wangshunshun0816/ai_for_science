@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "danus-ai"
+version = "0.1.0"
+readme = "README.md"
+description = "Danus-AI engineering foundation"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.14,<1", "mypy>=1.18,<2", "setuptools==80.9.0"]
+
+[tool.setuptools.packages.find]
+include = ["danus_ai*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["danus_ai", "scripts/check_import_boundaries.py", "tests"]

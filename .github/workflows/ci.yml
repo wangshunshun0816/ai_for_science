@@ -1,0 +1,25 @@
+name: P1-1 foundation checks
+# Manual-only: free allowance/runner eligibility has not been confirmed.
+# No push or pull_request trigger; dispatch only after that confirmation.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install pinned tooling
+        run: |
+          python3 -m venv /tmp/danus-ci-tools
+          /tmp/danus-ci-tools/bin/python -m pip install uv==0.13.7
+          echo "/tmp/danus-ci-tools/bin" >> "$GITHUB_PATH"
+      - name: Install pinned Python
+        run: uv python install 3.12.16
+      - name: Locked local checks and build
+        run: bash scripts/verify.sh

@@ -1,0 +1,52 @@
+{
+  "date": "2026-11-11",
+  "scope": "P1-1 first delivery, local engineering evidence only",
+  "python": "3.12.16",
+  "uv": "0.13.7",
+  "uv_lock_sha256": "457bd88b376b1d33e2c1527c9b640a6f24c83cbb26612761c53b633dd06d9caf",
+  "commands": [
+    {
+      "command": "bash scripts/verify.sh",
+      "exit_code": 0,
+      "result": "Ruff lint/format, mypy (3 files), import checker, 11 tests, sdist and wheel passed"
+    },
+    {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/wangshunshun/danus-ai/.venv-repro bash scripts/verify.sh",
+      "exit_code": 0,
+      "result": "same checks and 11 tests passed; installed package/version lists equal"
+    },
+    {
+      "command": "uv venv --python 3.12.16 .venv-wheel; uv pip install --python .venv-wheel/bin/python --no-deps dist/danus_ai-0.1.0-py3-none-any.whl",
+      "exit_code": 0,
+      "result": "isolated wheel installed; Python -I imported site-packages copy from /tmp"
+    }
+  ],
+  "negative_fixture": {
+    "path": "fixtures/import_boundaries/illegal/orchestration/service.py",
+    "expected_exit_code": 1,
+    "expected_rule": "B01",
+    "verified_by": "tests/test_foundation.py::test_fixture_cli"
+  },
+  "remote_ci": {
+    "status": "not_run",
+    "reason": "free runner eligibility not confirmed; workflow_dispatch only"
+  },
+  "direct_tools": {
+    "pytest": {
+      "version": "9.2.0",
+      "license_metadata": "MIT"
+    },
+    "ruff": {
+      "version": "0.17.4",
+      "license_metadata": "MIT"
+    },
+    "mypy": {
+      "version": "1.20.2",
+      "license_metadata": "MIT"
+    },
+    "setuptools": {
+      "version": "80.9.0",
+      "license_metadata": "MIT"
+    }
+  }
+}
