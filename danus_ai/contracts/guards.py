@@ -197,7 +197,9 @@ def validate_mode_preconditions(
 
 def require_runtime_ready() -> None:
     """Never turn the partial guard checks into permission to run an experiment."""
-    raise ContractBlocked("SPEC_UNRESOLVED: data/lease/sanity/approval adapters; Q04-Q07")
+    raise ContractBlocked(
+        "SPEC_UNRESOLVED: data and lease adapters; signed protocol/family/budget/data terms"
+    )
 
 
 def validate_prereg_approval_bindings(

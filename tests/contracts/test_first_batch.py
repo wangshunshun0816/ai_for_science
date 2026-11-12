@@ -613,9 +613,9 @@ def test_unapproved_branches_and_versions_remain_blocked() -> None:
     with pytest.raises(ValidationError):
         PreregDraft.model_validate(prereg() | {"inference": "sampling"})
     cases: list[tuple[ProtocolDraft | PreregDraft | RunRequestDraft, str]] = [
-        (ProtocolDraft.model_validate(protocol()), "Q07"),
-        (PreregDraft.model_validate(prereg()), "Q04"),
-        (RunRequestDraft.model_validate(run()), "Q04"),
+        (ProtocolDraft.model_validate(protocol()), "typed targets and applicability basis"),
+        (PreregDraft.model_validate(prereg()), "typed history and scientific terms"),
+        (RunRequestDraft.model_validate(run()), "typed ExecutionBinding"),
     ]
     for value, marker in cases:
         with pytest.raises(ContractBlocked, match=marker):

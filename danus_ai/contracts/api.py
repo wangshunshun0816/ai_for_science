@@ -20,6 +20,21 @@ from .first_objects import (
     ProtocolDraft,
     ProtocolRecord,
 )
+from .fixed_four import (
+    ApplicabilityBasis,
+    CodeEvidence,
+    ConfirmationProfile,
+    DependencyEvidence,
+    FixedBaseline,
+    FixedDataset,
+    FixedFamily,
+    FixedPopulation,
+    FixedQuestion,
+    FixedSelectionHistory,
+    FixedSplit,
+    ImageEvidence,
+    SanitySnapshot,
+)
 from .guards import ContractBlocked, ReadOnlyPort, RequestContext
 from .messages import (
     Delegation,
@@ -141,6 +156,19 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     FixedMissingPolicy,
     SelectionRule,
     FixedProtocolTargets,
+    ApplicabilityBasis,
+    FixedPopulation,
+    FixedDataset,
+    FixedSplit,
+    FixedQuestion,
+    FixedFamily,
+    FixedSelectionHistory,
+    FixedBaseline,
+    CodeEvidence,
+    ConfirmationProfile,
+    DependencyEvidence,
+    ImageEvidence,
+    SanitySnapshot,
     TaskTransitionCheck,
     AttemptTransitionCheck,
     SettlementCheck,
@@ -214,9 +242,11 @@ def content_id(value: StrictContract, context: RequestContext, port: ReadOnlyPor
     if isinstance(value, ClaimScience):
         return claim_content_version(value, context, port)
     if isinstance(value, (ProtocolDraft, ProtocolRecord)):
-        raise ContractBlocked("SPEC_UNRESOLVED: Protocol targets and issuance guard")
+        raise ContractBlocked(
+            "SPEC_UNRESOLVED: fixed Protocol requires a typed reader and applicability basis"
+        )
     if isinstance(value, _CONTENT_ID_BLOCKED):
-        raise ContractBlocked("SPEC_UNRESOLVED: scientific projection or resolved targets")
+        raise ContractBlocked("SPEC_UNRESOLVED: use fixed-four preimage with typed service targets")
     if isinstance(value, LegacyIncomplete):
         raise ContractBlocked("LEGACY_INCOMPLETE")
     raise ContractBlocked("CONTENT_ID_UNSUPPORTED")
@@ -246,6 +276,13 @@ def schema_capabilities() -> dict[str, object]:
             "verify_stored": sorted(model.__name__ for model in _CONTENT_ID_VERIFIED),
             "spec_unresolved": sorted(model.__name__ for model in _CONTENT_ID_BLOCKED),
             "legacy_incomplete": [LegacyIncomplete.__name__],
+        },
+        "fixed_four_preimage": {
+            "service_api": "FixedFour",
+            "objects": ["Protocol", "Prereg", "ExecutionBinding", "RunRequest"],
+            "run_modes": ["deterministic_confirmation"],
+            "requires_typed_targets_and_applicability": True,
+            "lock_and_admission": "blocked_pending_signed_terms_and_service_authority",
         },
         "unlisted_objects_and_operations": "unsupported",
         "runtime_validation_required": True,

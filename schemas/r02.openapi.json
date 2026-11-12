@@ -18,6 +18,43 @@
         "title": "AnalysisInputs",
         "type": "object"
       },
+      "ApplicabilityBasis": {
+        "additionalProperties": false,
+        "description": "Trusted evidence projection, scoped to an exact target and project.",
+        "properties": {
+          "check_name": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Check Name"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "target",
+          "project_id",
+          "evidence",
+          "check_name"
+        ],
+        "title": "ApplicabilityBasis",
+        "type": "object"
+      },
       "Applicable_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
         "discriminator": {
           "mapping": {
@@ -1301,6 +1338,33 @@
         "title": "ClosedInterval",
         "type": "object"
       },
+      "CodeEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "commit": {
+            "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$",
+            "title": "Commit",
+            "type": "string"
+          },
+          "dependency_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "image_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "method_spec_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "commit",
+          "method_spec_ref",
+          "dependency_ref",
+          "image_ref"
+        ],
+        "title": "CodeEvidence",
+        "type": "object"
+      },
       "ConfirmationInputs": {
         "additionalProperties": false,
         "properties": {
@@ -1312,6 +1376,34 @@
           "protocol_ref"
         ],
         "title": "ConfirmationInputs",
+        "type": "object"
+      },
+      "ConfirmationProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "const": "confirmation_full",
+            "title": "Name",
+            "type": "string"
+          },
+          "required_checks": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Required Checks",
+            "type": "array"
+          },
+          "suite_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "name",
+          "suite_ref",
+          "required_checks"
+        ],
+        "title": "ConfirmationProfile",
         "type": "object"
       },
       "CorrectionCheck": {
@@ -1377,6 +1469,21 @@
           "revoked"
         ],
         "title": "Delegation",
+        "type": "object"
+      },
+      "DependencyEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "lock_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Lock Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lock_sha256"
+        ],
+        "title": "DependencyEvidence",
         "type": "object"
       },
       "DevelopmentInputs": {
@@ -2039,6 +2146,38 @@
         "title": "ExternalOrigin",
         "type": "object"
       },
+      "FixedBaseline": {
+        "additionalProperties": false,
+        "properties": {
+          "method_spec_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "method_spec_ref"
+        ],
+        "title": "FixedBaseline",
+        "type": "object"
+      },
+      "FixedDataset": {
+        "additionalProperties": false,
+        "properties": {
+          "manifest_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Manifest Sha256",
+            "type": "string"
+          },
+          "population_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "population_ref",
+          "manifest_sha256"
+        ],
+        "title": "FixedDataset",
+        "type": "object"
+      },
       "FixedDiscrimination": {
         "additionalProperties": false,
         "properties": {
@@ -2101,6 +2240,27 @@
           "reason"
         ],
         "title": "FixedDiscrimination",
+        "type": "object"
+      },
+      "FixedFamily": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Candidate Refs",
+            "type": "array"
+          },
+          "question_ref": {
+            "$ref": "#/components/schemas/HistoricalRef"
+          }
+        },
+        "required": [
+          "question_ref",
+          "candidate_refs"
+        ],
+        "title": "FixedFamily",
         "type": "object"
       },
       "FixedFourPolicy": {
@@ -2193,6 +2353,24 @@
         "title": "FixedMissingPolicy",
         "type": "object"
       },
+      "FixedPopulation": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "FixedPopulation",
+        "type": "object"
+      },
       "FixedProtocolTargets": {
         "additionalProperties": false,
         "properties": {
@@ -2230,6 +2408,44 @@
           "selection_rules"
         ],
         "title": "FixedProtocolTargets",
+        "type": "object"
+      },
+      "FixedQuestion": {
+        "additionalProperties": false,
+        "properties": {
+          "direction": {
+            "enum": [
+              "greater",
+              "less"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "estimand": {
+            "minLength": 1,
+            "title": "Estimand",
+            "type": "string"
+          },
+          "population_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "scope_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "unit": {
+            "minLength": 1,
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "population_ref",
+          "estimand",
+          "unit",
+          "direction",
+          "scope_ref"
+        ],
+        "title": "FixedQuestion",
         "type": "object"
       },
       "FixedRandomness": {
@@ -2284,6 +2500,62 @@
           "reason"
         ],
         "title": "FixedRandomness",
+        "type": "object"
+      },
+      "FixedSelectionHistory": {
+        "additionalProperties": false,
+        "properties": {
+          "considered_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Considered Candidates",
+            "type": "array"
+          },
+          "family_ref": {
+            "$ref": "#/components/schemas/HistoricalRef"
+          },
+          "question_ref": {
+            "$ref": "#/components/schemas/HistoricalRef"
+          },
+          "test_exposures": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Test Exposures",
+            "type": "array"
+          }
+        },
+        "required": [
+          "question_ref",
+          "family_ref",
+          "considered_candidates",
+          "test_exposures"
+        ],
+        "title": "FixedSelectionHistory",
+        "type": "object"
+      },
+      "FixedSplit": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "manifest_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Manifest Sha256",
+            "type": "string"
+          },
+          "population_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "dataset_ref",
+          "population_ref",
+          "manifest_sha256"
+        ],
+        "title": "FixedSplit",
         "type": "object"
       },
       "FixedUnitSpec": {
@@ -2393,6 +2665,21 @@
           "content_version"
         ],
         "title": "HistoricalRef",
+        "type": "object"
+      },
+      "ImageEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "manifest_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Manifest Sha256",
+            "type": "string"
+          }
+        },
+        "required": [
+          "manifest_sha256"
+        ],
+        "title": "ImageEvidence",
         "type": "object"
       },
       "InternalOrigin": {
@@ -4614,6 +4901,85 @@
         "title": "SanityInputs",
         "type": "object"
       },
+      "SanitySnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_bindings": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalLocator"
+            },
+            "title": "Approval Bindings",
+            "type": "array"
+          },
+          "binding_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "checks": {
+            "additionalProperties": {
+              "enum": [
+                "pass",
+                "defect",
+                "error",
+                "not_covered",
+                "not_applicable"
+              ],
+              "type": "string"
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "not_applicable_bases": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "title": "Not Applicable Bases",
+            "type": "object"
+          },
+          "profile_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "suite_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "binding_ref",
+          "suite_ref",
+          "profile_ref",
+          "checks",
+          "stale",
+          "approval_bindings",
+          "not_applicable_bases"
+        ],
+        "title": "SanitySnapshot",
+        "type": "object"
+      },
       "ScienceLimits": {
         "additionalProperties": false,
         "properties": {
@@ -5689,7 +6055,22 @@
         "ClaimRecord"
       ]
     },
+    "fixed_four_preimage": {
+      "lock_and_admission": "blocked_pending_signed_terms_and_service_authority",
+      "objects": [
+        "Protocol",
+        "Prereg",
+        "ExecutionBinding",
+        "RunRequest"
+      ],
+      "requires_typed_targets_and_applicability": true,
+      "run_modes": [
+        "deterministic_confirmation"
+      ],
+      "service_api": "FixedFour"
+    },
     "objects": {
+      "ApplicabilityBasis": "service_owned",
       "ApprovalDisposition": "service_owned",
       "ApprovalEvidence": "service_owned",
       "ApprovalReview": "service_owned",
@@ -5702,18 +6083,29 @@
       "CandidateRecord": "service_owned",
       "ClaimRecord": "service_owned",
       "ClaimScience": "service_owned",
+      "CodeEvidence": "service_owned",
+      "ConfirmationProfile": "service_owned",
       "CorrectionCheck": "service_owned",
       "Delegation": "service_owned",
+      "DependencyEvidence": "service_owned",
       "EngineeringCheck": "service_owned",
       "EngineeringStatus": "service_owned",
       "ErrorDetail": "service_owned",
       "EvaluationView": "output_only",
       "EvidenceEvent": "service_owned",
       "ExecutionBinding": "service_owned",
+      "FixedBaseline": "service_owned",
+      "FixedDataset": "service_owned",
+      "FixedFamily": "service_owned",
       "FixedFourPolicy": "service_owned",
       "FixedMissingPolicy": "service_owned",
+      "FixedPopulation": "service_owned",
       "FixedProtocolTargets": "service_owned",
+      "FixedQuestion": "service_owned",
+      "FixedSelectionHistory": "service_owned",
+      "FixedSplit": "service_owned",
       "FixedUnitSpec": "service_owned",
+      "ImageEvidence": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
       "PreregDraft": "caller_input",
@@ -5727,6 +6119,7 @@
       "RetryCheck": "service_owned",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
+      "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
       "SelectionRule": "service_owned",
       "SettlementCheck": "service_owned",
@@ -5759,6 +6152,9 @@
     }
   },
   "x-r02-contracts": {
+    "ApplicabilityBasis": {
+      "$ref": "#/components/schemas/ApplicabilityBasis"
+    },
     "ApprovalDisposition": {
       "$ref": "#/components/schemas/ApprovalDisposition"
     },
@@ -5795,11 +6191,20 @@
     "ClaimScience": {
       "$ref": "#/components/schemas/ClaimScience"
     },
+    "CodeEvidence": {
+      "$ref": "#/components/schemas/CodeEvidence"
+    },
+    "ConfirmationProfile": {
+      "$ref": "#/components/schemas/ConfirmationProfile"
+    },
     "CorrectionCheck": {
       "$ref": "#/components/schemas/CorrectionCheck"
     },
     "Delegation": {
       "$ref": "#/components/schemas/Delegation"
+    },
+    "DependencyEvidence": {
+      "$ref": "#/components/schemas/DependencyEvidence"
     },
     "EngineeringCheck": {
       "$ref": "#/components/schemas/EngineeringCheck"
@@ -5819,17 +6224,41 @@
     "ExecutionBinding": {
       "$ref": "#/components/schemas/ExecutionBinding"
     },
+    "FixedBaseline": {
+      "$ref": "#/components/schemas/FixedBaseline"
+    },
+    "FixedDataset": {
+      "$ref": "#/components/schemas/FixedDataset"
+    },
+    "FixedFamily": {
+      "$ref": "#/components/schemas/FixedFamily"
+    },
     "FixedFourPolicy": {
       "$ref": "#/components/schemas/FixedFourPolicy"
     },
     "FixedMissingPolicy": {
       "$ref": "#/components/schemas/FixedMissingPolicy"
     },
+    "FixedPopulation": {
+      "$ref": "#/components/schemas/FixedPopulation"
+    },
     "FixedProtocolTargets": {
       "$ref": "#/components/schemas/FixedProtocolTargets"
     },
+    "FixedQuestion": {
+      "$ref": "#/components/schemas/FixedQuestion"
+    },
+    "FixedSelectionHistory": {
+      "$ref": "#/components/schemas/FixedSelectionHistory"
+    },
+    "FixedSplit": {
+      "$ref": "#/components/schemas/FixedSplit"
+    },
     "FixedUnitSpec": {
       "$ref": "#/components/schemas/FixedUnitSpec"
+    },
+    "ImageEvidence": {
+      "$ref": "#/components/schemas/ImageEvidence"
     },
     "LegacyIncomplete": {
       "$ref": "#/components/schemas/LegacyIncomplete"
@@ -5869,6 +6298,9 @@
     },
     "RunRequestRecord": {
       "$ref": "#/components/schemas/RunRequestRecord"
+    },
+    "SanitySnapshot": {
+      "$ref": "#/components/schemas/SanitySnapshot"
     },
     "Scope": {
       "$ref": "#/components/schemas/Scope"

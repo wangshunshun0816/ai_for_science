@@ -66,11 +66,15 @@ def content_version(
     In-memory fixtures exercising this API are not real scientific IDs/approval.
     """
     if isinstance(value, ProtocolFields):
-        raise ContractBlocked("Q07; MissingPolicy/SelectionRule targets unresolved")
+        raise ContractBlocked(
+            "SPEC_UNRESOLVED: use fixed Protocol with typed targets and applicability basis"
+        )
     if isinstance(value, PreregFields):
-        raise ContractBlocked("Q04/Q06/Q07; history/failure/retry/feedback targets unresolved")
+        raise ContractBlocked(
+            "SPEC_UNRESOLVED: use fixed Prereg with typed history and scientific terms"
+        )
     if isinstance(value, RunFields):
-        raise ContractBlocked("Q04/Q06; execution binding and authorization targets unresolved")
+        raise ContractBlocked("SPEC_UNRESOLVED: use fixed confirmation with typed ExecutionBinding")
     value = type(value).model_validate(value.model_dump())
     if isinstance(value, CandidateRecord):
         if value.tenant_id != ctx.tenant_id or value.project_id != ctx.project_id:
