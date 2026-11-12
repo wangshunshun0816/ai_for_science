@@ -26,6 +26,7 @@ PURE_CONTRACT_IMPORTS = {
     "unicodedata",
     "uuid",
     "pydantic",
+    "rfc8785",  # A 5.2; dependency approved by A0 on 2026-11-12
     "typing_extensions",
 }
 

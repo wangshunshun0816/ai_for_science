@@ -10,6 +10,7 @@ description = "Danus-AI engineering foundation"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "pydantic>=2,<3",
+    "rfc8785>=0.1.4",
 ]
 
 [dependency-groups]
