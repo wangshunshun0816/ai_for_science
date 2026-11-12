@@ -1,0 +1,5658 @@
+{
+  "$defs": {
+    "AnalysisInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_draft_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "calibration_suite_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "analysis_draft_ref",
+        "calibration_suite_ref"
+      ],
+      "title": "AnalysisInputs",
+      "type": "object"
+    },
+    "ApprovalConflict": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/ApprovalEvidence"
+          },
+          "minItems": 2,
+          "title": "Evidence",
+          "type": "array"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "evidence"
+      ],
+      "title": "ApprovalConflict",
+      "type": "object"
+    },
+    "ApprovalDisposition": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "revoke",
+            "replace"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "actor": {
+          "minLength": 1,
+          "title": "Actor",
+          "type": "string"
+        },
+        "affected_evidence_digests": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Affected Evidence Digests",
+          "type": "array"
+        },
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "replacement": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "actor",
+        "decided_at",
+        "reason",
+        "affected_evidence_digests",
+        "action",
+        "replacement"
+      ],
+      "title": "ApprovalDisposition",
+      "type": "object"
+    },
+    "ApprovalEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "envelope_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Envelope Digest",
+          "type": "string"
+        },
+        "source_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "subject": {
+          "$ref": "#/$defs/ApprovalSubject"
+        }
+      },
+      "required": [
+        "subject",
+        "envelope_digest",
+        "source_ref"
+      ],
+      "title": "ApprovalEvidence",
+      "type": "object"
+    },
+    "ApprovalLocator": {
+      "additionalProperties": false,
+      "properties": {
+        "purpose": {
+          "enum": [
+            "candidate_selection",
+            "protocol_use",
+            "meaningful_threshold",
+            "family_confirmation",
+            "budget_use",
+            "data_use",
+            "public_admission"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "purpose",
+        "record_id",
+        "revision"
+      ],
+      "title": "ApprovalLocator",
+      "type": "object"
+    },
+    "ApprovalReview": {
+      "additionalProperties": false,
+      "properties": {
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/ApprovalConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/ApprovalEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "revoked": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Revoked",
+          "type": "array"
+        },
+        "unresolved": {
+          "items": {
+            "$ref": "#/$defs/ApprovalConflict"
+          },
+          "title": "Unresolved",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evidence",
+        "conflicts",
+        "revoked",
+        "unresolved"
+      ],
+      "title": "ApprovalReview",
+      "type": "object"
+    },
+    "ApprovalScope": {
+      "additionalProperties": false,
+      "properties": {
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "scope_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Scope Digest",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "scope_digest"
+      ],
+      "title": "ApprovalScope",
+      "type": "object"
+    },
+    "ApprovalSubject": {
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "$ref": "#/$defs/ApprovalLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "$ref": "#/$defs/HistoricalRef"
+            },
+            {
+              "$ref": "#/$defs/RecordLocator"
+            }
+          ],
+          "title": "Target"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "terms_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Terms Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "target",
+        "terms_digest"
+      ],
+      "title": "ApprovalSubject",
+      "type": "object"
+    },
+    "Arm": {
+      "additionalProperties": false,
+      "properties": {
+        "arm_id": {
+          "minLength": 1,
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "baseline_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_spec_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "role": {
+          "enum": [
+            "reference",
+            "candidate"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "arm_id",
+        "role",
+        "method_spec_ref",
+        "baseline_ref"
+      ],
+      "title": "Arm",
+      "type": "object"
+    },
+    "Artifact": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "size": {
+          "minimum": 0,
+          "title": "Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "size",
+        "digest"
+      ],
+      "title": "Artifact",
+      "type": "object"
+    },
+    "AttemptFacts": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts_verified": {
+          "title": "Artifacts Verified",
+          "type": "boolean"
+        },
+        "attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "authorization_current": {
+          "title": "Authorization Current",
+          "type": "boolean"
+        },
+        "billing_pending": {
+          "title": "Billing Pending",
+          "type": "boolean"
+        },
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "external_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Id"
+        },
+        "external_state": {
+          "enum": [
+            "unknown",
+            "running",
+            "completed",
+            "failed",
+            "cancelled"
+          ],
+          "title": "External State",
+          "type": "string"
+        },
+        "fencing_token": {
+          "minimum": 0,
+          "title": "Fencing Token",
+          "type": "integer"
+        },
+        "historical_completion": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HistoricalCompletion"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "lease_current": {
+          "title": "Lease Current",
+          "type": "boolean"
+        },
+        "protocol_violation": {
+          "title": "Protocol Violation",
+          "type": "boolean"
+        },
+        "reason_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "required_outputs_complete": {
+          "title": "Required Outputs Complete",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "attempt_ref",
+        "expected_revision",
+        "fencing_token",
+        "external_id",
+        "external_state",
+        "authorization_current",
+        "lease_current",
+        "artifacts_verified",
+        "required_outputs_complete",
+        "protocol_violation",
+        "billing_pending",
+        "reason_ref"
+      ],
+      "title": "AttemptFacts",
+      "type": "object"
+    },
+    "AttemptSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "billing_pending": {
+          "title": "Billing Pending",
+          "type": "boolean"
+        },
+        "external_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "External Id"
+        },
+        "fencing_token": {
+          "minimum": 0,
+          "title": "Fencing Token",
+          "type": "integer"
+        },
+        "reason_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "settlement_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "reserved",
+            "running",
+            "collecting",
+            "reconciling",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt_ref",
+        "run_ref",
+        "status",
+        "external_id",
+        "fencing_token",
+        "billing_pending",
+        "reason_ref"
+      ],
+      "title": "AttemptSnapshot",
+      "type": "object"
+    },
+    "AttemptTransitionCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "$ref": "#/$defs/AttemptSnapshot"
+        },
+        "destination": {
+          "enum": [
+            "queued",
+            "reserved",
+            "running",
+            "collecting",
+            "reconciling",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Destination",
+          "type": "string"
+        },
+        "facts": {
+          "$ref": "#/$defs/AttemptFacts"
+        },
+        "protection_triggered": {
+          "title": "Protection Triggered",
+          "type": "boolean"
+        },
+        "writer": {
+          "enum": [
+            "R08Coordinator",
+            "R08Collector"
+          ],
+          "title": "Writer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt",
+        "destination",
+        "facts",
+        "writer",
+        "protection_triggered"
+      ],
+      "title": "AttemptTransitionCheck",
+      "type": "object"
+    },
+    "AuditCheckpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "checkpoint_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "head_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Head Digest",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "snapshot_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Snapshot Digest",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "checkpoint_ref",
+        "tenant_id",
+        "chain_id",
+        "sequence",
+        "head_digest",
+        "snapshot_digest"
+      ],
+      "title": "AuditCheckpoint",
+      "type": "object"
+    },
+    "AuditEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "actor": {
+          "minLength": 1,
+          "title": "Actor",
+          "type": "string"
+        },
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "cost_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Event Digest",
+          "type": "string"
+        },
+        "object_digest": {
+          "$ref": "#/$defs/ObjectCommitment"
+        },
+        "object_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "on_behalf_of_account": {
+          "minLength": 1,
+          "title": "On Behalf Of Account",
+          "type": "string"
+        },
+        "operation": {
+          "minLength": 1,
+          "title": "Operation",
+          "type": "string"
+        },
+        "plan_revision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous_chain_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Previous Chain Digest"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Project Id"
+        },
+        "result": {
+          "minLength": 1,
+          "title": "Result",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        },
+        "task_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "timestamp": {
+          "title": "Timestamp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "chain_id",
+        "sequence",
+        "previous_chain_digest",
+        "event_digest",
+        "object_digest",
+        "timestamp",
+        "tenant_id",
+        "project_id",
+        "on_behalf_of_account",
+        "actor",
+        "task_ref",
+        "plan_revision",
+        "operation",
+        "object_ref",
+        "result",
+        "cost_ref"
+      ],
+      "title": "AuditEntry",
+      "type": "object"
+    },
+    "AuditPosition": {
+      "additionalProperties": false,
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "sequence": {
+          "minimum": 1,
+          "title": "Sequence",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "chain_id",
+        "sequence"
+      ],
+      "title": "AuditPosition",
+      "type": "object"
+    },
+    "BaselineInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol_draft_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "task_template_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "protocol_draft_ref",
+        "task_template_ref"
+      ],
+      "title": "BaselineInputs",
+      "type": "object"
+    },
+    "BudgetRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "estimated_cost": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Estimate"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "purpose",
+        "estimated_cost"
+      ],
+      "title": "BudgetRequest",
+      "type": "object"
+    },
+    "CandidateDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "minLength": 1,
+          "title": "Background",
+          "type": "string"
+        },
+        "draft": {
+          "$ref": "#/$defs/DraftText"
+        },
+        "new_inference": {
+          "minLength": 1,
+          "title": "New Inference",
+          "type": "string"
+        },
+        "original_source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prediction": {
+          "minLength": 1,
+          "title": "Prediction",
+          "type": "string"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "source_kind": {
+          "enum": [
+            "original",
+            "external_reported",
+            "synthetic_design"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "synthetic_origin": {
+          "anyOf": [
+            {
+              "enum": [
+                "local",
+                "external"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Synthetic Origin"
+        }
+      },
+      "required": [
+        "background",
+        "sources",
+        "new_inference",
+        "prediction",
+        "draft",
+        "original_source",
+        "source_kind",
+        "scope_ref",
+        "synthetic_origin"
+      ],
+      "title": "CandidateDraft",
+      "type": "object"
+    },
+    "CandidateRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_bindings": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Approval Bindings",
+          "type": "array"
+        },
+        "background": {
+          "minLength": 1,
+          "title": "Background",
+          "type": "string"
+        },
+        "cache_location": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Location"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "minLength": 1,
+          "title": "Created By",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "draft": {
+          "$ref": "#/$defs/DraftText"
+        },
+        "new_inference": {
+          "minLength": 1,
+          "title": "New Inference",
+          "type": "string"
+        },
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "original_source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownership_scope": {
+          "const": "project",
+          "title": "Ownership Scope",
+          "type": "string"
+        },
+        "prediction": {
+          "minLength": 1,
+          "title": "Prediction",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "source_kind": {
+          "enum": [
+            "original",
+            "external_reported",
+            "synthetic_design"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "checked_ready",
+            "needs_revision",
+            "blocked",
+            "selected",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "synthetic_origin": {
+          "anyOf": [
+            {
+              "enum": [
+                "local",
+                "external"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Synthetic Origin"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id",
+        "content_version",
+        "tenant_id",
+        "project_id",
+        "ownership_scope",
+        "created_at",
+        "created_by",
+        "approval_bindings",
+        "background",
+        "sources",
+        "new_inference",
+        "prediction",
+        "draft",
+        "original_source",
+        "source_kind",
+        "scope_ref",
+        "synthetic_origin",
+        "status"
+      ],
+      "title": "CandidateRecord",
+      "type": "object"
+    },
+    "CheckpointScope": {
+      "additionalProperties": false,
+      "properties": {
+        "chain_id": {
+          "minLength": 1,
+          "title": "Chain Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "chain_id"
+      ],
+      "title": "CheckpointScope",
+      "type": "object"
+    },
+    "ClaimEvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "locator",
+        "content_version"
+      ],
+      "title": "ClaimEvidenceRef",
+      "type": "object"
+    },
+    "ClaimRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "science": {
+          "$ref": "#/$defs/ClaimScience"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "science",
+        "content_version"
+      ],
+      "title": "ClaimRecord",
+      "type": "object"
+    },
+    "ClaimScience": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "empirical",
+            "joint",
+            "method",
+            "efficiency",
+            "scaling_law",
+            "theorem_ref"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "logical_level": {
+          "enum": [
+            "L0",
+            "L1",
+            "L2",
+            "L3",
+            "L4"
+          ],
+          "title": "Logical Level",
+          "type": "string"
+        },
+        "origin_binding": {
+          "discriminator": {
+            "mapping": {
+              "external_report": "#/$defs/ExternalOrigin",
+              "internal_experiment": "#/$defs/InternalOrigin",
+              "math_reference": "#/$defs/MathOrigin"
+            },
+            "propertyName": "origin"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/InternalOrigin"
+            },
+            {
+              "$ref": "#/$defs/ExternalOrigin"
+            },
+            {
+              "$ref": "#/$defs/MathOrigin"
+            }
+          ],
+          "title": "Origin Binding"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "enum": [
+                "improvement",
+                "bounded_no_meaningful_gain",
+                "harm",
+                "inconclusive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "statement",
+        "scope_ref",
+        "kind",
+        "outcome",
+        "logical_level",
+        "origin_binding"
+      ],
+      "title": "ClaimScience",
+      "type": "object"
+    },
+    "ClosedInterval": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "exclusiveMinimum": 0,
+          "title": "Lower",
+          "type": "integer"
+        },
+        "upper": {
+          "exclusiveMinimum": 0,
+          "title": "Upper",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "title": "ClosedInterval",
+      "type": "object"
+    },
+    "ConfirmationInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "protocol_ref"
+      ],
+      "title": "ConfirmationInputs",
+      "type": "object"
+    },
+    "CorrectionCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "corrected": {
+          "$ref": "#/$defs/TerminalFact"
+        },
+        "correction": {
+          "$ref": "#/$defs/TerminalCorrection"
+        },
+        "original": {
+          "$ref": "#/$defs/TerminalFact"
+        }
+      },
+      "required": [
+        "original",
+        "correction",
+        "corrected"
+      ],
+      "title": "CorrectionCheck",
+      "type": "object"
+    },
+    "Delegation": {
+      "additionalProperties": false,
+      "properties": {
+        "context": {
+          "$ref": "#/$defs/TrustedRequestContext"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "revoked": {
+          "title": "Revoked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "locator",
+        "context",
+        "revoked"
+      ],
+      "title": "Delegation",
+      "type": "object"
+    },
+    "DevelopmentInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_candidate_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "selection_candidate_ref",
+        "protocol_ref"
+      ],
+      "title": "DevelopmentInputs",
+      "type": "object"
+    },
+    "Dimension_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____",
+          "not_applicable": "#/$defs/NotApplicable",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        },
+        {
+          "$ref": "#/$defs/NotApplicable"
+        }
+      ]
+    },
+    "Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____",
+          "not_applicable": "#/$defs/NotApplicable",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        },
+        {
+          "$ref": "#/$defs/NotApplicable"
+        }
+      ]
+    },
+    "Dimension_ClosedInterval_": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_ClosedInterval_",
+          "not_applicable": "#/$defs/NotApplicable",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_ClosedInterval_"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        },
+        {
+          "$ref": "#/$defs/NotApplicable"
+        }
+      ]
+    },
+    "Dimension_ScientificRef_": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_ScientificRef_",
+          "not_applicable": "#/$defs/NotApplicable",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_ScientificRef_"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        },
+        {
+          "$ref": "#/$defs/NotApplicable"
+        }
+      ]
+    },
+    "DraftText": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "minLength": 1,
+          "title": "Body",
+          "type": "string"
+        },
+        "format": {
+          "const": "plain_text",
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "format",
+        "body"
+      ],
+      "title": "DraftText",
+      "type": "object"
+    },
+    "EngineeringCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "current": {
+          "$ref": "#/$defs/EngineeringStatus"
+        },
+        "previous": {
+          "$ref": "#/$defs/EngineeringStatus"
+        },
+        "writer": {
+          "enum": [
+            "decision_maker",
+            "maintainer",
+            "reviewer",
+            "acceptor"
+          ],
+          "title": "Writer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "previous",
+        "current",
+        "writer"
+      ],
+      "title": "EngineeringCheck",
+      "type": "object"
+    },
+    "EngineeringStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Decision Refs",
+          "type": "array"
+        },
+        "decision_status": {
+          "enum": [
+            "pending",
+            "approved",
+            "deferred",
+            "withdrawn"
+          ],
+          "title": "Decision Status",
+          "type": "string"
+        },
+        "delivery_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Delivery Refs",
+          "type": "array"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "evidence_status": {
+          "enum": [
+            "not_evaluated",
+            "insufficient",
+            "met",
+            "negative"
+          ],
+          "title": "Evidence Status",
+          "type": "string"
+        },
+        "implementation_status": {
+          "enum": [
+            "not_started",
+            "in_progress",
+            "implemented",
+            "accepted"
+          ],
+          "title": "Implementation Status",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "work_item_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "work_item_ref",
+        "scope_ref",
+        "revision",
+        "decision_status",
+        "implementation_status",
+        "evidence_status",
+        "decision_refs",
+        "delivery_refs",
+        "evidence_refs"
+      ],
+      "title": "EngineeringStatus",
+      "type": "object"
+    },
+    "ErrorDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "minLength": 1,
+          "title": "Message",
+          "type": "string"
+        },
+        "next_action": {
+          "minLength": 1,
+          "title": "Next Action",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "code",
+        "retryable",
+        "message",
+        "next_action"
+      ],
+      "title": "ErrorDetail",
+      "type": "object"
+    },
+    "Estimate": {
+      "additionalProperties": false,
+      "properties": {
+        "basis_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "$ref": "#/$defs/RecordLocator"
+            }
+          ],
+          "title": "Basis Ref"
+        },
+        "nature": {
+          "const": "planning_estimate",
+          "title": "Nature",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "unit",
+        "nature",
+        "basis_ref"
+      ],
+      "title": "Estimate",
+      "type": "object"
+    },
+    "EvaluationView": {
+      "additionalProperties": false,
+      "properties": {
+        "accuracy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Accuracy"
+        },
+        "binding": {
+          "$ref": "#/$defs/ObservationBinding"
+        },
+        "conflict_groups": {
+          "items": {
+            "$ref": "#/$defs/ObservationGroup"
+          },
+          "title": "Conflict Groups",
+          "type": "array"
+        },
+        "correct_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Correct Count"
+        },
+        "denominator": {
+          "readOnly": true,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "duplicate_groups": {
+          "items": {
+            "$ref": "#/$defs/ObservationGroup"
+          },
+          "title": "Duplicate Groups",
+          "type": "array"
+        },
+        "expected_unit_keys": {
+          "items": {
+            "enum": [
+              "q1",
+              "q2",
+              "q3",
+              "q4"
+            ],
+            "type": "string"
+          },
+          "title": "Expected Unit Keys",
+          "type": "array"
+        },
+        "missing_unit_keys": {
+          "items": {
+            "enum": [
+              "q1",
+              "q2",
+              "q3",
+              "q4"
+            ],
+            "type": "string"
+          },
+          "title": "Missing Unit Keys",
+          "type": "array"
+        },
+        "observed_count": {
+          "readOnly": true,
+          "title": "Observed Count",
+          "type": "integer"
+        },
+        "observed_unit_keys": {
+          "items": {
+            "enum": [
+              "q1",
+              "q2",
+              "q3",
+              "q4"
+            ],
+            "type": "string"
+          },
+          "title": "Observed Unit Keys",
+          "type": "array"
+        },
+        "original_rows": {
+          "items": {
+            "$ref": "#/$defs/TrustedObservation"
+          },
+          "title": "Original Rows",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "binding",
+        "expected_unit_keys",
+        "observed_unit_keys",
+        "missing_unit_keys",
+        "original_rows",
+        "duplicate_groups",
+        "conflict_groups",
+        "status",
+        "correct_count",
+        "accuracy",
+        "denominator",
+        "observed_count"
+      ],
+      "title": "EvaluationView",
+      "type": "object"
+    },
+    "EvidenceChange": {
+      "additionalProperties": false,
+      "description": "Complete evidence snapshot, never a sparse patch.",
+      "properties": {
+        "status_flags": {
+          "items": {
+            "enum": [
+              "needs_reaudit",
+              "stale",
+              "scope_aged",
+              "revoked",
+              "contamination_risk"
+            ],
+            "type": "string"
+          },
+          "title": "Status Flags",
+          "type": "array"
+        },
+        "strength": {
+          "anyOf": [
+            {
+              "enum": [
+                "preliminary",
+                "supported",
+                "replicated"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Strength"
+        }
+      },
+      "required": [
+        "strength",
+        "status_flags"
+      ],
+      "title": "EvidenceChange",
+      "type": "object"
+    },
+    "EvidenceEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_digests": {
+          "items": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifact Digests",
+          "type": "array"
+        },
+        "attempt_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Attempt Refs",
+          "type": "array"
+        },
+        "audit_ref": {
+          "$ref": "#/$defs/AuditPosition"
+        },
+        "change": {
+          "$ref": "#/$defs/EvidenceChange"
+        },
+        "claim_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "event_id": {
+          "minLength": 1,
+          "title": "Event Id",
+          "type": "string"
+        },
+        "event_kind": {
+          "enum": [
+            "accepted",
+            "evidence_updated"
+          ],
+          "title": "Event Kind",
+          "type": "string"
+        },
+        "previous_event_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Previous Event Digest"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "report_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "minItems": 1,
+          "title": "Report Refs",
+          "type": "array"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "event_id",
+        "revision",
+        "event_kind",
+        "claim_ref",
+        "report_refs",
+        "attempt_refs",
+        "artifact_digests",
+        "audit_ref",
+        "previous_event_digest",
+        "change",
+        "reason"
+      ],
+      "title": "EvidenceEvent",
+      "type": "object"
+    },
+    "ExecutionBinding": {
+      "additionalProperties": false,
+      "description": "No RunRequest/report/back-reference fields can be supplied.",
+      "properties": {
+        "code_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "data_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "dependency_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "image_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "method_config_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "split_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suite_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "validation_profile_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "code_ref",
+        "image_ref",
+        "dependency_ref",
+        "data_ref",
+        "split_ref",
+        "method_config_ref",
+        "protocol_ref",
+        "suite_ref",
+        "validation_profile_ref"
+      ],
+      "title": "ExecutionBinding",
+      "type": "object"
+    },
+    "ExplorationInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "task_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "task_ref"
+      ],
+      "title": "ExplorationInputs",
+      "type": "object"
+    },
+    "ExternalOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "const": "external_report",
+          "title": "Origin",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        }
+      },
+      "required": [
+        "origin",
+        "source"
+      ],
+      "title": "ExternalOrigin",
+      "type": "object"
+    },
+    "FixedDiscrimination": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability": {
+          "const": "not_applicable",
+          "title": "Applicability",
+          "type": "string"
+        },
+        "explanations": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "maxItems": 0,
+          "title": "Explanations",
+          "type": "array"
+        },
+        "indistinguishable_conditions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 0,
+          "title": "Indistinguishable Conditions",
+          "type": "array"
+        },
+        "minimal_design_ref": {
+          "title": "Minimal Design Ref",
+          "type": "null"
+        },
+        "observable_differences": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 0,
+          "title": "Observable Differences",
+          "type": "array"
+        },
+        "predictions": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "maxItems": 0,
+          "title": "Predictions",
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "applicability",
+        "explanations",
+        "predictions",
+        "observable_differences",
+        "minimal_design_ref",
+        "indistinguishable_conditions",
+        "reason"
+      ],
+      "title": "FixedDiscrimination",
+      "type": "object"
+    },
+    "FixedFourPolicy": {
+      "additionalProperties": false,
+      "description": "Resolved evaluator-only view of locked unit, missing and duplicate policies.",
+      "properties": {
+        "duplicate_policy": {
+          "const": "deduplicate_identical_reject_conflicts",
+          "title": "Duplicate Policy",
+          "type": "string"
+        },
+        "expected_labels": {
+          "additionalProperties": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "propertyNames": {
+            "enum": [
+              "q1",
+              "q2",
+              "q3",
+              "q4"
+            ]
+          },
+          "title": "Expected Labels",
+          "type": "object"
+        },
+        "missing_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "unit_spec_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "protocol_ref",
+        "unit_spec_ref",
+        "missing_policy_ref",
+        "policy_ref",
+        "duplicate_policy",
+        "expected_labels"
+      ],
+      "title": "FixedFourPolicy",
+      "type": "object"
+    },
+    "FixedMissingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "const": "incomplete",
+          "title": "Action",
+          "type": "string"
+        },
+        "adjustment_spec_ref": {
+          "title": "Adjustment Spec Ref",
+          "type": "null"
+        },
+        "evaluation_unit_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "expected_universe_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "missing_definition": {
+          "minLength": 1,
+          "title": "Missing Definition",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evaluation_unit_ref",
+        "expected_universe_ref",
+        "missing_definition",
+        "action",
+        "adjustment_spec_ref",
+        "reason"
+      ],
+      "title": "FixedMissingPolicy",
+      "type": "object"
+    },
+    "FixedProtocolTargets": {
+      "additionalProperties": false,
+      "properties": {
+        "duplicate_policy": {
+          "const": "deduplicate_identical_reject_conflicts",
+          "title": "Duplicate Policy",
+          "type": "string"
+        },
+        "missing": {
+          "$ref": "#/$defs/FixedMissingPolicy"
+        },
+        "missing_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_rules": {
+          "items": {
+            "$ref": "#/$defs/SelectionRuleBinding"
+          },
+          "title": "Selection Rules",
+          "type": "array"
+        },
+        "unit": {
+          "$ref": "#/$defs/FixedUnitSpec"
+        },
+        "unit_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "unit_ref",
+        "unit",
+        "missing_ref",
+        "missing",
+        "duplicate_policy",
+        "selection_rules"
+      ],
+      "title": "FixedProtocolTargets",
+      "type": "object"
+    },
+    "FixedRandomness": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster_levels": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "maxItems": 0,
+          "title": "Cluster Levels",
+          "type": "array"
+        },
+        "estimation_method_ref": {
+          "title": "Estimation Method Ref",
+          "type": "null"
+        },
+        "random_sources": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "maxItems": 0,
+          "title": "Random Sources",
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "repetitions": {
+          "title": "Repetitions",
+          "type": "null"
+        },
+        "seed_generalization_target": {
+          "const": "not_applicable",
+          "title": "Seed Generalization Target",
+          "type": "string"
+        },
+        "unit_spec_ref": {
+          "title": "Unit Spec Ref",
+          "type": "null"
+        }
+      },
+      "required": [
+        "seed_generalization_target",
+        "random_sources",
+        "repetitions",
+        "unit_spec_ref",
+        "cluster_levels",
+        "estimation_method_ref",
+        "reason"
+      ],
+      "title": "FixedRandomness",
+      "type": "object"
+    },
+    "FixedUnitSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "cluster_mapping_ref": {
+          "title": "Cluster Mapping Ref",
+          "type": "null"
+        },
+        "evaluation_unit": {
+          "const": "unique_item",
+          "title": "Evaluation Unit",
+          "type": "string"
+        },
+        "independence_basis_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "population_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "repetition_mapping_ref": {
+          "title": "Repetition Mapping Ref",
+          "type": "null"
+        },
+        "sampling_frame_ref": {
+          "title": "Sampling Frame Ref",
+          "type": "null"
+        },
+        "unit_key_fields": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Unit Key Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "evaluation_unit",
+        "unit_key_fields",
+        "population_ref",
+        "sampling_frame_ref",
+        "cluster_mapping_ref",
+        "repetition_mapping_ref",
+        "independence_basis_ref"
+      ],
+      "title": "FixedUnitSpec",
+      "type": "object"
+    },
+    "HistoricalCompletion": {
+      "additionalProperties": false,
+      "description": "Trusted collector evidence for work completed under the original authorization.",
+      "properties": {
+        "attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "execution_fencing_token": {
+          "minimum": 0,
+          "title": "Execution Fencing Token",
+          "type": "integer"
+        },
+        "external_id": {
+          "minLength": 1,
+          "title": "External Id",
+          "type": "string"
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "evidence_ref",
+        "attempt_ref",
+        "run_ref",
+        "external_id",
+        "execution_fencing_token"
+      ],
+      "title": "HistoricalCompletion",
+      "type": "object"
+    },
+    "HistoricalRef": {
+      "additionalProperties": false,
+      "properties": {
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "entity_id": {
+          "minLength": 1,
+          "title": "Entity Id",
+          "type": "string"
+        },
+        "object_type": {
+          "minLength": 1,
+          "title": "Object Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_type",
+        "entity_id",
+        "content_version"
+      ],
+      "title": "HistoricalRef",
+      "type": "object"
+    },
+    "InternalOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "origin": {
+          "const": "internal_experiment",
+          "title": "Origin",
+          "type": "string"
+        },
+        "premise_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Premise Refs",
+          "type": "array"
+        },
+        "prereg_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "run_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Run Refs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "origin",
+        "run_refs",
+        "protocol_ref",
+        "prereg_ref",
+        "premise_refs"
+      ],
+      "title": "InternalOrigin",
+      "type": "object"
+    },
+    "Known_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "known",
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Value",
+          "type": "array"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "Known[Annotated[list[Annotated[str, FieldInfo(annotation=NoneType, required=True, metadata=[MinLen(min_length=1)])]], FieldInfo(annotation=NoneType, required=True, metadata=[MinLen(min_length=1)])]]",
+      "type": "object"
+    },
+    "Known_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "known",
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "Known[Annotated[str, FieldInfo(annotation=NoneType, required=True, metadata=[MinLen(min_length=1)])]]",
+      "type": "object"
+    },
+    "Known_ClosedInterval_": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "known",
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ClosedInterval"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "Known[ClosedInterval]",
+      "type": "object"
+    },
+    "Known_ScientificRef_": {
+      "additionalProperties": false,
+      "properties": {
+        "state": {
+          "const": "known",
+          "title": "State",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "state",
+        "value"
+      ],
+      "title": "Known[ScientificRef]",
+      "type": "object"
+    },
+    "LegacyIncomplete": {
+      "additionalProperties": false,
+      "properties": {
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "missing_fields": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Missing Fields",
+          "type": "array"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Project Id"
+        },
+        "status": {
+          "const": "legacy_incomplete",
+          "title": "Status",
+          "type": "string"
+        },
+        "tenant_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Tenant Id"
+        }
+      },
+      "required": [
+        "status",
+        "locator",
+        "tenant_id",
+        "project_id",
+        "missing_fields"
+      ],
+      "title": "LegacyIncomplete",
+      "type": "object"
+    },
+    "MathOrigin": {
+      "additionalProperties": false,
+      "properties": {
+        "fact_id": {
+          "pattern": "^danus_fact:[^\\s]+$",
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "origin": {
+          "const": "math_reference",
+          "title": "Origin",
+          "type": "string"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "origin",
+        "fact_id",
+        "snapshot_ref"
+      ],
+      "title": "MathOrigin",
+      "type": "object"
+    },
+    "MethodConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "hardware_semantics_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_spec_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterValue"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "precision": {
+          "minLength": 1,
+          "title": "Precision",
+          "type": "string"
+        },
+        "science_limits": {
+          "$ref": "#/$defs/ScienceLimits"
+        }
+      },
+      "required": [
+        "method_spec_ref",
+        "parameters",
+        "precision",
+        "hardware_semantics_ref",
+        "science_limits"
+      ],
+      "title": "MethodConfig",
+      "type": "object"
+    },
+    "MetricSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "maximize",
+            "minimize"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "implementation_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "unit",
+        "direction",
+        "implementation_ref"
+      ],
+      "title": "MetricSpec",
+      "type": "object"
+    },
+    "NotApplicable": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "state": {
+          "const": "not_applicable",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason"
+      ],
+      "title": "NotApplicable",
+      "type": "object"
+    },
+    "ObjectCommitment": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "object_type": {
+          "minLength": 1,
+          "title": "Object Type",
+          "type": "string"
+        },
+        "schema_version": {
+          "minimum": 0,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "object_type",
+        "schema_version",
+        "digest"
+      ],
+      "title": "ObjectCommitment",
+      "type": "object"
+    },
+    "ObservationBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "arm_id": {
+          "minLength": 1,
+          "title": "Arm Id",
+          "type": "string"
+        },
+        "attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "run_ref",
+        "attempt_ref",
+        "arm_id",
+        "protocol_ref",
+        "policy_ref"
+      ],
+      "title": "ObservationBinding",
+      "type": "object"
+    },
+    "ObservationGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "duplicate_count": {
+          "minimum": 0,
+          "title": "Duplicate Count",
+          "type": "integer"
+        },
+        "policy_version": {
+          "minLength": 1,
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "source_row_refs": {
+          "items": {
+            "$ref": "#/$defs/SourceRowRef"
+          },
+          "title": "Source Row Refs",
+          "type": "array"
+        },
+        "unit_key": {
+          "enum": [
+            "q1",
+            "q2",
+            "q3",
+            "q4"
+          ],
+          "title": "Unit Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "unit_key",
+        "source_row_refs",
+        "duplicate_count",
+        "policy_version"
+      ],
+      "title": "ObservationGroup",
+      "type": "object"
+    },
+    "ObservationRow": {
+      "additionalProperties": false,
+      "properties": {
+        "item_id": {
+          "enum": [
+            "q1",
+            "q2",
+            "q3",
+            "q4"
+          ],
+          "title": "Item Id",
+          "type": "string"
+        },
+        "prediction": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Prediction",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "item_id",
+        "prediction"
+      ],
+      "title": "ObservationRow",
+      "type": "object"
+    },
+    "ParameterRange": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "integer",
+            "decimal",
+            "categorical"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "lower": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lower"
+        },
+        "lower_inclusive": {
+          "title": "Lower Inclusive",
+          "type": "boolean"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "selection_rule_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Step"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "upper": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Upper"
+        },
+        "upper_inclusive": {
+          "title": "Upper Inclusive",
+          "type": "boolean"
+        },
+        "values": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "lower",
+        "upper",
+        "lower_inclusive",
+        "upper_inclusive",
+        "step",
+        "values",
+        "unit",
+        "selection_rule_ref"
+      ],
+      "title": "ParameterRange",
+      "type": "object"
+    },
+    "ParameterValue": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "integer",
+            "decimal",
+            "text",
+            "boolean"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "boolean"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "value"
+      ],
+      "title": "ParameterValue",
+      "type": "object"
+    },
+    "PreregDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "arms": {
+          "items": {
+            "$ref": "#/$defs/Arm"
+          },
+          "minItems": 2,
+          "title": "Arms",
+          "type": "array"
+        },
+        "candidate_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "discrimination_plan": {
+          "$ref": "#/$defs/FixedDiscrimination"
+        },
+        "estimand": {
+          "minLength": 1,
+          "title": "Estimand",
+          "type": "string"
+        },
+        "failure_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "family_alpha": {
+          "title": "Family Alpha",
+          "type": "null"
+        },
+        "family_alpha_reason": {
+          "minLength": 1,
+          "title": "Family Alpha Reason",
+          "type": "string"
+        },
+        "family_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "inference": {
+          "const": "exact_finite_population_only",
+          "title": "Inference",
+          "type": "string"
+        },
+        "missing_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "randomness_plan": {
+          "$ref": "#/$defs/FixedRandomness"
+        },
+        "retry_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_feedback_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_history_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "stop_rule": {
+          "$ref": "#/$defs/StopSpec"
+        },
+        "test": {
+          "title": "Test",
+          "type": "null"
+        }
+      },
+      "required": [
+        "candidate_ref",
+        "protocol_ref",
+        "question_ref",
+        "family_ref",
+        "selection_history_ref",
+        "randomness_plan",
+        "discrimination_plan",
+        "family_alpha",
+        "family_alpha_reason",
+        "arms",
+        "estimand",
+        "test",
+        "analysis_ref",
+        "failure_policy_ref",
+        "retry_policy_ref",
+        "inference",
+        "missing_policy_ref",
+        "selection_feedback_policy_ref",
+        "stop_rule"
+      ],
+      "title": "PreregDraft",
+      "type": "object"
+    },
+    "PreregRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "approval_bindings": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Approval Bindings",
+          "type": "array"
+        },
+        "arms": {
+          "items": {
+            "$ref": "#/$defs/Arm"
+          },
+          "minItems": 2,
+          "title": "Arms",
+          "type": "array"
+        },
+        "cache_location": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Location"
+        },
+        "candidate_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "minLength": 1,
+          "title": "Created By",
+          "type": "string"
+        },
+        "discrimination_plan": {
+          "$ref": "#/$defs/FixedDiscrimination"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "estimand": {
+          "minLength": 1,
+          "title": "Estimand",
+          "type": "string"
+        },
+        "failure_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "family_alpha": {
+          "title": "Family Alpha",
+          "type": "null"
+        },
+        "family_alpha_reason": {
+          "minLength": 1,
+          "title": "Family Alpha Reason",
+          "type": "string"
+        },
+        "family_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "inference": {
+          "const": "exact_finite_population_only",
+          "title": "Inference",
+          "type": "string"
+        },
+        "missing_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "ownership_scope": {
+          "const": "project",
+          "title": "Ownership Scope",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "randomness_plan": {
+          "$ref": "#/$defs/FixedRandomness"
+        },
+        "retry_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_feedback_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_history_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "selection_ref": {
+          "$ref": "#/$defs/ApprovalLocator"
+        },
+        "selection_terms": {
+          "$ref": "#/$defs/SelectionTerms"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "validated",
+            "locked",
+            "active",
+            "completed",
+            "invalidated"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "stop_rule": {
+          "$ref": "#/$defs/StopSpec"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "test": {
+          "title": "Test",
+          "type": "null"
+        },
+        "threshold_decision_ref": {
+          "$ref": "#/$defs/ApprovalLocator"
+        },
+        "threshold_terms": {
+          "$ref": "#/$defs/ThresholdTerms"
+        }
+      },
+      "required": [
+        "object_id",
+        "content_version",
+        "tenant_id",
+        "project_id",
+        "ownership_scope",
+        "created_at",
+        "created_by",
+        "approval_bindings",
+        "candidate_ref",
+        "protocol_ref",
+        "question_ref",
+        "family_ref",
+        "selection_history_ref",
+        "randomness_plan",
+        "discrimination_plan",
+        "family_alpha",
+        "family_alpha_reason",
+        "arms",
+        "estimand",
+        "test",
+        "analysis_ref",
+        "failure_policy_ref",
+        "retry_policy_ref",
+        "inference",
+        "missing_policy_ref",
+        "selection_feedback_policy_ref",
+        "stop_rule",
+        "status",
+        "selection_ref",
+        "threshold_decision_ref",
+        "selection_terms",
+        "threshold_terms"
+      ],
+      "title": "PreregRecord",
+      "type": "object"
+    },
+    "ProtocolDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_template": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "baseline_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Baseline Refs",
+          "type": "array"
+        },
+        "dataset_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "design_type": {
+          "const": "finite_population_enumeration",
+          "title": "Design Type",
+          "type": "string"
+        },
+        "duplicate_policy": {
+          "minLength": 1,
+          "title": "Duplicate Policy",
+          "type": "string"
+        },
+        "evaluation_unit": {
+          "const": "unique_item",
+          "title": "Evaluation Unit",
+          "type": "string"
+        },
+        "metric": {
+          "$ref": "#/$defs/MetricSpec"
+        },
+        "missing_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "required_items": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Items",
+          "type": "array"
+        },
+        "sanity_suite_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "split_not_applicable_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Split Not Applicable Reason"
+        },
+        "split_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tuning_space": {
+          "items": {
+            "$ref": "#/$defs/ParameterRange"
+          },
+          "title": "Tuning Space",
+          "type": "array"
+        }
+      },
+      "required": [
+        "design_type",
+        "dataset_ref",
+        "split_ref",
+        "split_not_applicable_reason",
+        "metric",
+        "baseline_refs",
+        "tuning_space",
+        "sanity_suite_ref",
+        "applicability_template",
+        "evaluation_unit",
+        "required_items",
+        "duplicate_policy",
+        "missing_policy_ref"
+      ],
+      "title": "ProtocolDraft",
+      "type": "object"
+    },
+    "ProtocolRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_template": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "approval_bindings": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Approval Bindings",
+          "type": "array"
+        },
+        "approval_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "baseline_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Baseline Refs",
+          "type": "array"
+        },
+        "cache_location": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Location"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "minLength": 1,
+          "title": "Created By",
+          "type": "string"
+        },
+        "dataset_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "design_type": {
+          "const": "finite_population_enumeration",
+          "title": "Design Type",
+          "type": "string"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "duplicate_policy": {
+          "minLength": 1,
+          "title": "Duplicate Policy",
+          "type": "string"
+        },
+        "evaluation_unit": {
+          "const": "unique_item",
+          "title": "Evaluation Unit",
+          "type": "string"
+        },
+        "metric": {
+          "$ref": "#/$defs/MetricSpec"
+        },
+        "missing_policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "ownership_scope": {
+          "enum": [
+            "project",
+            "tenant"
+          ],
+          "title": "Ownership Scope",
+          "type": "string"
+        },
+        "project_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Project Id"
+        },
+        "required_items": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Items",
+          "type": "array"
+        },
+        "sanity_suite_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "split_not_applicable_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Split Not Applicable Reason"
+        },
+        "split_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "audited",
+            "approved",
+            "superseded",
+            "revoked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tuning_space": {
+          "items": {
+            "$ref": "#/$defs/ParameterRange"
+          },
+          "title": "Tuning Space",
+          "type": "array"
+        }
+      },
+      "required": [
+        "object_id",
+        "content_version",
+        "tenant_id",
+        "project_id",
+        "ownership_scope",
+        "created_at",
+        "created_by",
+        "approval_bindings",
+        "design_type",
+        "dataset_ref",
+        "split_ref",
+        "split_not_applicable_reason",
+        "metric",
+        "baseline_refs",
+        "tuning_space",
+        "sanity_suite_ref",
+        "applicability_template",
+        "evaluation_unit",
+        "required_items",
+        "duplicate_policy",
+        "missing_policy_ref",
+        "approval_ref",
+        "status"
+      ],
+      "title": "ProtocolRecord",
+      "type": "object"
+    },
+    "RecordLocator": {
+      "additionalProperties": false,
+      "properties": {
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "record_type": {
+          "minLength": 1,
+          "title": "Record Type",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "record_type",
+        "record_id",
+        "revision"
+      ],
+      "title": "RecordLocator",
+      "type": "object"
+    },
+    "ReferenceQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "$ref": "#/$defs/HistoricalRef"
+            }
+          ],
+          "title": "Ref"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "title": "ReferenceQuery",
+      "type": "object"
+    },
+    "ReferenceRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "contract_version": {
+          "const": "1.2",
+          "title": "Contract Version",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "minLength": 1,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "operation": {
+          "const": "references.resolve",
+          "title": "Operation",
+          "type": "string"
+        },
+        "payload": {
+          "$ref": "#/$defs/ReferenceQuery"
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id",
+        "idempotency_key",
+        "contract_version",
+        "operation",
+        "payload"
+      ],
+      "title": "ReferenceRequest",
+      "type": "object"
+    },
+    "ReleaseManifestBody": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_manifest": {
+          "items": {
+            "$ref": "#/$defs/Artifact"
+          },
+          "minItems": 1,
+          "title": "Artifact Manifest",
+          "type": "array"
+        },
+        "check_report_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "minItems": 1,
+          "title": "Check Report Refs",
+          "type": "array"
+        },
+        "code_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "data_license_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Data License Refs",
+          "type": "array"
+        },
+        "dependency_lock_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Dependency Lock Digest",
+          "type": "string"
+        },
+        "disclosures": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Disclosures",
+          "type": "array"
+        },
+        "evidence_snapshot_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "image_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Image Digest",
+          "type": "string"
+        },
+        "public_mapping_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "release_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "reproduction_steps": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Reproduction Steps",
+          "type": "array"
+        },
+        "result_tolerances": {
+          "items": {
+            "$ref": "#/$defs/ResultTolerance"
+          },
+          "title": "Result Tolerances",
+          "type": "array"
+        },
+        "sbom_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "minItems": 1,
+          "title": "Sbom Refs",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "scope": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "schema_version",
+        "release_ref",
+        "scope",
+        "evidence_snapshot_ref",
+        "artifact_manifest",
+        "code_ref",
+        "dependency_lock_digest",
+        "image_digest",
+        "sbom_refs",
+        "data_license_refs",
+        "public_mapping_ref",
+        "reproduction_steps",
+        "result_tolerances",
+        "disclosures",
+        "check_report_refs"
+      ],
+      "title": "ReleaseManifestBody",
+      "type": "object"
+    },
+    "ReleaseReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "publish",
+            "withdraw"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "artifact_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Digest",
+          "type": "string"
+        },
+        "channel": {
+          "minLength": 1,
+          "title": "Channel",
+          "type": "string"
+        },
+        "envelope_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Envelope Digest",
+          "type": "string"
+        },
+        "external_locator": {
+          "minLength": 1,
+          "title": "External Locator",
+          "type": "string"
+        },
+        "manifest_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Hash",
+          "type": "string"
+        },
+        "occurred_at": {
+          "title": "Occurred At",
+          "type": "string"
+        },
+        "record_id": {
+          "minLength": 1,
+          "title": "Record Id",
+          "type": "string"
+        },
+        "release_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "result": {
+          "enum": [
+            "confirmed",
+            "unknown",
+            "failed"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "verified_by": {
+          "minLength": 1,
+          "title": "Verified By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "record_id",
+        "revision",
+        "release_ref",
+        "manifest_hash",
+        "envelope_digest",
+        "action",
+        "channel",
+        "external_locator",
+        "artifact_digest",
+        "occurred_at",
+        "verified_by",
+        "result"
+      ],
+      "title": "ReleaseReceipt",
+      "type": "object"
+    },
+    "ReleaseScope": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_channels": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Channels",
+          "type": "array"
+        },
+        "visibility": {
+          "enum": [
+            "public",
+            "restricted"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        }
+      },
+      "required": [
+        "visibility",
+        "allowed_channels"
+      ],
+      "title": "ReleaseScope",
+      "type": "object"
+    },
+    "ReplicationInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "original_claim_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "replication_plan_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "original_claim_ref",
+        "replication_plan_ref"
+      ],
+      "title": "ReplicationInputs",
+      "type": "object"
+    },
+    "ResponseEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorDetail"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_id": {
+          "minLength": 1,
+          "title": "Request Id",
+          "type": "string"
+        },
+        "result_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "$ref": "#/$defs/HistoricalRef"
+            },
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Ref"
+        },
+        "status": {
+          "enum": [
+            "ok",
+            "blocked",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "request_id",
+        "status",
+        "result_ref",
+        "error"
+      ],
+      "title": "ResponseEnvelope",
+      "type": "object"
+    },
+    "ResultTolerance": {
+      "additionalProperties": false,
+      "properties": {
+        "metric_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tolerance": {
+          "title": "Tolerance",
+          "type": "string"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "metric_ref",
+        "tolerance",
+        "unit"
+      ],
+      "title": "ResultTolerance",
+      "type": "object"
+    },
+    "ResumeFacts": {
+      "additionalProperties": false,
+      "properties": {
+        "active_plan_revision": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "authorization_current": {
+          "title": "Authorization Current",
+          "type": "boolean"
+        },
+        "blocker_cleared": {
+          "title": "Blocker Cleared",
+          "type": "boolean"
+        },
+        "budget_current": {
+          "title": "Budget Current",
+          "type": "boolean"
+        },
+        "inputs_current": {
+          "title": "Inputs Current",
+          "type": "boolean"
+        },
+        "lease_current": {
+          "title": "Lease Current",
+          "type": "boolean"
+        },
+        "reconciled_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Reconciled Refs",
+          "type": "array"
+        },
+        "reconciliation_complete": {
+          "title": "Reconciliation Complete",
+          "type": "boolean"
+        },
+        "task_contract_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "task_ref",
+        "active_plan_revision",
+        "task_contract_ref",
+        "inputs_current",
+        "authorization_current",
+        "budget_current",
+        "lease_current",
+        "reconciled_refs",
+        "reconciliation_complete",
+        "blocker_cleared"
+      ],
+      "title": "ResumeFacts",
+      "type": "object"
+    },
+    "RetryCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "facts": {
+          "$ref": "#/$defs/RetryFacts"
+        },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RetryPolicyView"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior": {
+          "$ref": "#/$defs/AttemptSnapshot"
+        },
+        "proposed": {
+          "$ref": "#/$defs/AttemptSnapshot"
+        }
+      },
+      "required": [
+        "prior",
+        "proposed",
+        "policy",
+        "facts"
+      ],
+      "title": "RetryCheck",
+      "type": "object"
+    },
+    "RetryFacts": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization_current": {
+          "title": "Authorization Current",
+          "type": "boolean"
+        },
+        "budget_current": {
+          "title": "Budget Current",
+          "type": "boolean"
+        },
+        "failure_reason": {
+          "minLength": 1,
+          "title": "Failure Reason",
+          "type": "string"
+        },
+        "infrastructure_failure_confirmed": {
+          "title": "Infrastructure Failure Confirmed",
+          "type": "boolean"
+        },
+        "no_unknown_side_effects": {
+          "title": "No Unknown Side Effects",
+          "type": "boolean"
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "prior_attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "retries_used": {
+          "minimum": 0,
+          "title": "Retries Used",
+          "type": "integer"
+        },
+        "selected_by_result": {
+          "title": "Selected By Result",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "prior_attempt_ref",
+        "policy_ref",
+        "failure_reason",
+        "retries_used",
+        "infrastructure_failure_confirmed",
+        "no_unknown_side_effects",
+        "authorization_current",
+        "budget_current",
+        "selected_by_result"
+      ],
+      "title": "RetryFacts",
+      "type": "object"
+    },
+    "RetryPolicyView": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_reasons": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Reasons",
+          "type": "array"
+        },
+        "max_auto_retries": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Max Auto Retries",
+          "type": "integer"
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "policy_ref",
+        "run_ref",
+        "allowed_reasons",
+        "max_auto_retries"
+      ],
+      "title": "RetryPolicyView",
+      "type": "object"
+    },
+    "RunRequestDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "arm_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Arm Id"
+        },
+        "budget_request": {
+          "$ref": "#/$defs/BudgetRequest"
+        },
+        "code_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "data_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "image_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "method_config_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "mode": {
+          "enum": [
+            "exploration",
+            "baseline_dev",
+            "analysis_calibration",
+            "dev",
+            "val",
+            "sanity",
+            "confirmation",
+            "replication"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "mode_inputs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExplorationInputs"
+            },
+            {
+              "$ref": "#/$defs/BaselineInputs"
+            },
+            {
+              "$ref": "#/$defs/AnalysisInputs"
+            },
+            {
+              "$ref": "#/$defs/DevelopmentInputs"
+            },
+            {
+              "$ref": "#/$defs/SanityInputs"
+            },
+            {
+              "$ref": "#/$defs/ConfirmationInputs"
+            },
+            {
+              "$ref": "#/$defs/ReplicationInputs"
+            }
+          ],
+          "title": "Mode Inputs"
+        },
+        "prereg_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replicate_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replicate Index"
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Seed"
+        }
+      },
+      "required": [
+        "mode",
+        "code_ref",
+        "image_ref",
+        "data_ref",
+        "method_config_ref",
+        "seed",
+        "deterministic",
+        "arm_id",
+        "prereg_ref",
+        "replicate_index",
+        "mode_inputs",
+        "budget_request"
+      ],
+      "title": "RunRequestDraft",
+      "type": "object"
+    },
+    "RunRequestRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_bindings": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Approval Bindings",
+          "type": "array"
+        },
+        "arm_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Arm Id"
+        },
+        "authorization_receipt": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "budget_binding": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "budget_request": {
+          "$ref": "#/$defs/BudgetRequest"
+        },
+        "cache_location": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cache Location"
+        },
+        "code_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by": {
+          "minLength": 1,
+          "title": "Created By",
+          "type": "string"
+        },
+        "data_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "display_name": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Name"
+        },
+        "execution_binding_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "image_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "method_config_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "mode": {
+          "enum": [
+            "exploration",
+            "baseline_dev",
+            "analysis_calibration",
+            "dev",
+            "val",
+            "sanity",
+            "confirmation",
+            "replication"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "mode_inputs": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExplorationInputs"
+            },
+            {
+              "$ref": "#/$defs/BaselineInputs"
+            },
+            {
+              "$ref": "#/$defs/AnalysisInputs"
+            },
+            {
+              "$ref": "#/$defs/DevelopmentInputs"
+            },
+            {
+              "$ref": "#/$defs/SanityInputs"
+            },
+            {
+              "$ref": "#/$defs/ConfirmationInputs"
+            },
+            {
+              "$ref": "#/$defs/ReplicationInputs"
+            }
+          ],
+          "title": "Mode Inputs"
+        },
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "ownership_scope": {
+          "const": "project",
+          "title": "Ownership Scope",
+          "type": "string"
+        },
+        "prereg_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "replicate_index": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Replicate Index"
+        },
+        "safety_limits": {
+          "$ref": "#/$defs/SafetyLimits"
+        },
+        "sanity_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seed": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Seed"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_id",
+        "content_version",
+        "tenant_id",
+        "project_id",
+        "ownership_scope",
+        "created_at",
+        "created_by",
+        "approval_bindings",
+        "mode",
+        "code_ref",
+        "image_ref",
+        "data_ref",
+        "method_config_ref",
+        "seed",
+        "deterministic",
+        "arm_id",
+        "prereg_ref",
+        "replicate_index",
+        "mode_inputs",
+        "budget_request",
+        "execution_binding_ref",
+        "sanity_ref",
+        "authorization_receipt",
+        "budget_binding",
+        "safety_limits"
+      ],
+      "title": "RunRequestRecord",
+      "type": "object"
+    },
+    "SafetyLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "lease_deadline": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lease Deadline"
+        },
+        "memory_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Memory Bytes"
+        },
+        "wall_time_seconds": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wall Time Seconds"
+        }
+      },
+      "required": [
+        "wall_time_seconds",
+        "memory_bytes",
+        "lease_deadline"
+      ],
+      "title": "SafetyLimits",
+      "type": "object"
+    },
+    "SanityInputs": {
+      "additionalProperties": false,
+      "properties": {
+        "sanity_request_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "sanity_request_ref"
+      ],
+      "title": "SanityInputs",
+      "type": "object"
+    },
+    "ScienceLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_output_tokens": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Output Tokens"
+        },
+        "max_steps": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Max Steps"
+        },
+        "method_memory_bytes": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Method Memory Bytes"
+        },
+        "method_wall_time_seconds": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Method Wall Time Seconds"
+        }
+      },
+      "required": [
+        "max_steps",
+        "max_output_tokens",
+        "method_wall_time_seconds",
+        "method_memory_bytes"
+      ],
+      "title": "ScienceLimits",
+      "type": "object"
+    },
+    "ScientificRef": {
+      "additionalProperties": false,
+      "properties": {
+        "content_version": {
+          "pattern": "^[a-z][a-z0-9_]*:v[1-9][0-9]*:[0-9a-f]{64}$",
+          "title": "Content Version",
+          "type": "string"
+        },
+        "object_id": {
+          "minLength": 1,
+          "title": "Object Id",
+          "type": "string"
+        },
+        "object_type": {
+          "minLength": 1,
+          "title": "Object Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "object_type",
+        "object_id",
+        "content_version"
+      ],
+      "title": "ScientificRef",
+      "type": "object"
+    },
+    "Scope": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "design_type": {
+          "enum": [
+            "finite_population_enumeration",
+            "comparative_sampling",
+            "descriptive"
+          ],
+          "title": "Design Type",
+          "type": "string"
+        },
+        "estimand": {
+          "$ref": "#/$defs/Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        "hardware": {
+          "$ref": "#/$defs/Dimension_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        "measurement_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "method_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "model_snapshot_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "observed_data_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "parameter_scale": {
+          "$ref": "#/$defs/Dimension_ClosedInterval_"
+        },
+        "precision": {
+          "$ref": "#/$defs/Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        "sampling_frame": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "selection_mechanism": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "sequence_length": {
+          "$ref": "#/$defs/Dimension_ClosedInterval_"
+        },
+        "target_population_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/Dimension_ScientificRef_"
+        },
+        "unit": {
+          "$ref": "#/$defs/Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        }
+      },
+      "required": [
+        "design_type",
+        "model_snapshot_ref",
+        "observed_data_ref",
+        "task_ref",
+        "parameter_scale",
+        "sequence_length",
+        "hardware",
+        "precision",
+        "estimand",
+        "target_population_ref",
+        "sampling_frame",
+        "selection_mechanism",
+        "unit",
+        "method_ref",
+        "baseline_ref",
+        "measurement_ref"
+      ],
+      "title": "Scope",
+      "type": "object"
+    },
+    "SelectionRule": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_universe_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "exposure_constraints_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "independent_reference_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "rule_spec_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "candidate_universe_ref",
+        "rule_spec_ref",
+        "inputs",
+        "exposure_constraints_ref",
+        "independent_reference_ref"
+      ],
+      "title": "SelectionRule",
+      "type": "object"
+    },
+    "SelectionRuleBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "rule": {
+          "$ref": "#/$defs/SelectionRule"
+        }
+      },
+      "required": [
+        "ref",
+        "rule"
+      ],
+      "title": "SelectionRuleBinding",
+      "type": "object"
+    },
+    "SelectionTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "meaningful_delta": {
+          "title": "Meaningful Delta",
+          "type": "string"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "candidate_ref",
+        "scope_ref",
+        "meaningful_delta"
+      ],
+      "title": "SelectionTerms",
+      "type": "object"
+    },
+    "SettlementCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "$ref": "#/$defs/AttemptSnapshot"
+        },
+        "facts": {
+          "$ref": "#/$defs/SettlementFacts"
+        },
+        "writer": {
+          "const": "R07",
+          "title": "Writer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt",
+        "facts",
+        "writer"
+      ],
+      "title": "SettlementCheck",
+      "type": "object"
+    },
+    "SettlementFacts": {
+      "additionalProperties": false,
+      "description": "Resolved R07 final settlement for this exact attempt revision.",
+      "properties": {
+        "attempt_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "outcome": {
+          "enum": [
+            "settled",
+            "no_charge",
+            "pending"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "settlement_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "settlement_ref",
+        "attempt_ref",
+        "run_ref",
+        "outcome"
+      ],
+      "title": "SettlementFacts",
+      "type": "object"
+    },
+    "SignatureEnvelope": {
+      "additionalProperties": false,
+      "properties": {
+        "signature": {
+          "pattern": "^[0-9a-f]{128}$",
+          "title": "Signature",
+          "type": "string"
+        },
+        "signing_input": {
+          "$ref": "#/$defs/SigningInput"
+        }
+      },
+      "required": [
+        "signing_input",
+        "signature"
+      ],
+      "title": "SignatureEnvelope",
+      "type": "object"
+    },
+    "SigningInput": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "authorization_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalScope"
+            },
+            {
+              "$ref": "#/$defs/ReleaseScope"
+            },
+            {
+              "$ref": "#/$defs/CheckpointScope"
+            }
+          ],
+          "title": "Authorization Scope"
+        },
+        "domain": {
+          "enum": [
+            "approval:v1",
+            "release:v1",
+            "audit-checkpoint:v1"
+          ],
+          "title": "Domain",
+          "type": "string"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "issued_at": {
+          "title": "Issued At",
+          "type": "string"
+        },
+        "issuer_id": {
+          "minLength": 1,
+          "title": "Issuer Id",
+          "type": "string"
+        },
+        "key_id": {
+          "minLength": 1,
+          "title": "Key Id",
+          "type": "string"
+        },
+        "purpose": {
+          "anyOf": [
+            {
+              "enum": [
+                "candidate_selection",
+                "protocol_use",
+                "meaningful_threshold",
+                "family_confirmation",
+                "budget_use",
+                "data_use",
+                "public_admission"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "publish_release",
+                "audit_checkpoint"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Purpose"
+        },
+        "schema_version": {
+          "const": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "subject_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Subject Digest",
+          "type": "string"
+        },
+        "subject_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            },
+            {
+              "$ref": "#/$defs/RecordLocator"
+            }
+          ],
+          "title": "Subject Ref"
+        }
+      },
+      "required": [
+        "schema_version",
+        "domain",
+        "purpose",
+        "key_id",
+        "algorithm",
+        "issuer_id",
+        "subject_ref",
+        "subject_digest",
+        "authorization_scope",
+        "issued_at",
+        "expires_at"
+      ],
+      "title": "SigningInput",
+      "type": "object"
+    },
+    "SourceLocation": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "page",
+            "line",
+            "section",
+            "whole_document"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "locator": {
+          "minLength": 1,
+          "title": "Locator",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "locator"
+      ],
+      "title": "SourceLocation",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/SourceLocation"
+        },
+        "snapshot_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "snapshot_ref",
+        "location"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SourceRowRef": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Artifact Digest",
+          "type": "string"
+        },
+        "row_number": {
+          "exclusiveMinimum": 0,
+          "title": "Row Number",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "artifact_digest",
+        "row_number"
+      ],
+      "title": "SourceRowRef",
+      "type": "object"
+    },
+    "StopSpec": {
+      "additionalProperties": false,
+      "description": "Only the approved complete fixed enumeration branch.",
+      "properties": {
+        "kind": {
+          "const": "complete_items",
+          "title": "Kind",
+          "type": "string"
+        },
+        "required_items": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Items",
+          "type": "array"
+        },
+        "rule_ref": {
+          "title": "Rule Ref",
+          "type": "null"
+        },
+        "sample_count": {
+          "title": "Sample Count",
+          "type": "null"
+        }
+      },
+      "required": [
+        "kind",
+        "required_items",
+        "sample_count",
+        "rule_ref"
+      ],
+      "title": "StopSpec",
+      "type": "object"
+    },
+    "TaskSnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "active_plan_revision": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "pending_reconciliation_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Pending Reconciliation Refs",
+          "type": "array"
+        },
+        "prior_phase": {
+          "anyOf": [
+            {
+              "enum": [
+                "ideating",
+                "awaiting_selection",
+                "designing",
+                "executing",
+                "reviewing"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Prior Phase"
+        },
+        "reason_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "ideating",
+                "awaiting_selection",
+                "designing",
+                "executing",
+                "reviewing"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "draft",
+                "paused",
+                "blocked",
+                "cancelled",
+                "completed"
+              ],
+              "type": "string"
+            }
+          ],
+          "title": "Status"
+        },
+        "task_contract_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "task_ref",
+        "status",
+        "prior_phase",
+        "reason_ref",
+        "active_plan_revision",
+        "task_contract_ref",
+        "pending_reconciliation_refs"
+      ],
+      "title": "TaskSnapshot",
+      "type": "object"
+    },
+    "TaskTransition": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "pause",
+            "block",
+            "resume",
+            "cancel"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "reason_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "action",
+        "expected_revision",
+        "reason_ref"
+      ],
+      "title": "TaskTransition",
+      "type": "object"
+    },
+    "TaskTransitionCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "$ref": "#/$defs/TaskTransition"
+        },
+        "resume": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ResumeFacts"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "task": {
+          "$ref": "#/$defs/TaskSnapshot"
+        },
+        "writer": {
+          "enum": [
+            "R09",
+            "R16"
+          ],
+          "title": "Writer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "task",
+        "command",
+        "writer",
+        "resume"
+      ],
+      "title": "TaskTransitionCheck",
+      "type": "object"
+    },
+    "TerminalCorrection": {
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "enum": [
+            "execution",
+            "billing",
+            "evidence",
+            "release"
+          ],
+          "title": "Category",
+          "type": "string"
+        },
+        "corrected_fact_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "correction_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "evidence_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "minItems": 1,
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "recorded_at": {
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "supersedes_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "writer": {
+          "enum": [
+            "R08",
+            "R07",
+            "R13",
+            "R21"
+          ],
+          "title": "Writer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "correction_ref",
+        "supersedes_ref",
+        "tenant_id",
+        "project_id",
+        "expected_revision",
+        "writer",
+        "category",
+        "reason",
+        "evidence_refs",
+        "corrected_fact_ref",
+        "recorded_at"
+      ],
+      "title": "TerminalCorrection",
+      "type": "object"
+    },
+    "TerminalFact": {
+      "additionalProperties": false,
+      "description": "Resolved record identity and relationship, from the authoritative reader.",
+      "properties": {
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "protected_content_digest": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Protected Content Digest"
+        },
+        "supersedes_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "terminal": {
+          "title": "Terminal",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "terminal",
+        "supersedes_ref",
+        "protected_content_digest"
+      ],
+      "title": "TerminalFact",
+      "type": "object"
+    },
+    "ThresholdTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "enum": [
+            "greater",
+            "less"
+          ],
+          "title": "Direction",
+          "type": "string"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "rationale_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_ref",
+        "value",
+        "unit",
+        "direction",
+        "scope_ref",
+        "rationale_ref"
+      ],
+      "title": "ThresholdTerms",
+      "type": "object"
+    },
+    "TrustedObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/ObservationBinding"
+        },
+        "row": {
+          "$ref": "#/$defs/ObservationRow"
+        },
+        "source_row_ref": {
+          "$ref": "#/$defs/SourceRowRef"
+        }
+      },
+      "required": [
+        "binding",
+        "source_row_ref",
+        "row"
+      ],
+      "title": "TrustedObservation",
+      "type": "object"
+    },
+    "TrustedRequestContext": {
+      "additionalProperties": false,
+      "description": "Project-scoped subset derived by the control service.",
+      "properties": {
+        "expires_at": {
+          "title": "Expires At",
+          "type": "string"
+        },
+        "family_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Family Id"
+        },
+        "lease_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "on_behalf_of_account": {
+          "minLength": 1,
+          "title": "On Behalf Of Account",
+          "type": "string"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "role": {
+          "minLength": 1,
+          "title": "Role",
+          "type": "string"
+        },
+        "task_id": {
+          "minLength": 1,
+          "title": "Task Id",
+          "type": "string"
+        },
+        "task_kind": {
+          "minLength": 1,
+          "title": "Task Kind",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "on_behalf_of_account",
+        "principal_id",
+        "role",
+        "task_id",
+        "task_kind",
+        "family_id",
+        "lease_ref",
+        "purpose",
+        "expires_at"
+      ],
+      "title": "TrustedRequestContext",
+      "type": "object"
+    },
+    "Unknown": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "state": {
+          "const": "unknown",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason"
+      ],
+      "title": "Unknown",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-r02-contracts": {
+    "ApprovalDisposition": {
+      "$ref": "#/$defs/ApprovalDisposition"
+    },
+    "ApprovalEvidence": {
+      "$ref": "#/$defs/ApprovalEvidence"
+    },
+    "ApprovalReview": {
+      "$ref": "#/$defs/ApprovalReview"
+    },
+    "ApprovalSubject": {
+      "$ref": "#/$defs/ApprovalSubject"
+    },
+    "AttemptSnapshot": {
+      "$ref": "#/$defs/AttemptSnapshot"
+    },
+    "AttemptTransitionCheck": {
+      "$ref": "#/$defs/AttemptTransitionCheck"
+    },
+    "AuditCheckpoint": {
+      "$ref": "#/$defs/AuditCheckpoint"
+    },
+    "AuditEntry": {
+      "$ref": "#/$defs/AuditEntry"
+    },
+    "CandidateDraft": {
+      "$ref": "#/$defs/CandidateDraft"
+    },
+    "CandidateRecord": {
+      "$ref": "#/$defs/CandidateRecord"
+    },
+    "ClaimRecord": {
+      "$ref": "#/$defs/ClaimRecord"
+    },
+    "ClaimScience": {
+      "$ref": "#/$defs/ClaimScience"
+    },
+    "CorrectionCheck": {
+      "$ref": "#/$defs/CorrectionCheck"
+    },
+    "Delegation": {
+      "$ref": "#/$defs/Delegation"
+    },
+    "EngineeringCheck": {
+      "$ref": "#/$defs/EngineeringCheck"
+    },
+    "EngineeringStatus": {
+      "$ref": "#/$defs/EngineeringStatus"
+    },
+    "ErrorDetail": {
+      "$ref": "#/$defs/ErrorDetail"
+    },
+    "EvaluationView": {
+      "$ref": "#/$defs/EvaluationView"
+    },
+    "EvidenceEvent": {
+      "$ref": "#/$defs/EvidenceEvent"
+    },
+    "ExecutionBinding": {
+      "$ref": "#/$defs/ExecutionBinding"
+    },
+    "FixedFourPolicy": {
+      "$ref": "#/$defs/FixedFourPolicy"
+    },
+    "FixedMissingPolicy": {
+      "$ref": "#/$defs/FixedMissingPolicy"
+    },
+    "FixedProtocolTargets": {
+      "$ref": "#/$defs/FixedProtocolTargets"
+    },
+    "FixedUnitSpec": {
+      "$ref": "#/$defs/FixedUnitSpec"
+    },
+    "LegacyIncomplete": {
+      "$ref": "#/$defs/LegacyIncomplete"
+    },
+    "MethodConfig": {
+      "$ref": "#/$defs/MethodConfig"
+    },
+    "PreregDraft": {
+      "$ref": "#/$defs/PreregDraft"
+    },
+    "PreregRecord": {
+      "$ref": "#/$defs/PreregRecord"
+    },
+    "ProtocolDraft": {
+      "$ref": "#/$defs/ProtocolDraft"
+    },
+    "ProtocolRecord": {
+      "$ref": "#/$defs/ProtocolRecord"
+    },
+    "ReferenceRequest": {
+      "$ref": "#/$defs/ReferenceRequest"
+    },
+    "ReleaseManifestBody": {
+      "$ref": "#/$defs/ReleaseManifestBody"
+    },
+    "ReleaseReceipt": {
+      "$ref": "#/$defs/ReleaseReceipt"
+    },
+    "ResponseEnvelope": {
+      "$ref": "#/$defs/ResponseEnvelope"
+    },
+    "RetryCheck": {
+      "$ref": "#/$defs/RetryCheck"
+    },
+    "RunRequestDraft": {
+      "$ref": "#/$defs/RunRequestDraft"
+    },
+    "RunRequestRecord": {
+      "$ref": "#/$defs/RunRequestRecord"
+    },
+    "Scope": {
+      "$ref": "#/$defs/Scope"
+    },
+    "SelectionRule": {
+      "$ref": "#/$defs/SelectionRule"
+    },
+    "SettlementCheck": {
+      "$ref": "#/$defs/SettlementCheck"
+    },
+    "SignatureEnvelope": {
+      "$ref": "#/$defs/SignatureEnvelope"
+    },
+    "TaskSnapshot": {
+      "$ref": "#/$defs/TaskSnapshot"
+    },
+    "TaskTransitionCheck": {
+      "$ref": "#/$defs/TaskTransitionCheck"
+    },
+    "TerminalCorrection": {
+      "$ref": "#/$defs/TerminalCorrection"
+    },
+    "TerminalFact": {
+      "$ref": "#/$defs/TerminalFact"
+    },
+    "TrustedObservation": {
+      "$ref": "#/$defs/TrustedObservation"
+    },
+    "TrustedRequestContext": {
+      "$ref": "#/$defs/TrustedRequestContext"
+    }
+  }
+}

@@ -2,3 +2,5 @@ include uv.lock .python-version
 recursive-include scripts *.py *.sh
 recursive-include fixtures *.py
 recursive-include tests *.py
+recursive-include tests/fixtures *.json *.md
+recursive-include schemas *.json

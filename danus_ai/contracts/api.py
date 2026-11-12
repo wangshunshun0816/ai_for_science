@@ -1,0 +1,238 @@
+"""Initial I-SCHEMA surface. Registered shapes are distinct from service eligibility."""
+
+from typing import Literal
+
+from .approval_conflicts import ApprovalDisposition, ApprovalEvidence, ApprovalReview
+from .base import StrictContract
+from .claims import (
+    AuditCheckpoint,
+    AuditEntry,
+    ClaimRecord,
+    ClaimScience,
+    EvidenceEvent,
+    claim_content_version,
+)
+from .first_objects import (
+    CandidateDraft,
+    CandidateRecord,
+    PreregDraft,
+    PreregRecord,
+    ProtocolDraft,
+    ProtocolRecord,
+)
+from .guards import ContractBlocked, ReadOnlyPort, RequestContext
+from .messages import (
+    Delegation,
+    ErrorDetail,
+    LegacyIncomplete,
+    ReferenceRequest,
+    ResponseEnvelope,
+    TrustedRequestContext,
+)
+from .observations import EvaluationView, FixedFourPolicy, TrustedObservation
+from .projections import content_version
+from .protocol_targets import FixedMissingPolicy, FixedProtocolTargets, FixedUnitSpec, SelectionRule
+from .references import MethodConfig
+from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
+from .scope import Scope
+from .signing import ApprovalSubject, ReleaseManifestBody, ReleaseReceipt, SignatureEnvelope
+from .transitions import (
+    AttemptFacts,
+    AttemptSnapshot,
+    AttemptStatus,
+    EngineeringStatus,
+    ResumeFacts,
+    RetryFacts,
+    RetryPolicyView,
+    SettlementFacts,
+    TaskSnapshot,
+    TaskTransition,
+    TerminalCorrection,
+    TerminalFact,
+    apply_settlement,
+    retry_attempt,
+    transition_attempt,
+    transition_task,
+    validate_engineering_update,
+    validate_terminal_correction,
+)
+
+
+class TaskTransitionCheck(StrictContract):
+    task: TaskSnapshot
+    command: TaskTransition
+    writer: Literal["R09", "R16"]
+    resume: ResumeFacts | None
+
+
+class AttemptTransitionCheck(StrictContract):
+    attempt: AttemptSnapshot
+    destination: AttemptStatus
+    facts: AttemptFacts
+    writer: Literal["R08Coordinator", "R08Collector"]
+    protection_triggered: bool
+
+
+class SettlementCheck(StrictContract):
+    attempt: AttemptSnapshot
+    facts: SettlementFacts
+    writer: Literal["R07"]
+
+
+class RetryCheck(StrictContract):
+    prior: AttemptSnapshot
+    proposed: AttemptSnapshot
+    policy: RetryPolicyView | None
+    facts: RetryFacts
+
+
+class CorrectionCheck(StrictContract):
+    original: TerminalFact
+    correction: TerminalCorrection
+    corrected: TerminalFact
+
+
+class EngineeringCheck(StrictContract):
+    previous: EngineeringStatus
+    current: EngineeringStatus
+    writer: Literal["decision_maker", "maintainer", "reviewer", "acceptor"]
+
+
+_CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    CandidateDraft,
+    ProtocolDraft,
+    PreregDraft,
+    RunRequestDraft,
+    ReferenceRequest,
+    Scope,
+)
+_SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    CandidateRecord,
+    ProtocolRecord,
+    PreregRecord,
+    RunRequestRecord,
+    ExecutionBinding,
+    MethodConfig,
+    ClaimScience,
+    ClaimRecord,
+    EvidenceEvent,
+    AuditEntry,
+    AuditCheckpoint,
+    ApprovalSubject,
+    ApprovalEvidence,
+    ApprovalDisposition,
+    ApprovalReview,
+    SignatureEnvelope,
+    ReleaseManifestBody,
+    ReleaseReceipt,
+    FixedFourPolicy,
+    TrustedObservation,
+    TaskSnapshot,
+    AttemptSnapshot,
+    TerminalFact,
+    TerminalCorrection,
+    EngineeringStatus,
+    TrustedRequestContext,
+    Delegation,
+    LegacyIncomplete,
+    ResponseEnvelope,
+    ErrorDetail,
+    FixedUnitSpec,
+    FixedMissingPolicy,
+    SelectionRule,
+    FixedProtocolTargets,
+    TaskTransitionCheck,
+    AttemptTransitionCheck,
+    SettlementCheck,
+    RetryCheck,
+    CorrectionCheck,
+    EngineeringCheck,
+)
+_OUTPUT_MODELS: tuple[type[StrictContract], ...] = (EvaluationView,)
+
+
+def schema_registry() -> dict[
+    str, tuple[type[StrictContract], Literal["validation", "serialization"]]
+]:
+    return {
+        model.__name__: (model, "validation") for model in (*_CALLER_MODELS, *_SERVICE_MODELS)
+    } | {model.__name__: (model, "serialization") for model in _OUTPUT_MODELS}
+
+
+def _parse(model: type[StrictContract], payload: object) -> StrictContract:
+    if isinstance(payload, (str, bytes, bytearray)):
+        return model.model_validate_json(payload)
+    return model.model_validate(payload)
+
+
+def validate_object(name: str, payload: object, *, trusted: bool = False) -> StrictContract:
+    registered = schema_registry().get(name)
+    if registered is None:
+        raise ContractBlocked("OBJECT_UNSUPPORTED")
+    model, mode = registered
+    if mode == "serialization":
+        raise ContractBlocked("OUTPUT_ONLY_CONTRACT")
+    if model not in _CALLER_MODELS and trusted is not True:
+        raise ContractBlocked("SERVICE_OWNED_CONTRACT")
+    return _parse(model, payload)
+
+
+def content_id(value: StrictContract, context: RequestContext, port: ReadOnlyPort) -> str:
+    if isinstance(value, (CandidateDraft, CandidateRecord)):
+        return content_version(value, context, port)
+    if isinstance(value, ClaimRecord):
+        value.verify(context, port)
+        return value.content_version
+    if isinstance(value, ClaimScience):
+        return claim_content_version(value, context, port)
+    if isinstance(value, (ProtocolDraft, ProtocolRecord)):
+        raise ContractBlocked("SPEC_UNRESOLVED: Protocol targets and issuance guard")
+    if isinstance(
+        value, (PreregDraft, PreregRecord, RunRequestDraft, RunRequestRecord, ExecutionBinding)
+    ):
+        raise ContractBlocked("SPEC_UNRESOLVED: scientific projection or resolved targets")
+    if isinstance(value, LegacyIncomplete):
+        raise ContractBlocked("LEGACY_INCOMPLETE")
+    raise ContractBlocked("CONTENT_ID_UNSUPPORTED")
+
+
+_TRANSITIONS: dict[str, type[StrictContract]] = {
+    "task": TaskTransitionCheck,
+    "attempt": AttemptTransitionCheck,
+    "settlement": SettlementCheck,
+    "retry": RetryCheck,
+    "correction": CorrectionCheck,
+    "engineering": EngineeringCheck,
+}
+
+
+def validate_transition(
+    operation: str, payload: object, *, trusted: bool = False
+) -> TaskSnapshot | AttemptSnapshot | None:
+    model = _TRANSITIONS.get(operation)
+    if model is None:
+        raise ContractBlocked("TRANSITION_UNSUPPORTED")
+    if trusted is not True:
+        raise ContractBlocked("SERVICE_OWNED_CONTRACT")
+    check = _parse(model, payload)
+    if isinstance(check, TaskTransitionCheck):
+        return transition_task(check.task, check.command, check.writer, check.resume)
+    if isinstance(check, AttemptTransitionCheck):
+        return transition_attempt(
+            check.attempt,
+            check.destination,
+            check.facts,
+            check.writer,
+            protection_triggered=check.protection_triggered,
+        )
+    if isinstance(check, SettlementCheck):
+        return apply_settlement(check.attempt, check.facts, check.writer)
+    if isinstance(check, RetryCheck):
+        return retry_attempt(check.prior, check.proposed, check.policy, check.facts)
+    if isinstance(check, CorrectionCheck):
+        validate_terminal_correction(check.original, check.correction, check.corrected)
+        return None
+    if isinstance(check, EngineeringCheck):
+        validate_engineering_update(check.previous, check.current, check.writer)
+        return None
+    raise ContractBlocked("TRANSITION_UNSUPPORTED")

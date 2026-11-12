@@ -1,0 +1,224 @@
+{
+  "protocol": {
+    "input": {
+      "design_type": "finite_population_enumeration",
+      "dataset_ref": {
+        "object_type": "Dataset",
+        "object_id": "Dataset",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "split_ref": null,
+      "split_not_applicable_reason": "固定四题\r\n全部使用",
+      "metric": {
+        "name": "accuracy",
+        "unit": "ratio",
+        "direction": "maximize",
+        "implementation_ref": {
+          "object_type": "MetricImplementation",
+          "object_id": "MetricImplementation",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "baseline_refs": [
+        {
+          "object_type": "Baseline",
+          "object_id": "Baseline",
+          "content_version": "test:v1:2222222222222222222222222222222222222222222222222222222222222222"
+        },
+        {
+          "object_type": "Baseline",
+          "object_id": "Baseline",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        {
+          "object_type": "Baseline",
+          "object_id": "another",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      ],
+      "tuning_space": [
+        {
+          "name": "rate",
+          "kind": "decimal",
+          "lower": "0.10",
+          "upper": "0.30",
+          "lower_inclusive": true,
+          "upper_inclusive": true,
+          "step": "1e-1",
+          "values": [],
+          "unit": "ratio",
+          "selection_rule_ref": {
+            "object_type": "SelectionRule",
+            "object_id": "SelectionRule",
+            "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+          }
+        }
+      ],
+      "sanity_suite_ref": {
+        "object_type": "CheckSuite",
+        "object_id": "CheckSuite",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "applicability_template": {
+        "object_type": "ApplicabilityTemplate",
+        "object_id": "ApplicabilityTemplate",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "evaluation_unit": "unique_item",
+      "required_items": [
+        "q4",
+        "q1",
+        "q3",
+        "q2",
+        "q3"
+      ],
+      "duplicate_policy": "deduplicate_identical_reject_conflicts",
+      "missing_policy_ref": {
+        "object_type": "MissingPolicy",
+        "object_id": "MissingPolicy",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      }
+    },
+    "targets": {
+      "unit_ref": {
+        "object_type": "UnitSpec",
+        "object_id": "UnitSpec",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "unit": {
+        "evaluation_unit": "unique_item",
+        "unit_key_fields": [
+          "item_id"
+        ],
+        "population_ref": {
+          "object_type": "Population",
+          "object_id": "Population",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "sampling_frame_ref": null,
+        "cluster_mapping_ref": null,
+        "repetition_mapping_ref": null,
+        "independence_basis_ref": {
+          "object_type": "IndependentReference",
+          "object_id": "IndependentReference",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        }
+      },
+      "missing_ref": {
+        "object_type": "MissingPolicy",
+        "object_id": "MissingPolicy",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "missing": {
+        "evaluation_unit_ref": {
+          "object_type": "UnitSpec",
+          "object_id": "UnitSpec",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "expected_universe_ref": {
+          "object_type": "Population",
+          "object_id": "Population",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "missing_definition": "one item missing",
+        "action": "incomplete",
+        "adjustment_spec_ref": null,
+        "reason": "fixed denominator"
+      },
+      "duplicate_policy": "deduplicate_identical_reject_conflicts",
+      "selection_rules": [
+        {
+          "ref": {
+            "object_type": "SelectionRule",
+            "object_id": "SelectionRule",
+            "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "rule": {
+            "candidate_universe_ref": {
+              "object_type": "Population",
+              "object_id": "Population",
+              "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+            },
+            "rule_spec_ref": {
+              "object_type": "RuleSpec",
+              "object_id": "RuleSpec",
+              "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+            },
+            "inputs": [],
+            "exposure_constraints_ref": {
+              "object_type": "ExposureConstraints",
+              "object_id": "ExposureConstraints",
+              "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+            },
+            "independent_reference_ref": {
+              "object_type": "IndependentReference",
+              "object_id": "IndependentReference",
+              "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+            }
+          }
+        }
+      ]
+    },
+    "expected_utf8": "{\"applicability_template\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"ApplicabilityTemplate\"},\"baseline_refs\":[{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Baseline\"},{\"content_version\":\"test:v1:2222222222222222222222222222222222222222222222222222222222222222\",\"object_type\":\"Baseline\"}],\"dataset_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Dataset\"},\"design_type\":\"finite_population_enumeration\",\"duplicate_policy\":\"deduplicate_identical_reject_conflicts\",\"evaluation_unit\":\"unique_item\",\"metric\":{\"direction\":\"maximize\",\"implementation_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"MetricImplementation\"},\"name\":\"accuracy\",\"unit\":\"ratio\"},\"missing_policy_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"MissingPolicy\"},\"required_items\":[\"q1\",\"q2\",\"q3\",\"q4\"],\"sanity_suite_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"CheckSuite\"},\"split_not_applicable_reason\":\"固定四题\\n全部使用\",\"split_ref\":null,\"tuning_space\":[{\"kind\":\"decimal\",\"lower\":\"0.1\",\"lower_inclusive\":true,\"name\":\"rate\",\"selection_rule_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"SelectionRule\"},\"step\":\"0.1\",\"unit\":\"ratio\",\"upper\":\"0.3\",\"upper_inclusive\":true,\"values\":[]}]}"
+  },
+  "candidate": {
+    "input": {
+      "background": "é\r\n下一行",
+      "sources": [],
+      "new_inference": "推断",
+      "prediction": "预测",
+      "draft": {
+        "format": "plain_text",
+        "body": "内容"
+      },
+      "original_source": null,
+      "source_kind": "original",
+      "scope_ref": {
+        "object_type": "Scope",
+        "object_id": "Scope",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "synthetic_origin": null
+    },
+    "expected_utf8": "{\"background\":\"é\\n下一行\",\"draft\":{\"body\":\"内容\",\"format\":\"plain_text\"},\"new_inference\":\"推断\",\"original_source\":null,\"prediction\":\"预测\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"source_kind\":\"original\",\"sources\":[],\"synthetic_origin\":null}"
+  },
+  "claim": {
+    "input": {
+      "statement": "发现",
+      "scope_ref": {
+        "object_type": "Scope",
+        "object_id": "Scope",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "kind": "empirical",
+      "outcome": "improvement",
+      "logical_level": "L2",
+      "origin_binding": {
+        "origin": "external_report",
+        "source": {
+          "snapshot_ref": {
+            "object_type": "SourceSnapshot",
+            "object_id": "SourceSnapshot",
+            "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+          },
+          "location": {
+            "kind": "page",
+            "locator": "8"
+          }
+        }
+      }
+    },
+    "expected_utf8": "{\"kind\":\"empirical\",\"logical_level\":\"L2\",\"origin\":\"external_report\",\"origin_binding\":{\"origin\":\"external_report\",\"source\":{\"location\":{\"kind\":\"page\",\"locator\":\"8\"},\"snapshot_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"SourceSnapshot\"}}},\"outcome\":\"improvement\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"statement\":\"发现\"}"
+  },
+  "normalization": {
+    "input": {
+      "text": "é\r\n四",
+      "exact": "-0.00",
+      "ordered": [
+        2,
+        1
+      ]
+    },
+    "expected_utf8": "{\"exact\":\"0\",\"ordered\":[2,1],\"text\":\"é\\n四\"}"
+  }
+}

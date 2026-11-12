@@ -36,6 +36,7 @@ class ReferenceState:
     allowed_projects: frozenset[str]
     readable: bool
     specification_ready: bool
+    legacy_incomplete: bool = False
 
 
 @dataclass(frozen=True)
@@ -92,6 +93,8 @@ def require_reference(ctx: RequestContext, ref: Ref, port: ReadOnlyPort) -> Refe
     # Exact locator, not only equal scientific hash. No cross-record substitution.
     if state.ref != ref:
         raise ContractBlocked("VERSION_MISMATCH")
+    if state.legacy_incomplete:
+        raise ContractBlocked("LEGACY_INCOMPLETE")
     if not state.specification_ready:
         raise ContractBlocked("SPEC_UNRESOLVED")
     return state

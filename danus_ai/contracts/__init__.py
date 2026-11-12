@@ -1,5 +1,6 @@
-"""R02 foundations; no approved references, authorization or content IDs."""
+"""Public I-SCHEMA functions for the supported R02 subset."""
 
+from .api import content_id, validate_object, validate_transition
 from .base import AuthoritativeRecord, DraftContract, StrictContract
 from .canonicalization import (
     canonicalize,
@@ -10,8 +11,15 @@ from .canonicalization import (
     normalize,
 )
 from .parsing import ContractJSONError, parse_json
+from .scope import scope_comparable, scope_contains, scope_overlaps
 
 __all__ = [
+    "content_id",
+    "validate_object",
+    "validate_transition",
+    "scope_comparable",
+    "scope_contains",
+    "scope_overlaps",
     "AuthoritativeRecord",
     "ContractJSONError",
     "DraftContract",

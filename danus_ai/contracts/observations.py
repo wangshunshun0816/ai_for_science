@@ -7,6 +7,7 @@ from pydantic import Field, computed_field, model_validator
 from .base import AuthoritativeRecord, StrictContract
 from .claims import Digest
 from .guards import ContractBlocked
+from .protocol_targets import DuplicatePolicyName
 from .references import PositiveInt, RecordLocator, Revision, ScientificRef, Text
 
 Binary = Annotated[int, Field(ge=0, le=1)]
@@ -20,7 +21,7 @@ class FixedFourPolicy(AuthoritativeRecord):
     unit_spec_ref: ScientificRef
     missing_policy_ref: ScientificRef
     policy_ref: ScientificRef
-    duplicate_policy: Literal["deduplicate_identical_reject_conflicts"]
+    duplicate_policy: DuplicatePolicyName
     expected_labels: dict[Item, Binary]
 
     @model_validator(mode="after")
