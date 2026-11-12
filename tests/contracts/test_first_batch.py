@@ -729,8 +729,14 @@ def test_prereg_order_and_reserved_scientific_fields() -> None:
     original = PreregDraft.model_validate(data)
     reversed_arms = PreregDraft.model_validate(data | {"arms": list(reversed(data["arms"]))})
     assert original.arms != reversed_arms.arms
-    with pytest.raises(ValidationError):
-        PreregDraft.model_validate(data | {"arms": [data["arms"][0], data["arms"][0]]})
+    first, second = data["arms"]
+    repeated = PreregDraft.model_validate(data | {"arms": [first, second, first]})
+    assert repeated.arms == [original.arms[0], original.arms[1], original.arms[0]]
+    conflicting = second | {"arm_id": first["arm_id"]}
+    with pytest.raises(ValidationError, match="different arms share an arm_id"):
+        PreregDraft.model_validate(data | {"arms": [first, conflicting]})
+    with pytest.raises(ValidationError, match="Comparison requires"):
+        PreregDraft.model_validate(data | {"arms": [first, first]})
     with pytest.raises(ValidationError):
         RunRequestDraft.model_validate(run() | {"resource_limits": {"max_steps": 1}})
     with pytest.raises(ValidationError):
@@ -769,3 +775,68 @@ def test_stored_candidate_version_cannot_be_reused_after_scientific_change() -> 
     data["prediction"] = "changed scientific prediction"
     with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
         validate_candidate_version(CandidateRecord.model_validate(data), CTX, port)
+
+
+def test_external_synthetic_origin_can_be_located_outside_background_sources() -> None:
+    source = {
+        "snapshot_ref": ref("SourceSnapshot", "synthetic-origin"),
+        "location": {"kind": "page", "locator": "7"},
+    }
+    data = candidate() | {
+        "source_kind": "synthetic_design",
+        "synthetic_origin": "external",
+        "original_source": source,
+    }
+    value = CandidateDraft.model_validate(data)
+    assert not value.sources
+    assert candidate_projection(value)["original_source"]["location"] == source["location"]
+
+    class DeniedOriginPort(MemoryPort):
+        def resolve(
+            self, ctx: RequestContext, reference: ScientificRef | HistoricalRef
+        ) -> ReferenceState:
+            state = super().resolve(ctx, reference)
+            return (
+                replace(state, readable=False)
+                if reference.object_type == "SourceSnapshot"
+                else state
+            )
+
+    assert content_version(value, CTX, MemoryPort()).startswith("candidate:v1:")
+    with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
+        content_version(value, CTX, DeniedOriginPort())
+
+
+def test_approval_bindings_deduplicate_exact_triples_only() -> None:
+    first = approval("candidate_selection")
+    revised = first | {"revision": first["revision"] + 1}
+    other_record = first | {"record_id": "another-approval"}
+    data = candidate() | metadata() | {"status": "draft"}
+    record = CandidateRecord.model_validate(
+        data | {"approval_bindings": [first, revised, dict(first), other_record, revised]}
+    )
+    assert record.model_dump()["approval_bindings"] == [first, revised, other_record]
+
+
+def test_conflicting_approval_binding_does_not_grant_another_purpose() -> None:
+    first = approval("candidate_selection")
+    conflict = first | {"purpose": "protocol_use"}
+    data = candidate() | metadata() | {"status": "draft"}
+    record = CandidateRecord.model_validate(data | {"approval_bindings": [first, conflict]})
+    assert record.model_dump()["approval_bindings"] == [first, conflict]
+
+    port = MemoryPort()
+    target = ScientificRef.model_validate(ref("CandidateHypothesis"))
+    locator, conflicting_locator = record.approval_bindings
+    port.approval_value = ApprovalState(locator, target, CTX.tenant_id, CTX.project_id, True, False)
+    require_approval(CTX, locator, target, "candidate_selection", port)
+    with pytest.raises(ContractBlocked, match="APPROVAL_INVALID"):
+        require_approval(CTX, conflicting_locator, target, "protocol_use", port)
+
+
+@pytest.mark.parametrize("change", [False, True], ids=["exact-duplicate", "different-value"])
+def test_method_parameter_names_must_be_unique(change: bool) -> None:
+    first = {"name": "x", "kind": "integer", "value": 1}
+    second = first | {"value": 2} if change else dict(first)
+    with pytest.raises(ValidationError, match="duplicate named item"):
+        MethodConfig.model_validate(method() | {"parameters": [first, second]})

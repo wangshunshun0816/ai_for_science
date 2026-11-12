@@ -3,10 +3,10 @@
 from decimal import Decimal
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 
 from .base import DraftContract, StrictContract
-from .canonicalization import canonicalize
+from .canonicalization import canonicalize, normalize
 from .references import (
     ApprovalLocator,
     DecimalText,
@@ -52,7 +52,7 @@ class CandidateFields(StrictContract):
             external = self.source_kind == "external_reported"
         if external != (self.original_source is not None):
             raise ValueError("Original source branch mismatch")
-        if external and self.original_source is not None:
+        if self.source_kind == "external_reported" and self.original_source is not None:
             original = canonicalize(source_projection(self.original_source))
             if original not in [canonicalize(source_projection(s)) for s in self.sources]:
                 raise ValueError("Original source missing from sources")
@@ -84,6 +84,18 @@ class RecordMetadata(StrictContract):
         if (self.ownership_scope == "project") != (self.project_id is not None):
             raise ValueError("Ownership scope/project mismatch")
         return self
+
+    @field_validator("approval_bindings")
+    @classmethod
+    def deduplicate_approval_bindings(
+        cls, bindings: list[ApprovalLocator]
+    ) -> list[ApprovalLocator]:
+        # Preserve the first occurrence of each exact locator, including its revision.
+        distinct: dict[tuple[str, str, int], ApprovalLocator] = {}
+        for binding in bindings:
+            key = (binding.purpose, binding.record_id, binding.revision)
+            distinct.setdefault(key, binding)
+        return list(distinct.values())
 
 
 class CandidateRecord(CandidateFields, RecordMetadata):
@@ -236,7 +248,12 @@ class PreregFields(StrictContract):
 
     @model_validator(mode="after")
     def prereg_consistency(self) -> Self:
-        require_unique_names(self.arms, "arm_id")
+        arms_by_id: dict[str, bytes] = {}
+        for arm in self.arms:
+            key = str(normalize(arm.arm_id))
+            content = canonicalize(arm.model_dump())
+            if arms_by_id.setdefault(key, content) != content:
+                raise ValueError("CONTRACT_CONFLICT: different arms share an arm_id")
         if not {"reference", "candidate"}.issubset({a.role for a in self.arms}):
             raise ValueError("Comparison requires reference and candidate arms")
         for name, expected in {

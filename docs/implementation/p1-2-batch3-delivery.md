@@ -76,3 +76,21 @@ GitHub 运行页所示实际提交为 `86aeac09bfe9e36ef3dac272ff9f09ea8e6ac8a2`
 GitHub 注释记录了 Node.js 20 弃用警告。固定版本的 `actions/checkout` 由 runner 强制在 Node.js 24 上执行，任务结果为成功。
 
 本批工程验收仅限上述已实现纯契约及本地检查；真实服务、跨平台、R02 全部验收及人工签收另行处理。
+
+## 6. 第三批人工验收整改
+
+依据 A0 在 `1f34e0d611066acd7273a9c0843e5c93514ecd14` 的签收和绑定提案 `48bd0dcc0afa78c2b6447fdfe789465b0d3a8068`。复验基线为 `938f7dcaf953be57e99cafc79cd3fc725c4ddd38`。
+
+| 处置 | 字段与批准规则 | 整改前影响及当前结果 |
+| --- | --- | --- |
+| 已整改 | `RecordMetadata.approval_bindings`，提案 §1.1 按 purpose、record_id、revision 精确去重 | 原先保留完全相同的绑定。现由四对象共用字段校验保留每个精确三元组的首次出现，不同记录、修订和用途各自保留。测试覆盖完全相同、不同修订及同记录同修订不同用途。只读批准核验仍拒绝用途与权威记录不符的请求 |
+| 已整改 | `CandidateFields.original_source` 与 `sources`，提案 §6.1 | 原先要求 external_reported 和外部 synthetic_design 均将原始来源列入 sources，导致后者无背景来源时被拒。现只对 external_reported 要求包含该源位置。外部 synthetic_design 仍须提供有位置的 original_source，且该引用独立参与投影和访问检查。回归测试验证允许空 sources 及拒绝不可访问的原始来源 |
+| 已整改 | `PreregFields.arms`，提案 §1.2 和 §6.2 规定有序及同键异值冲突 | 原先同一 arm_id 一律拒绝。现保留完全相同条目及原序，拒绝规范化后同一 ID 内容不同的条目。固定比较仍需 reference 和 candidate 两类臂。回归测试覆盖这三种情况 |
+| 保留限制 | `MethodConfig.parameters[].name` 与 `ProtocolFields.tuning_space[].name`，提案 §4 和 §1.2 明确名称唯一，§4 明确保留名和重复参数冲突 | 继续拒绝完全相同及内容不同的同名方法参数，继续拒绝重复的调参名称和科学限额覆盖。一般集合去重规则不取消这两处字段约束 |
+| 已批准延期 | 完整投影和版本计算、目标规范依赖的跨对象停止条件、实际审批／公共准入／运行服务 | 仍按 §3 和 A0 清单 §6 跟踪。固定枚举 Prereg 的 randomness/discrimination 仅支持明确不适用形状，其他适用分支缺方法和目标规范。预算估价仅实现 planning_estimate，其他 NumericValue 性质与依据结构尚缺，本轮保留为待补缺项 |
+| 仍待决定 | 多个批准版本或用途同时出现时的权威选择、列表排序合同 | 提案仅规定精确去重。首次出现顺序为本次实现的稳定保留策略。批量拒绝、修订优先级、同记录同修订跨用途的记录级处置等待领域合同。当前保留不同三元组，逐次授权仍以只读权威记录精确核对 |
+| 仍待决定或验证 | Q-04～Q-07、缺失目标规范、采样／描述型启用、Windows/Linux 一致性 | 按原批准边界跟踪。尚无新增关闭证据 |
+
+本轮在 Ubuntu CPython 3.12.16 下运行 `bash scripts/verify.sh`，165 项测试通过，锁检查与锁定安装、Ruff、mypy、导入边界、源码包和 wheel 构建通过。[整改本地验证日志](evidence/p1-2-batch3-remediation-verify.log)
+
+整改提交的远端手动 CI 待登记。§5 的运行 43184083094 覆盖整改前的代码。
