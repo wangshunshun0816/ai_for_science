@@ -46,4 +46,4 @@ GitHub Actions [运行 43318093230](https://github.com/wangshunshun0816/ai_for_s
 
 完整族选择和数据暴露事实、分析独立校准与实际工件核验仍由对应权威来源提供。本批只支持固定四题已明确的尝试选择和反馈规则；其他预注册策略缺规范时阻断。未注册目标域、未审定批准用途、跨 Scope 映射、历史标记清除、采样／描述型启用继续按既有边界处理。生产服务装配和实际运行另验收。
 
-整改远端 CI 待登记准确运行 SHA 及结果。A0 签收待填写。
+GitHub Actions [运行 43323478957](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957) 在 `main` 手动触发，结果为 **Success**。实际运行 SHA 为 `b2e2fb93eb9a5823d9ba313ff64c163071133daf`，与第六批整改提交一致。从运行开始到完成更新为 26 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957/job/131549915158)的锁定检查与构建通过。Checkout 成功，唯一警告为固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。 A0 签收待填写。
