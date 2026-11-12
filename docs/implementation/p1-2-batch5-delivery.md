@@ -42,4 +42,6 @@ Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`，**208 项通过**，锁
 
 **32 项规范 UTF-8 字节和完整 SHA-256 逐项一致**，包括既有 28 项和新增 Scope、委派读取、权威候选版本、Schema 能力四项独立预期。原两项 RFC 非法向量均被拒绝。整改守卫反例也在两侧报告过程中执行，单独登记。两个 Schema 摘要一致。原九个金样例与手算逐字节一致，依赖锁无新增条目。[整改工程日志](evidence/p1-2-batch5-remediation-verify.log) · [整改跨平台证据](evidence/p1-2-batch5-remediation-cross-platform.json)
 
-正式 Protocol ID、未经批准的科研映射、历史标记清除及缺已审定条款的批准用途继续阻断。真实委派和租约来源仍属后续服务验收。整改远端 CI 待登记。
+正式 Protocol ID、未经批准的科研映射、历史标记清除及缺已审定条款的批准用途继续阻断。真实委派和租约来源仍属后续服务验收。
+
+整改 CI [运行 43308363032](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43308363032) 已完成，结果为 **Success**，总用时 20 秒。实际运行 SHA 为 `cd70f2091d16d1f31f83dad268d323176dc9e88c`，与整改提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43308363032/job/131497540836) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 有 Node.js 20 弃用警告，由 runner 使用 Node.js 24 执行，Checkout 成功。
