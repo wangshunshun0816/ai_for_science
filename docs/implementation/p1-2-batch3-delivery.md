@@ -69,7 +69,10 @@ fatal: could not read Username for 'https://github.com': terminal prompts disabl
 GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never git -c credential.helper= -c credential.helper=/mnt/d/Git/mingw64/bin/git-credential-manager.exe push origin main
 ```
 
-沿用现有免费手动 CI：公开仓库、标准 ubuntu-24.04 runner、contents: read、workflow_dispatch，无付费调用。本批未改工作流。当前 Ubuntu 无 gh，Git 推送已通过现有 Windows 凭据助手完成；浏览器控制工具初始化失败（failed to write kernel assets，系统找不到指定的路径），无法代为点击 workflow_dispatch。已请求用户手动触发并提供运行链接，**本批尚无远端运行证据**；不得沿用第二批 run 43147247201 作为本批通过。
-在 Actions → P1-1 foundation checks → Run workflow 选择 main；核对运行 head_sha 等于本批代码提交（或明确包含该代码的后续证据提交），跟踪到结束并另登链接/结果。此前 CI 的 Node.js 警告不在本批变更范围。
+2026-11-12，用户在 main 手动触发 `P1-1 foundation checks`（`workflow_dispatch`）。[运行 43184083094](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43184083094) 已结束，结论为 **Success**，总用时 21 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43184083094/job/131066858494) 成功，其中 `Locked local checks and build` 步骤成功。
+
+GitHub 运行页所示实际提交为 `86aeac09bfe9e36ef3dac272ff9f09ea8e6ac8a2`。本地通过 `git merge-base --is-ancestor` 确认它包含第三批代码提交 `a4d0553233c62613afb90cb0202618d01f5e5dd9`。两者的差异仅涉及本交付记录及提交日志，运行覆盖第三批交付代码和既有工作流。
+
+GitHub 注释记录了 Node.js 20 弃用警告。固定版本的 `actions/checkout` 由 runner 强制在 Node.js 24 上执行，任务结果为成功。
 
 本批工程验收仅限上述已实现纯契约及本地检查；真实服务、跨平台、R02 全部验收及人工签收另行处理。
