@@ -20,4 +20,4 @@
 
 Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`。锁检查、锁定安装、Ruff、mypy、导入边界、源码包和 wheel 构建通过，pytest **181 项通过**。新增测试使用既有规范化逻辑、独立预期和固定 Ed25519 测试密钥，测试适配器调用 Ubuntu 自带 OpenSSL，无新依赖。原九个金样例、手算 README 与三份设计基线逐字节与批准提交一致。见 [本地检查日志](evidence/p1-2-batch4-verify.log) 和 [保留文件比对](evidence/p1-2-batch4-preservation.txt)。
 
-第四批远端 CI 待登记，沿用公开仓库的免费手动 `P1-1 foundation checks` 流程。
+第四批远端 CI [运行 43207738623](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43207738623) 由 `workflow_dispatch` 触发，结果为 **Success**，总用时 20 秒。GitHub 运行页指向 `f0da7c201821599a2ac40a20447e133ffe9bf55b`，与第四批代码提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43207738623/job/131147086969) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 仍有 Node.js 20 弃用警告，runner 使用 Node.js 24 执行，Checkout 步骤成功。
