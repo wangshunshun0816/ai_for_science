@@ -25,7 +25,7 @@ from danus_ai.contracts.api import schema_registry
 from danus_ai.contracts.canonicalization import jcs_bytes
 from danus_ai.contracts.claims import ClaimScience, claim_science_bytes, digest_bytes
 from danus_ai.contracts.export_schema import schema_bytes
-from danus_ai.contracts.first_objects import CandidateDraft, ProtocolDraft
+from danus_ai.contracts.first_objects import CandidateDraft, CandidateRecord, ProtocolDraft
 from danus_ai.contracts.guards import (
     ApprovalState,
     BudgetState,
@@ -36,7 +36,9 @@ from danus_ai.contracts.guards import (
     TaskPolicy,
 )
 from danus_ai.contracts.messages import (
+    AuthorizedDelegation,
     Delegation,
+    DelegationState,
     LegacyIncomplete,
     ReferenceRequest,
     ResponseEnvelope,
@@ -48,7 +50,7 @@ from danus_ai.contracts.messages import (
 from danus_ai.contracts.parsing import ContractJSONError
 from danus_ai.contracts.projections import candidate_projection
 from danus_ai.contracts.protocol_targets import FixedProtocolTargets, protocol_science_preview
-from danus_ai.contracts.references import ApprovalLocator, RecordLocator
+from danus_ai.contracts.references import ApprovalLocator, RecordLocator, ScientificRef
 from danus_ai.contracts.scope import Scope, Truth
 
 VECTORS = json.loads(
@@ -91,6 +93,7 @@ def scope_input() -> dict[str, Any]:
 
 def test_scope_intervals_sets_and_unknown() -> None:
     wide = Scope.model_validate(scope_input())
+    assert validate_object("Scope", wide) == wide
     narrow = Scope.model_validate(
         scope_input()
         | {
@@ -144,7 +147,20 @@ class Port:
     replacement: Ref | None = None
     incomplete = False
 
+    def __init__(self, grant: Delegation | None = None):
+        self.grant = grant
+        self.lease = grant.context.lease_ref if grant is not None else None
+        self.resolve_calls = 0
+
+    def delegation_state(
+        self, ctx: RequestContext, locator: RecordLocator, /
+    ) -> DelegationState | None:
+        if self.grant is None or self.grant.locator != locator:
+            return None
+        return DelegationState(self.grant, self.lease)
+
     def resolve(self, ctx: RequestContext, ref: Ref) -> ReferenceState:
+        self.resolve_calls += 1
         return ReferenceState(
             self.replacement or ref,
             self.tenant,
@@ -178,7 +194,10 @@ def locator(kind: str, revision: int = 0) -> RecordLocator:
     return RecordLocator(record_type=kind, record_id=kind, revision=revision)
 
 
-def test_delegation_pins_identity_task_lease_and_purpose() -> None:
+NOW = datetime(2026, 11, 13, 2, tzinfo=UTC)
+
+
+def make_grant(operation: str = "references.resolve") -> Delegation:
     ctx = TrustedRequestContext(
         tenant_id="tenant",
         project_id="project",
@@ -192,9 +211,25 @@ def test_delegation_pins_identity_task_lease_and_purpose() -> None:
         purpose="read",
         expires_at="2026-11-13T03:00:00Z",
     )
-    grant = Delegation(locator=locator("Delegation", 2), context=ctx, revoked=False)
-    now = datetime(2026, 11, 13, 2, tzinfo=UTC)
-    assert authorize_delegated_request(ctx, grant, grant.locator, ctx.lease_ref, "read", now) == CTX
+    return Delegation(
+        locator=locator("Delegation", 2),
+        context=ctx,
+        operation=operation,
+        target_refs=[ScientificRef.model_validate(sci("Scope"))],
+        revoked=False,
+    )
+
+
+def authorize(grant: Delegation) -> AuthorizedDelegation:
+    ctx = grant.context
+    return authorize_delegated_request(ctx, grant, grant.locator, ctx.lease_ref, "read", NOW)
+
+
+def test_delegation_pins_identity_task_lease_and_purpose() -> None:
+    grant = make_grant()
+    ctx = grant.context
+    now = NOW
+    assert authorize(grant).request_context == CTX
     for wrong, expected, lease, purpose, time in [
         (grant.model_copy(update={"revoked": True}), grant.locator, ctx.lease_ref, "read", now),
         (grant, locator("Delegation", 1), ctx.lease_ref, "read", now),
@@ -215,17 +250,28 @@ def test_delegation_pins_identity_task_lease_and_purpose() -> None:
         )
 
 
-def test_shared_request_contract_and_readonly_guards() -> None:
-    data: dict[str, Any] = {
+def request_data(target: str = "one") -> dict[str, Any]:
+    return {
         "request_id": "r",
         "idempotency_key": "i",
         "contract_version": "1.2",
         "operation": "references.resolve",
-        "payload": {"ref": sci("Scope")},
+        "payload": {"ref": sci("Scope", target)},
     }
+
+
+def test_shared_request_contract_and_readonly_guards() -> None:
+    data = request_data()
     consumer = validate_object("ReferenceRequest", data)
     assert isinstance(consumer, ReferenceRequest)
-    response = resolve_reference_query(consumer.model_dump_json(), CTX, Port())
+    grant = make_grant()
+    authorization = authorize(grant)
+    port = Port(grant)
+
+    def query(raw: str) -> ResponseEnvelope:
+        return resolve_reference_query(raw, authorization, port, expected_purpose="read", now=NOW)
+
+    response = query(consumer.model_dump_json())
     assert validate_object("ResponseEnvelope", response.model_dump_json(), trusted=True) == response
     for forged in [
         data | {"principal_id": "other"},
@@ -233,24 +279,23 @@ def test_shared_request_contract_and_readonly_guards() -> None:
         data | {"operation": "run.start"},
     ]:
         with pytest.raises(ValidationError):
-            resolve_reference_query(json.dumps(forged), CTX, Port())
+            query(json.dumps(forged))
     with pytest.raises(ContractBlocked, match="SERVICE_OWNED"):
         validate_object("TrustedRequestContext", {})
-    port = Port()
     port.tenant = "other"
     with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
-        resolve_reference_query(consumer.model_dump_json(), CTX, port)
+        query(consumer.model_dump_json())
     port.tenant = "tenant"
     assert hasattr(response.result_ref, "content_version")
     assert response.result_ref is not None
     wrong = consumer.payload.ref.model_copy(update={"content_version": "test:v1:" + "9" * 64})
     port.replacement = wrong
     with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
-        resolve_reference_query(consumer.model_dump_json(), CTX, port)
+        query(consumer.model_dump_json())
     port.replacement = None
     port.incomplete = True
     with pytest.raises(ContractBlocked, match="LEGACY_INCOMPLETE"):
-        resolve_reference_query(consumer.model_dump_json(), CTX, port)
+        query(consumer.model_dump_json())
     old = read_legacy(CTX, locator("Prereg"), port)
     assert old.missing_fields == ["selection_history_ref"]
     with pytest.raises(ContractBlocked, match="LEGACY_INCOMPLETE"):
@@ -385,7 +430,19 @@ def cross_platform_results() -> dict[str, object]:
     assert content_id(claim, CTX, Port()) == "claim:v1:" + digest_bytes(
         vector["expected_utf8"].encode("utf-8")
     )
+    expected = json.loads(
+        ref_path.with_name("r02-batch5-remediation.json").read_text(encoding="utf-8")
+    )
+    for name, actual in remediation_vectors().items():
+        check(name, canonicalize(actual), expected[name].encode("utf-8"))
     return {
+        "remediation_guards": [
+            "reject-inapplicable-core",
+            "reject-inapplicable-sampling-frame-and-selection",
+            "reject-delegated-operation-target-purpose-expiry-revocation-and-inactive-lease",
+            "reject-stale-candidate-version",
+            "schema-runtime-access-and-response-conditions",
+        ],
         "platform": platform.system(),
         "python": platform.python_version(),
         "versions": {name: version(name) for name in ("pydantic", "pydantic-core", "rfc8785")},
@@ -399,6 +456,216 @@ def cross_platform_results() -> dict[str, object]:
 
 def test_batch5_independent_vectors() -> None:
     cross_platform_results()
+
+
+def test_remediation_scope_cannot_skip_all_core_dimensions() -> None:
+    omitted = {"state": "not_applicable", "reason": "No evidence"}
+    raw: dict[str, object] = {name: omitted for name in scope_input() if name != "design_type"}
+    raw["design_type"] = "finite_population_enumeration"
+    with pytest.raises(ValidationError):
+        Scope.model_validate(raw)
+
+
+def test_remediation_sampling_requires_frame_and_selection_mechanism() -> None:
+    raw = scope_input() | {"design_type": "comparative_sampling"}
+    with pytest.raises(ValidationError):
+        Scope.model_validate(raw)
+
+
+def test_remediation_reference_query_rejects_unscoped_context() -> None:
+    payload = {
+        "request_id": "r",
+        "idempotency_key": "i",
+        "contract_version": "1.2",
+        "operation": "references.resolve",
+        "payload": {"ref": sci("Scope", "outside")},
+    }
+    with pytest.raises(ContractBlocked, match="DELEGATION_REQUIRED"):
+        resolve_reference_query(json.dumps(payload), CTX, Port())
+
+
+def test_remediation_candidate_record_rejects_wrong_stored_version() -> None:
+    value = candidate_record("candidate:v1:" + "0" * 64)
+    with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
+        content_id(value, CTX, Port())
+
+
+def candidate_record(stored: str) -> CandidateRecord:
+    return CandidateRecord.model_validate(
+        VECTORS["candidate"]["input"]
+        | {
+            "object_id": "candidate",
+            "tenant_id": "tenant",
+            "project_id": "project",
+            "ownership_scope": "project",
+            "content_version": stored,
+            "status": "draft",
+            "created_at": "2026-11-13T00:00:00Z",
+            "created_by": "principal",
+            "approval_bindings": [],
+        }
+    )
+
+
+def test_remediation_export_declares_access_and_runtime_checks() -> None:
+    document = json.loads(schema_bytes("json-schema"))
+    caps = document["x-r02-capabilities"]
+    assert caps["objects"]["ReferenceRequest"] == "caller_input"
+    assert caps["objects"]["TrustedRequestContext"] == "service_owned"
+    assert caps["objects"]["EvaluationView"] == "output_only"
+    assert caps["runtime_validation_required"] is True
+    assert document["$defs"]["ResponseEnvelope"]["allOf"]
+
+
+def test_scope_required_unknown_and_descriptive_not_applicable() -> None:
+    unknown = {"state": "unknown", "reason": "Not observed"}
+    raw = scope_input()
+    uncertain = Scope.model_validate(raw | {"observed_data_ref": unknown})
+    fixed = Scope.model_validate(raw)
+    assert scope_contains(fixed, uncertain) is Truth.UNKNOWN
+    assert scope_overlaps(fixed, uncertain) is Truth.UNKNOWN
+    assert (
+        scope_overlaps(
+            fixed,
+            Scope.model_validate(raw | {"observed_data_ref": unknown, "hardware": known(["tpu"])}),
+        )
+        is Truth.FALSE
+    )
+    na = {"state": "not_applicable", "reason": "Single method"}
+    descriptive = Scope.model_validate(raw | {"design_type": "descriptive", "baseline_ref": na})
+    assert scope_comparable(descriptive, descriptive) is Truth.TRUE
+    with pytest.raises(ValidationError):
+        Scope.model_validate(raw | {"baseline_ref": na})
+
+
+def test_delegated_query_rechecks_current_scope_before_resolution() -> None:
+    grant = make_grant()
+    verified = authorize(grant)
+    raw = json.dumps(request_data())
+    wrong_op = make_grant("reports.read")
+    denied = [
+        (
+            json.dumps(request_data("outside")),
+            verified,
+            Port(grant),
+            "read",
+            NOW,
+            "DELEGATION_SCOPE_MISMATCH",
+        ),
+        (raw, authorize(wrong_op), Port(wrong_op), "read", NOW, "DELEGATION_SCOPE_MISMATCH"),
+        (raw, verified, Port(grant), "write", NOW, "DELEGATION_INVALID"),
+        (raw, verified, Port(grant), "read", NOW.replace(hour=3), "DELEGATION_INVALID"),
+        (
+            raw,
+            verified,
+            Port(grant.model_copy(update={"revoked": True})),
+            "read",
+            NOW,
+            "DELEGATION_INVALID",
+        ),
+        (raw, verified, Port(), "read", NOW, "DELEGATION_INVALID"),
+    ]
+    expired_lease = Port(grant)
+    expired_lease.lease = None
+    denied.append((raw, verified, expired_lease, "read", NOW, "DELEGATION_INVALID"))
+    for query, authorization, port, purpose, time, code in denied:
+        with pytest.raises(ContractBlocked, match=code):
+            resolve_reference_query(query, authorization, port, expected_purpose=purpose, now=time)
+        assert port.resolve_calls == 0
+
+
+def test_remediation_schema_matches_runtime_surface() -> None:
+    js = json.loads(schema_bytes("json-schema"))
+    oa = json.loads(schema_bytes("openapi"))
+    caps = js["x-r02-capabilities"]
+    assert caps == oa["x-r02-capabilities"]
+    assert caps["objects"].keys() == js["x-r02-contracts"].keys()
+    for name, access in caps["objects"].items():
+        if access == "caller_input":
+            with pytest.raises(ValidationError):
+                validate_object(name, {})
+        else:
+            code = "OUTPUT_ONLY" if access == "output_only" else "SERVICE_OWNED"
+            with pytest.raises(ContractBlocked, match=code):
+                validate_object(name, {})
+    assert sorted(caps["validate_transition"]) == [
+        "attempt",
+        "correction",
+        "engineering",
+        "retry",
+        "settlement",
+        "task",
+    ]
+    assert caps["reference_operations"] == ["references.resolve"]
+    assert caps["unlisted_objects_and_operations"] == "unsupported"
+    rules = js["$defs"]["ResponseEnvelope"]["allOf"][0]
+    assert rules["if"]["properties"]["status"]["const"] == "ok"
+    assert rules["then"]["properties"] == {
+        "error": {"type": "null"},
+        "result_ref": {"type": "object"},
+    }
+    assert rules["else"]["properties"] == {"error": {"type": "object"}}
+    with pytest.raises(ValidationError):
+        ResponseEnvelope.model_validate(
+            {
+                "request_id": "r",
+                "status": "ok",
+                "result_ref": None,
+                "error": None,
+            }
+        )
+    assert schema_bytes("json-schema") == schema_bytes("json-schema")
+
+
+def remediation_vectors() -> dict[str, object]:
+    raw = scope_input()
+    fixed = Scope.model_validate(raw)
+    unknown = {"state": "unknown", "reason": "Missing observation"}
+    uncertain = Scope.model_validate(raw | {"observed_data_ref": unknown})
+    sampling = raw | {
+        "design_type": "comparative_sampling",
+        "sampling_frame": known(sci("SamplingFrame")),
+        "selection_mechanism": known(sci("SelectionMechanism")),
+    }
+    grant = make_grant()
+    response = resolve_reference_query(
+        json.dumps(request_data()),
+        authorize(grant),
+        Port(grant),
+        expected_purpose="read",
+        now=NOW,
+    )
+    expected_version = "candidate:v1:" + digest_bytes(
+        VECTORS["candidate"]["expected_utf8"].encode("utf-8")
+    )
+    caps = json.loads(schema_bytes("openapi"))["x-r02-capabilities"]
+    # Include fail-closed paths in the executable cross-platform report.
+    test_remediation_scope_cannot_skip_all_core_dimensions()
+    test_remediation_sampling_requires_frame_and_selection_mechanism()
+    test_delegated_query_rechecks_current_scope_before_resolution()
+    test_remediation_candidate_record_rejects_wrong_stored_version()
+    test_remediation_schema_matches_runtime_surface()
+    return {
+        "scope-decisions": {
+            "contains_missing": scope_contains(fixed, uncertain).value,
+            "sampling_comparable": scope_comparable(
+                Scope.model_validate(sampling),
+                Scope.model_validate(
+                    sampling | {"observed_data_ref": known(sci("Dataset", "two"))}
+                ),
+            ).value,
+        },
+        "delegated-reference": response.model_dump(),
+        "candidate-stored-version": {
+            "id": content_id(candidate_record(expected_version), CTX, Port())
+        },
+        "schema-capability-sample": {
+            "caller": caps["objects"]["ReferenceRequest"],
+            "output": caps["objects"]["EvaluationView"],
+            "runtime": caps["runtime_validation_required"],
+            "service": caps["objects"]["Delegation"],
+        },
+    }
 
 
 if __name__ == "__main__":

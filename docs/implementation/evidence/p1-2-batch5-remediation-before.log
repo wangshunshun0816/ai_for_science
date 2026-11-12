@@ -1,0 +1,66 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+____________ test_remediation_scope_cannot_skip_all_core_dimensions ____________
+
+    def test_remediation_scope_cannot_skip_all_core_dimensions() -> None:
+        omitted = {"state": "not_applicable", "reason": "No evidence"}
+        raw = {name: omitted for name in scope_input() if name != "design_type"}
+        raw["design_type"] = "finite_population_enumeration"
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/contracts/test_batch5.py:412: Failed
+_______ test_remediation_sampling_requires_frame_and_selection_mechanism _______
+
+    def test_remediation_sampling_requires_frame_and_selection_mechanism() -> None:
+        raw = scope_input() | {"design_type": "comparative_sampling"}
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/contracts/test_batch5.py:418: Failed
+__________ test_remediation_reference_query_rejects_unscoped_context ___________
+
+    def test_remediation_reference_query_rejects_unscoped_context() -> None:
+        payload = {
+            "request_id": "r", "idempotency_key": "i", "contract_version": "1.2",
+            "operation": "references.resolve", "payload": {"ref": sci("Scope", "outside")},
+        }
+>       with pytest.raises(ContractBlocked, match="DELEGATION_REQUIRED"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch5.py:427: Failed
+________ test_remediation_candidate_record_rejects_wrong_stored_version ________
+
+    def test_remediation_candidate_record_rejects_wrong_stored_version() -> None:
+        from danus_ai.contracts.first_objects import CandidateRecord
+
+        value = CandidateRecord.model_validate(VECTORS["candidate"]["input"] | {
+            "object_id": "candidate", "tenant_id": "tenant", "project_id": "project",
+            "ownership_scope": "project", "content_version": "candidate:v1:" + "0" * 64,
+            "status": "draft", "created_at": "2026-11-13T00:00:00Z",
+            "created_by": "principal", "approval_bindings": [],
+        })
+>       with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch5.py:440: Failed
+__________ test_remediation_export_declares_access_and_runtime_checks __________
+
+    def test_remediation_export_declares_access_and_runtime_checks() -> None:
+        document = json.loads(schema_bytes("json-schema"))
+>       caps = document["x-r02-capabilities"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'x-r02-capabilities'
+
+tests/contracts/test_batch5.py:446: KeyError
+=========================== short test summary info ============================
+FAILED tests/contracts/test_batch5.py::test_remediation_scope_cannot_skip_all_core_dimensions
+FAILED tests/contracts/test_batch5.py::test_remediation_sampling_requires_frame_and_selection_mechanism
+FAILED tests/contracts/test_batch5.py::test_remediation_reference_query_rejects_unscoped_context
+FAILED tests/contracts/test_batch5.py::test_remediation_candidate_record_rejects_wrong_stored_version
+FAILED tests/contracts/test_batch5.py::test_remediation_export_declares_access_and_runtime_checks
+5 failed, 8 deselected in 0.59s

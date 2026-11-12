@@ -17,6 +17,40 @@
       "title": "AnalysisInputs",
       "type": "object"
     },
+    "Applicable_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        }
+      ]
+    },
+    "Applicable_ScientificRef_": {
+      "discriminator": {
+        "mapping": {
+          "known": "#/$defs/Known_ScientificRef_",
+          "unknown": "#/$defs/Unknown"
+        },
+        "propertyName": "state"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Known_ScientificRef_"
+        },
+        {
+          "$ref": "#/$defs/Unknown"
+        }
+      ]
+    },
     "ApprovalConflict": {
       "additionalProperties": false,
       "properties": {
@@ -1309,14 +1343,36 @@
         "locator": {
           "$ref": "#/$defs/RecordLocator"
         },
+        "operation": {
+          "minLength": 1,
+          "title": "Operation",
+          "type": "string"
+        },
         "revoked": {
           "title": "Revoked",
           "type": "boolean"
+        },
+        "target_refs": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ScientificRef"
+              },
+              {
+                "$ref": "#/$defs/HistoricalRef"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Target Refs",
+          "type": "array"
         }
       },
       "required": [
         "locator",
         "context",
+        "operation",
+        "target_refs",
         "revoked"
       ],
       "title": "Delegation",
@@ -3851,6 +3907,34 @@
     },
     "ResponseEnvelope": {
       "additionalProperties": false,
+      "allOf": [
+        {
+          "else": {
+            "properties": {
+              "error": {
+                "type": "object"
+              }
+            }
+          },
+          "if": {
+            "properties": {
+              "status": {
+                "const": "ok"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "error": {
+                "type": "null"
+              },
+              "result_ref": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "error": {
           "anyOf": [
@@ -4618,6 +4702,69 @@
     },
     "Scope": {
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "design_type": {
+                "enum": [
+                  "finite_population_enumeration",
+                  "comparative_sampling"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "baseline_ref": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "known",
+                      "unknown"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "design_type": {
+                "enum": [
+                  "comparative_sampling"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "sampling_frame": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "known",
+                      "unknown"
+                    ]
+                  }
+                }
+              },
+              "selection_mechanism": {
+                "properties": {
+                  "state": {
+                    "enum": [
+                      "known",
+                      "unknown"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
       "properties": {
         "baseline_ref": {
           "$ref": "#/$defs/Dimension_ScientificRef_"
@@ -4632,22 +4779,22 @@
           "type": "string"
         },
         "estimand": {
-          "$ref": "#/$defs/Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+          "$ref": "#/$defs/Applicable_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
         },
         "hardware": {
           "$ref": "#/$defs/Dimension_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
         },
         "measurement_ref": {
-          "$ref": "#/$defs/Dimension_ScientificRef_"
+          "$ref": "#/$defs/Applicable_ScientificRef_"
         },
         "method_ref": {
-          "$ref": "#/$defs/Dimension_ScientificRef_"
+          "$ref": "#/$defs/Applicable_ScientificRef_"
         },
         "model_snapshot_ref": {
           "$ref": "#/$defs/Dimension_ScientificRef_"
         },
         "observed_data_ref": {
-          "$ref": "#/$defs/Dimension_ScientificRef_"
+          "$ref": "#/$defs/Applicable_ScientificRef_"
         },
         "parameter_scale": {
           "$ref": "#/$defs/Dimension_ClosedInterval_"
@@ -4665,13 +4812,13 @@
           "$ref": "#/$defs/Dimension_ClosedInterval_"
         },
         "target_population_ref": {
-          "$ref": "#/$defs/Dimension_ScientificRef_"
+          "$ref": "#/$defs/Applicable_ScientificRef_"
         },
         "task_ref": {
-          "$ref": "#/$defs/Dimension_ScientificRef_"
+          "$ref": "#/$defs/Applicable_ScientificRef_"
         },
         "unit": {
-          "$ref": "#/$defs/Dimension_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
+          "$ref": "#/$defs/Applicable_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____"
         }
       },
       "required": [
@@ -5512,6 +5659,98 @@
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "x-r02-capabilities": {
+    "content_id": {
+      "calculate": [
+        "CandidateDraft",
+        "ClaimScience"
+      ],
+      "legacy_incomplete": [
+        "LegacyIncomplete"
+      ],
+      "spec_unresolved": [
+        "ExecutionBinding",
+        "PreregDraft",
+        "PreregRecord",
+        "ProtocolDraft",
+        "ProtocolRecord",
+        "RunRequestDraft",
+        "RunRequestRecord"
+      ],
+      "verify_stored": [
+        "CandidateRecord",
+        "ClaimRecord"
+      ]
+    },
+    "objects": {
+      "ApprovalDisposition": "service_owned",
+      "ApprovalEvidence": "service_owned",
+      "ApprovalReview": "service_owned",
+      "ApprovalSubject": "service_owned",
+      "AttemptSnapshot": "service_owned",
+      "AttemptTransitionCheck": "service_owned",
+      "AuditCheckpoint": "service_owned",
+      "AuditEntry": "service_owned",
+      "CandidateDraft": "caller_input",
+      "CandidateRecord": "service_owned",
+      "ClaimRecord": "service_owned",
+      "ClaimScience": "service_owned",
+      "CorrectionCheck": "service_owned",
+      "Delegation": "service_owned",
+      "EngineeringCheck": "service_owned",
+      "EngineeringStatus": "service_owned",
+      "ErrorDetail": "service_owned",
+      "EvaluationView": "output_only",
+      "EvidenceEvent": "service_owned",
+      "ExecutionBinding": "service_owned",
+      "FixedFourPolicy": "service_owned",
+      "FixedMissingPolicy": "service_owned",
+      "FixedProtocolTargets": "service_owned",
+      "FixedUnitSpec": "service_owned",
+      "LegacyIncomplete": "service_owned",
+      "MethodConfig": "service_owned",
+      "PreregDraft": "caller_input",
+      "PreregRecord": "service_owned",
+      "ProtocolDraft": "caller_input",
+      "ProtocolRecord": "service_owned",
+      "ReferenceRequest": "caller_input",
+      "ReleaseManifestBody": "service_owned",
+      "ReleaseReceipt": "service_owned",
+      "ResponseEnvelope": "service_owned",
+      "RetryCheck": "service_owned",
+      "RunRequestDraft": "caller_input",
+      "RunRequestRecord": "service_owned",
+      "Scope": "caller_input",
+      "SelectionRule": "service_owned",
+      "SettlementCheck": "service_owned",
+      "SignatureEnvelope": "service_owned",
+      "TaskSnapshot": "service_owned",
+      "TaskTransitionCheck": "service_owned",
+      "TerminalCorrection": "service_owned",
+      "TerminalFact": "service_owned",
+      "TrustedObservation": "service_owned",
+      "TrustedRequestContext": "service_owned"
+    },
+    "reference_operations": [
+      "references.resolve"
+    ],
+    "runtime_only_checks": [
+      "strict JSON parsing (duplicate keys and non-finite numbers)",
+      "interval endpoint ordering and domain-specific normalization",
+      "trusted origin, exact target, active delegation and lease",
+      "reference resolution and eligibility, scientific version and transition guards"
+    ],
+    "runtime_validation_required": true,
+    "unlisted_objects_and_operations": "unsupported",
+    "validate_transition": {
+      "attempt": "AttemptTransitionCheck",
+      "correction": "CorrectionCheck",
+      "engineering": "EngineeringCheck",
+      "retry": "RetryCheck",
+      "settlement": "SettlementCheck",
+      "task": "TaskTransitionCheck"
+    }
+  },
   "x-r02-contracts": {
     "ApprovalDisposition": {
       "$ref": "#/$defs/ApprovalDisposition"

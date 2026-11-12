@@ -1,6 +1,6 @@
 """Initial I-SCHEMA surface. Registered shapes are distinct from service eligibility."""
 
-from typing import Literal
+from typing import Literal, get_args
 
 from .approval_conflicts import ApprovalDisposition, ApprovalEvidence, ApprovalReview
 from .base import StrictContract
@@ -30,7 +30,7 @@ from .messages import (
     TrustedRequestContext,
 )
 from .observations import EvaluationView, FixedFourPolicy, TrustedObservation
-from .projections import content_version
+from .projections import content_version, validate_candidate_version
 from .protocol_targets import FixedMissingPolicy, FixedProtocolTargets, FixedUnitSpec, SelectionRule
 from .references import MethodConfig
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
@@ -159,9 +159,20 @@ def schema_registry() -> dict[
     } | {model.__name__: (model, "serialization") for model in _OUTPUT_MODELS}
 
 
+Access = Literal["caller_input", "service_owned", "output_only"]
+
+
+def _access(model: type[StrictContract]) -> Access:
+    if model in _CALLER_MODELS:
+        return "caller_input"
+    return "output_only" if model in _OUTPUT_MODELS else "service_owned"
+
+
 def _parse(model: type[StrictContract], payload: object) -> StrictContract:
     if isinstance(payload, (str, bytes, bytearray)):
         return model.model_validate_json(payload)
+    if isinstance(payload, model):
+        return model.model_validate(payload.model_dump())
     return model.model_validate(payload)
 
 
@@ -169,17 +180,34 @@ def validate_object(name: str, payload: object, *, trusted: bool = False) -> Str
     registered = schema_registry().get(name)
     if registered is None:
         raise ContractBlocked("OBJECT_UNSUPPORTED")
-    model, mode = registered
-    if mode == "serialization":
+    model, _ = registered
+    access = _access(model)
+    if access == "output_only":
         raise ContractBlocked("OUTPUT_ONLY_CONTRACT")
-    if model not in _CALLER_MODELS and trusted is not True:
+    if access == "service_owned" and trusted is not True:
         raise ContractBlocked("SERVICE_OWNED_CONTRACT")
     return _parse(model, payload)
 
 
+_CONTENT_ID_CALCULATED = (CandidateDraft, ClaimScience)
+_CONTENT_ID_VERIFIED = (CandidateRecord, ClaimRecord)
+_CONTENT_ID_BLOCKED = (
+    ProtocolDraft,
+    ProtocolRecord,
+    PreregDraft,
+    PreregRecord,
+    RunRequestDraft,
+    RunRequestRecord,
+    ExecutionBinding,
+)
+
+
 def content_id(value: StrictContract, context: RequestContext, port: ReadOnlyPort) -> str:
-    if isinstance(value, (CandidateDraft, CandidateRecord)):
+    if isinstance(value, CandidateDraft):
         return content_version(value, context, port)
+    if isinstance(value, CandidateRecord):
+        validate_candidate_version(value, context, port)
+        return value.content_version
     if isinstance(value, ClaimRecord):
         value.verify(context, port)
         return value.content_version
@@ -187,9 +215,7 @@ def content_id(value: StrictContract, context: RequestContext, port: ReadOnlyPor
         return claim_content_version(value, context, port)
     if isinstance(value, (ProtocolDraft, ProtocolRecord)):
         raise ContractBlocked("SPEC_UNRESOLVED: Protocol targets and issuance guard")
-    if isinstance(
-        value, (PreregDraft, PreregRecord, RunRequestDraft, RunRequestRecord, ExecutionBinding)
-    ):
+    if isinstance(value, _CONTENT_ID_BLOCKED):
         raise ContractBlocked("SPEC_UNRESOLVED: scientific projection or resolved targets")
     if isinstance(value, LegacyIncomplete):
         raise ContractBlocked("LEGACY_INCOMPLETE")
@@ -204,6 +230,32 @@ _TRANSITIONS: dict[str, type[StrictContract]] = {
     "correction": CorrectionCheck,
     "engineering": EngineeringCheck,
 }
+
+
+def schema_capabilities() -> dict[str, object]:
+    return {
+        "objects": {name: _access(model) for name, (model, _) in schema_registry().items()},
+        "validate_transition": {
+            operation: model.__name__ for operation, model in _TRANSITIONS.items()
+        },
+        "reference_operations": list(
+            get_args(ReferenceRequest.model_fields["operation"].annotation)
+        ),
+        "content_id": {
+            "calculate": sorted(model.__name__ for model in _CONTENT_ID_CALCULATED),
+            "verify_stored": sorted(model.__name__ for model in _CONTENT_ID_VERIFIED),
+            "spec_unresolved": sorted(model.__name__ for model in _CONTENT_ID_BLOCKED),
+            "legacy_incomplete": [LegacyIncomplete.__name__],
+        },
+        "unlisted_objects_and_operations": "unsupported",
+        "runtime_validation_required": True,
+        "runtime_only_checks": [
+            "strict JSON parsing (duplicate keys and non-finite numbers)",
+            "interval endpoint ordering and domain-specific normalization",
+            "trusted origin, exact target, active delegation and lease",
+            "reference resolution and eligibility, scientific version and transition guards",
+        ],
+    }
 
 
 def validate_transition(

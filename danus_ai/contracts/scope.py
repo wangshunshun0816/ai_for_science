@@ -2,9 +2,9 @@
 
 from collections.abc import Callable
 from enum import StrEnum
-from typing import Annotated, Generic, Literal, Self, TypeVar
+from typing import Annotated, Any, Generic, Literal, Self, TypeVar
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from .base import StrictContract
 from .references import PositiveInt, ScientificRef, Text
@@ -37,6 +37,29 @@ class NotApplicable(StrictContract):
 
 
 type Dimension[T] = Annotated[Known[T] | Unknown | NotApplicable, Field(discriminator="state")]
+type Applicable[T] = Annotated[Known[T] | Unknown, Field(discriminator="state")]
+
+_SCOPE_APPLICABILITY = (
+    (("finite_population_enumeration", "comparative_sampling"), ("baseline_ref",)),
+    (("comparative_sampling",), ("sampling_frame", "selection_mechanism")),
+)
+
+
+def _scope_schema_rules() -> dict[str, Any]:
+    return {
+        "allOf": [
+            {
+                "if": {"properties": {"design_type": {"enum": list(designs)}}},
+                "then": {
+                    "properties": {
+                        field: {"properties": {"state": {"enum": ["known", "unknown"]}}}
+                        for field in fields
+                    }
+                },
+            }
+            for designs, fields in _SCOPE_APPLICABILITY
+        ]
+    }
 
 
 class ClosedInterval(StrictContract):
@@ -51,22 +74,35 @@ class ClosedInterval(StrictContract):
 
 
 class Scope(StrictContract):
+    model_config = ConfigDict(json_schema_extra=_scope_schema_rules())
+
     design_type: Literal["finite_population_enumeration", "comparative_sampling", "descriptive"]
     model_snapshot_ref: Dimension[ScientificRef]
-    observed_data_ref: Dimension[ScientificRef]
-    task_ref: Dimension[ScientificRef]
+    observed_data_ref: Applicable[ScientificRef]
+    task_ref: Applicable[ScientificRef]
     parameter_scale: Dimension[ClosedInterval]
     sequence_length: Dimension[ClosedInterval]
     hardware: Dimension[Annotated[list[Text], Field(min_length=1)]]
     precision: Dimension[Text]
-    estimand: Dimension[Text]
-    target_population_ref: Dimension[ScientificRef]
+    estimand: Applicable[Text]
+    target_population_ref: Applicable[ScientificRef]
     sampling_frame: Dimension[ScientificRef]
     selection_mechanism: Dimension[ScientificRef]
-    unit: Dimension[Text]
-    method_ref: Dimension[ScientificRef]
+    unit: Applicable[Text]
+    method_ref: Applicable[ScientificRef]
     baseline_ref: Dimension[ScientificRef]
-    measurement_ref: Dimension[ScientificRef]
+    measurement_ref: Applicable[ScientificRef]
+
+    @model_validator(mode="after")
+    def required_applicability(self) -> Self:
+        for designs, fields in _SCOPE_APPLICABILITY:
+            if self.design_type in designs:
+                for field in fields:
+                    if isinstance(getattr(self, field), NotApplicable):
+                        raise ValueError(
+                            f"{field} is applicable to {self.design_type}; use unknown if needed"
+                        )
+        return self
 
 
 def _dimension(a: Dimension[T], b: Dimension[T], compare: Callable[[T, T], Truth]) -> Truth:
@@ -93,6 +129,8 @@ def _all(*values: Truth) -> Truth:
 
 
 def _scope_relation(a: Scope, b: Scope, *, contains: bool, compare_observed: bool = True) -> Truth:
+    a, b = Scope.model_validate(a.model_dump()), Scope.model_validate(b.model_dump())
+
     def intervals(x: ClosedInterval, y: ClosedInterval) -> Truth:
         match = (
             x.lower <= y.lower and x.upper >= y.upper

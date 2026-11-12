@@ -1,0 +1,6 @@
+{
+  "scope-decisions": "{\"contains_missing\":\"unknown\",\"sampling_comparable\":\"true\"}",
+  "delegated-reference": "{\"error\":null,\"request_id\":\"r\",\"result_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_id\":\"one\",\"object_type\":\"Scope\"},\"status\":\"ok\"}",
+  "candidate-stored-version": "{\"id\":\"candidate:v1:0cb05cbd130784afc5f626b921a48fa65455167f562a1ac52fbeeaa056bb7071\"}",
+  "schema-capability-sample": "{\"caller\":\"caller_input\",\"output\":\"output_only\",\"runtime\":true,\"service\":\"service_owned\"}"
+}

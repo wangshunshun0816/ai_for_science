@@ -26,3 +26,20 @@ Windows 原生验证环境位于 `%TEMP%\danus-r02-batch5`，使用现有 uv 0.1
 [Ubuntu 验证日志](evidence/p1-2-batch5-verify.log) · [Windows/Linux 向量实测](evidence/p1-2-batch5-cross-platform.json) · [保留文件字节核对](evidence/p1-2-batch5-preservation.txt)
 
 第五批远端 CI [运行 43261216047](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43261216047) 由 `workflow_dispatch` 触发，已完成，结果为 **Success**，总用时 25 秒。GitHub 运行页指向 `4cbc58651fc88489d510201263b2538611ee0e76`，与第五批交付提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43261216047/job/131332722045) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 仍有 Node.js 20 弃用警告，runner 使用 Node.js 24 执行，Checkout 成功。
+
+## 第五批验收整改
+
+整改基线 `7fac273dfc82bb83040beff5f0f6fa84caed8474`。先保留五个用例，在整改前分别复现 Scope 全不适用、采样维度跳过、无范围委派入口、候选错版和导出能力缺失。[整改前复现日志](evidence/p1-2-batch5-remediation-before.log)
+
+| 项目 | 修复及复验 |
+| --- | --- |
+| Scope | 大方案 §5.5 的实际观察、任务、估计目标、目标总体、单位、方法与测量语义只接受 known 或 unknown。比较型需要基线，采样型需要抽样框及选择机制；这些维度填 N/A 拒绝。显式未知传播为 unknown，已知冲突仍为 false。非比较型可明确说明基线不适用，已确认同一目标及其他条件的不同样本仍可比 |
+| 委派 | 经验证的授权保留原任务、用途、委派及租约定位、有效期、一个明确操作和精确目标列表。实际引用查询重新从受信端口读取委派及当前租约，核对操作、目标、用途、当前时刻及撤销。过期、撤销、无当前租约或同项目越范围请求在读取目标前拒绝；随后复用既有精确版本、归属和旧缺项守卫 |
+| 内容 ID | 候选草稿计算版本。权威候选调用 validate_candidate_version 核对存储版本，错版返回 VERSION_MISMATCH。独立规范字节导出的版本用于权威正例，保留错存储版本反例 |
+| Schema | JSON Schema 和 OpenAPI 共享 x-r02-capabilities，声明调用方、服务持有、仅输出及支持的操作／内容 ID 模式，未列能力视为不支持。标准 Schema 编码响应状态的 error／result_ref 条件及 Scope 的研究类型适用性。重复键、跨字段区间顺序、可信来源、实际权限和版本守卫仍由运行时执行，生成物显式说明。测试逐合同核对入口边界并检查生成可重复 |
+
+Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`，**208 项通过**，锁检查、静态检查、导入边界、Schema 漂移、源码包和 wheel 均成功。Windows 沿用 `%TEMP%\danus-r02-batch5` 的原生 3.12.14 及原锁，运行 `python -B -m pytest -q -p no:cacheprovider <...>\test_canonicalization.py <...>\test_batch5.py`，**83 项通过**。两侧继续用 `python -B tests/contracts/test_batch5.py` 输出向量，Ubuntu 经 `uv run --no-sync`，Windows 经隔离环境解释器及 UNC 源码路径。
+
+**32 项规范 UTF-8 字节和完整 SHA-256 逐项一致**，包括既有 28 项和新增 Scope、委派读取、权威候选版本、Schema 能力四项独立预期。原两项 RFC 非法向量均被拒绝。整改守卫反例也在两侧报告过程中执行，单独登记。两个 Schema 摘要一致。原九个金样例与手算逐字节一致，依赖锁无新增条目。[整改工程日志](evidence/p1-2-batch5-remediation-verify.log) · [整改跨平台证据](evidence/p1-2-batch5-remediation-cross-platform.json)
+
+正式 Protocol ID、未经批准的科研映射、历史标记清除及缺已审定条款的批准用途继续阻断。真实委派和租约来源仍属后续服务验收。整改远端 CI 待登记。

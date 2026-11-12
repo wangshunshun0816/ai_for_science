@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from pydantic.json_schema import models_json_schema
 
-from .api import schema_registry
+from .api import schema_capabilities, schema_registry
 
 Format = Literal["json-schema", "openapi"]
 
@@ -38,6 +38,7 @@ def schema_bytes(format: Format) -> bytes:
             "components": {"schemas": definitions},
             "x-r02-contracts": roots,
         }
+    document["x-r02-capabilities"] = schema_capabilities()
     return (json.dumps(document, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode(
         "utf-8"
     )
