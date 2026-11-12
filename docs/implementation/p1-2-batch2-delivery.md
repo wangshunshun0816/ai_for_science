@@ -1,5 +1,7 @@
 # P1-2 第二批交付：通用规范化与首组字段定稿提案
 
+当前验证状态：第二批代码已获远端 CI 成功证据，见 §7；§5/6 的认证阻塞及旧运行记录作为历史保留。A0 决策与 Windows/Linux 一致性仍待完成。
+
 日期：2026-11-12。起点本地 HEAD 和远端 main 经 git ls-remote 核对均为 `198a2dc6b0a4b3a0109eacc69988bd8e684798f0`，工作区干净。仓库根目录 `/home/wangshunshun/danus-ai`。已读 AGENTS、G §3.4/P1-2、A §5.2/6.4、第一批交付及 Q 草案。本轮用户另明确批准新增 rfc8785；不扩大其他依赖、付费或科研批准范围。
 
 ## 1. 已实施的 T03 通用部分
@@ -69,3 +71,14 @@ https://github.com/wangshunshun0816/ai_for_science/actions/runs/43036783370 。
 - 下一步：在 Actions → P1-1 foundation checks → Run workflow 选择 main 创建新运行，不在旧 #1 页面点 Re-run jobs。重跑旧 run 仍绑定旧提交。新运行需核对完整 head SHA、event、run attempt、workflow/job 状态和结论；本轮文档提交包含 f538edd 的全部代码，可作为当前 main 的代码覆盖证据，但须记录实际新 SHA，不冒充精确 f538edd 运行。失败时再按日志修复本批范围、重验并记录新的代码/运行版本。
 - [A0 决策清单](decisions/A0-R02-first-contracts-checklist.md) 整理 Q03-1～3、Q01-1～5、Q02-1～3 的决定内容、推荐/备选、字段、后果和设计出处，并显式登记未闭合结构。所有选择、确认人、日期、意见与结论保持待审/空白；不改变首组提案或设计基线。
 - Windows Python 3.12 缺失及 Windows/Linux 纯契约字节一致性仍待办；本轮没有安装解释器或依赖。既有 122 项本地测试是第二批代码交付证据，本轮文档核对没有把它记成新测试运行。
+
+
+## 7. 新运行 #2：第二批精确提交 CI 成功（2026-11-12）
+
+- 用户提供新 [运行 #2](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43147247201)。已读取公开 summary 和 [foundation job](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43147247201/job/130947831819)，两者均已结束，分别显示 Status Success、foundation succeeded。
+- 实际运行提交：**f538edddc065b98445026e5f23088a3a52162e47**。公开页面 commit 链接为完整 SHA，与第二批目标完全一致；不是旧 #1 的 30e97ad，也不是后续文档提交。
+- 工作流：P1-1 foundation checks #2，ci.yml，workflow_dispatch，main。页面时间为 November 12, 2026 03:17（页面未标时区，原样记录，不冒称本地时间）；总耗时 18s，foundation 14s，无制品。
+- 警告 1 条：固定 actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 声明 Node.js 20，平台强制改用 Node.js 24。该次运行/作业仍成功；未为清除警告擅自升级 action。本项作为工具链后续维护待办，不视为测试失败。
+- 未登录页面显示 Sign in to view logs，未取得详细步骤日志；因此只确认运行和 job 成功，不把本地 122 passed 数字说成已逐行复核的远端日志。固定提交的 workflow 调用 scripts/verify.sh，可追溯到当次代码。
+- 核对时远端 main 仍为 f538edd，本地为 5a4b85f126aab5bfc6299118f0fd75e028b3eb60；两者差异仅三份实施文档。该 CI 覆盖第二批代码，也包含第一批代码，但不等于为第一批 198a2dc 单独运行一次 CI。本轮只追加证据文档，未改工程代码、依赖或工作流，未重跑已通过的本地工程检查。
+- **关闭第二批“缺少目标提交远端 CI 证据”项。** 不关闭 A0 的 Q-03/Q-01/Q-02 待审决定、Q04～07、Windows Python 3.12 缺失/跨平台验证、P1-2 整体验收或 R01 后续验收。
