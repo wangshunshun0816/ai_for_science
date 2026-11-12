@@ -84,6 +84,30 @@ class ApprovalSubject(AuthoritativeRecord):
     target: ScientificRef | HistoricalRef | RecordLocator
     terms_digest: Digest
 
+    @model_validator(mode="after")
+    def purpose_target(self) -> Self:
+        target = self.target
+        purpose = self.locator.purpose
+        if isinstance(target, ScientificRef):
+            valid = purpose == "public_admission" or (purpose, target.object_type) in {
+                ("candidate_selection", "CandidateHypothesis"),
+                ("protocol_use", "Protocol"),
+                ("data_use", "DataPolicy"),
+            }
+        elif isinstance(target, HistoricalRef):
+            valid = (purpose, target.object_type) in {
+                ("meaningful_threshold", "ResearchQuestion"),
+                ("family_confirmation", "FamilyDeclaration"),
+            }
+        else:
+            valid = (purpose, target.record_type) in {
+                ("budget_use", "Budget"),
+                ("data_use", "SendPermit"),
+            }
+        if not valid:
+            raise ValueError("APPROVAL_TARGET_TYPE_MISMATCH")
+        return self
+
 
 class ApprovalScope(StrictContract):
     tenant_id: Text

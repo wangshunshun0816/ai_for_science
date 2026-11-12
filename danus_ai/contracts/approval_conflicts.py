@@ -1,11 +1,13 @@
 """Q05-C: preserve evidence and resolve approval identity without revision priority."""
 
+from dataclasses import replace
 from typing import Annotated, Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
 from .base import AuthoritativeRecord, StrictContract
 from .claims import Digest, record_digest
+from .first_objects import SelectionTerms, ThresholdTerms
 from .guards import (
     ApprovalState,
     ContractBlocked,
@@ -78,6 +80,7 @@ def review_approvals(
     authority: DispositionAuthority,
 ) -> ApprovalReview:
     """Review an authoritative history, preserving each conflicting source."""
+    evidence = [ApprovalEvidence.model_validate(item.model_dump()) for item in evidence]
     groups: dict[tuple[str, int], list[ApprovalEvidence]] = {}
     by_digest: dict[str, ApprovalEvidence] = {}
     for item in evidence:
@@ -163,7 +166,7 @@ def require_unambiguous_approval(
     ):
         raise ContractBlocked("APPROVAL_AMBIGUOUS")
     matching = {
-        record_digest("approval-subject:v1", item.subject)
+        record_digest("approval-subject:v1", item.subject): item.subject
         for item in review.evidence
         if item.subject.locator == locator and item.subject.target == target
     }
@@ -172,4 +175,22 @@ def require_unambiguous_approval(
     state = require_approval(ctx, locator, target, purpose, port)
     if state.subject_digest not in matching:
         raise ContractBlocked("APPROVAL_SUBJECT_MISMATCH")
-    return state
+    subject = matching[state.subject_digest]
+    terms: SelectionTerms | ThresholdTerms
+    if purpose == "candidate_selection":
+        if not isinstance(state.terms, SelectionTerms):
+            raise ContractBlocked("SPEC_UNRESOLVED: signed selection terms")
+        terms = SelectionTerms.model_validate(state.terms.model_dump())
+        if terms.candidate_ref != subject.target:
+            raise ContractBlocked("APPROVAL_TERMS_MISMATCH")
+    elif purpose == "meaningful_threshold":
+        if not isinstance(state.terms, ThresholdTerms):
+            raise ContractBlocked("SPEC_UNRESOLVED: signed threshold terms")
+        terms = ThresholdTerms.model_validate(state.terms.model_dump())
+        if terms.question_ref != subject.target:
+            raise ContractBlocked("APPROVAL_TERMS_MISMATCH")
+    else:
+        raise ContractBlocked("SPEC_UNRESOLVED: signed terms contract for " + purpose)
+    if record_digest("approval-terms:v1", terms) != subject.terms_digest:
+        raise ContractBlocked("APPROVAL_TERMS_MISMATCH")
+    return replace(state, terms=terms)

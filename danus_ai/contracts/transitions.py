@@ -5,6 +5,7 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, model_validator
 
 from .base import AuthoritativeRecord, StrictContract
+from .claims import Digest
 from .guards import ContractBlocked
 from .references import RecordLocator, Revision, ScientificRef, Text, UTCTime
 
@@ -152,6 +153,7 @@ class AttemptSnapshot(AuthoritativeRecord):
     external_id: Text | None
     fencing_token: Revision
     billing_pending: bool
+    settlement_ref: RecordLocator | None = None
     reason_ref: RecordLocator | None
 
     @model_validator(mode="after")
@@ -159,6 +161,16 @@ class AttemptSnapshot(AuthoritativeRecord):
         if self.attempt_ref.record_type != "Attempt" or self.run_ref.object_type != "RunRequest":
             raise ValueError("Expected an attempt and locked run")
         return self
+
+
+class HistoricalCompletion(AuthoritativeRecord):
+    """Trusted collector evidence for work completed under the original authorization."""
+
+    evidence_ref: RecordLocator
+    attempt_ref: RecordLocator
+    run_ref: ScientificRef
+    external_id: Text
+    execution_fencing_token: Revision
 
 
 class AttemptFacts(AuthoritativeRecord):
@@ -172,6 +184,7 @@ class AttemptFacts(AuthoritativeRecord):
     artifacts_verified: bool
     required_outputs_complete: bool
     protocol_violation: bool
+    historical_completion: HistoricalCompletion | None = None
     billing_pending: bool
     reason_ref: RecordLocator
 
@@ -192,6 +205,15 @@ def transition_attempt(
     ):
         raise ContractBlocked("ATTEMPT_STALE_WRITE")
     status = attempt.status
+    historical = facts.historical_completion
+    completion_authorized = (facts.authorization_current and facts.lease_current) or (
+        historical is not None
+        and historical.evidence_ref.record_type == "CompletionEvidence"
+        and historical.attempt_ref == attempt.attempt_ref
+        and historical.run_ref == attempt.run_ref
+        and historical.external_id == facts.external_id
+        and historical.execution_fencing_token == attempt.fencing_token
+    )
     if protection_triggered and destination not in {"reconciling", "failed", "cancelled"}:
         raise ContractBlocked("PROTECTIVE_STOP_REQUIRED")
     if status in {"reserved", "running", "collecting"} and destination == "reconciling":
@@ -210,12 +232,14 @@ def transition_attempt(
                 status in {"running", "reconciling"}
                 and destination == "collecting"
                 and facts.external_state == "completed"
+                and completion_authorized
                 and facts.external_id is not None
             )
             or (
                 status in {"collecting", "reconciling"}
                 and destination == "succeeded"
                 and facts.external_state == "completed"
+                and completion_authorized
                 and facts.artifacts_verified
                 and facts.external_id is not None
             )
@@ -240,8 +264,60 @@ def transition_attempt(
             },
             "status": destination,
             "external_id": facts.external_id,
-            "billing_pending": facts.billing_pending or destination == "reconciling",
+            "billing_pending": (
+                attempt.billing_pending or facts.billing_pending or destination == "reconciling"
+            ),
+            "settlement_ref": (
+                None
+                if attempt.billing_pending or facts.billing_pending or destination == "reconciling"
+                else attempt.settlement_ref
+            ),
             "reason_ref": facts.reason_ref,
+        }
+    )
+
+
+class SettlementFacts(AuthoritativeRecord):
+    """Resolved R07 final settlement for this exact attempt revision."""
+
+    settlement_ref: RecordLocator
+    attempt_ref: RecordLocator
+    run_ref: ScientificRef
+    outcome: Literal["settled", "no_charge", "pending"]
+
+
+def apply_settlement(
+    attempt: AttemptSnapshot, facts: SettlementFacts, writer: Literal["R07"]
+) -> AttemptSnapshot:
+    if (
+        writer != "R07"
+        or facts.settlement_ref.record_type != "Settlement"
+        or facts.run_ref != attempt.run_ref
+        or attempt.status not in _TERMINAL
+        or facts.outcome == "pending"
+    ):
+        raise ContractBlocked("SETTLEMENT_UNVERIFIED")
+    if not attempt.billing_pending:
+        applied_to = facts.attempt_ref
+        if (
+            attempt.settlement_ref != facts.settlement_ref
+            or applied_to.record_type != attempt.attempt_ref.record_type
+            or applied_to.record_id != attempt.attempt_ref.record_id
+            or applied_to.revision + 1 != attempt.attempt_ref.revision
+        ):
+            raise ContractBlocked("SETTLEMENT_UNVERIFIED")
+        return attempt.model_copy(deep=True)
+    if facts.attempt_ref != attempt.attempt_ref:
+        raise ContractBlocked("SETTLEMENT_UNVERIFIED")
+    return AttemptSnapshot.model_validate(
+        {
+            **attempt.model_dump(),
+            "attempt_ref": {
+                **attempt.attempt_ref.model_dump(),
+                "revision": attempt.attempt_ref.revision + 1,
+            },
+            "billing_pending": False,
+            "settlement_ref": facts.settlement_ref,
         }
     )
 
@@ -295,6 +371,7 @@ def retry_attempt(
         or proposed.status != "queued"
         or proposed.attempt_ref.revision != 0
         or proposed.external_id is not None
+        or proposed.settlement_ref is not None
         or proposed.billing_pending
         or prior.status != "failed"
         or prior.billing_pending
@@ -313,6 +390,8 @@ def retry_attempt(
 class TerminalCorrection(AuthoritativeRecord):
     correction_ref: RecordLocator
     supersedes_ref: RecordLocator
+    tenant_id: Text
+    project_id: Text
     expected_revision: Revision
     writer: Literal["R08", "R07", "R13", "R21"]
     category: Literal["execution", "billing", "evidence", "release"]
@@ -322,8 +401,19 @@ class TerminalCorrection(AuthoritativeRecord):
     recorded_at: UTCTime
 
 
+class TerminalFact(AuthoritativeRecord):
+    """Resolved record identity and relationship, from the authoritative reader."""
+
+    locator: RecordLocator
+    tenant_id: Text
+    project_id: Text
+    terminal: bool
+    supersedes_ref: RecordLocator | None
+    protected_content_digest: Digest | None
+
+
 def validate_terminal_correction(
-    original: RecordLocator, correction: TerminalCorrection, *, terminal: bool
+    original: TerminalFact, correction: TerminalCorrection, corrected: TerminalFact
 ) -> None:
     writer, record_types = {
         "execution": ("R08", {"Attempt"}),
@@ -331,20 +421,25 @@ def validate_terminal_correction(
         "evidence": ("R13", {"ClaimNode", "EvidenceReport"}),
         "release": ("R21", {"ReleaseManifest", "ReleaseReceipt"}),
     }[correction.category]
-    replacement = correction.corrected_fact_ref
+    old, new = original.locator, corrected.locator
+    scope = (original.tenant_id, original.project_id)
     if (
-        not terminal
-        or correction.supersedes_ref != original
-        or correction.expected_revision != original.revision
+        not original.terminal
+        or not corrected.terminal
+        or correction.supersedes_ref != old
+        or corrected.supersedes_ref != old
+        or (correction.tenant_id, correction.project_id) != scope
+        or (corrected.tenant_id, corrected.project_id) != scope
+        or correction.expected_revision != old.revision
         or correction.writer != writer
-        or original.record_type not in record_types
+        or old.record_type not in record_types
         or correction.correction_ref.record_type != "TerminalCorrection"
-        or replacement.record_type != original.record_type
-        or replacement == original
-        or (
-            replacement.record_id == original.record_id
-            and replacement.revision != original.revision + 1
-        )
+        or correction.corrected_fact_ref != new
+        or (new.record_type, new.record_id) != (old.record_type, old.record_id)
+        or new.revision != old.revision + 1
+        or corrected.protected_content_digest != original.protected_content_digest
+        or old.record_type in {"ClaimNode", "ReleaseManifest"}
+        and original.protected_content_digest is None
     ):
         raise ContractBlocked("TERMINAL_CORRECTION_INVALID")
 

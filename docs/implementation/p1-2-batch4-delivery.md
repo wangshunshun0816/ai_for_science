@@ -21,3 +21,22 @@
 Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`。锁检查、锁定安装、Ruff、mypy、导入边界、源码包和 wheel 构建通过，pytest **181 项通过**。新增测试使用既有规范化逻辑、独立预期和固定 Ed25519 测试密钥，测试适配器调用 Ubuntu 自带 OpenSSL，无新依赖。原九个金样例、手算 README 与三份设计基线逐字节与批准提交一致。见 [本地检查日志](evidence/p1-2-batch4-verify.log) 和 [保留文件比对](evidence/p1-2-batch4-preservation.txt)。
 
 第四批远端 CI [运行 43207738623](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43207738623) 由 `workflow_dispatch` 触发，结果为 **Success**，总用时 20 秒。GitHub 运行页指向 `f0da7c201821599a2ac40a20447e133ffe9bf55b`，与第四批代码提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43207738623/job/131147086969) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 仍有 Node.js 20 弃用警告，runner 使用 Node.js 24 执行，Checkout 步骤成功。
+
+## 第四批验收整改
+
+本轮依据第四批人工验收草稿中的六项发现。整改前基线为 `2990da51f9fe3d0daf5d41467e599edf3d9537f2`，批准及绑定方案沿用本记录开头。
+
+| 发现 | 整改及回归证据 |
+| --- | --- |
+| 证据事件 | `EvidenceEvent.audit_ref` 保存链 ID 与序号，核验解析出的审计条目归属、位置、事件定位和事件摘要。事件只含位置，避免互哈希。证据变更采用必填完整快照，前一事件摘要显式承接。测试拒绝缺审计条目、错归属、错定位、篡改摘要、稀疏快照和错前序。强度更新保留历史标记 |
+| 批准用途与目标 | `ApprovalSubject` 按首组 §5 分流。选题和协议用对应科学版本，阈值和族用历史引用，预算用 Budget 记录修订，数据用 DataPolicy 科学版本或 SendPermit 记录修订，公开准入用资源科学版本。逐分支测试合法和错误类型，具体许可适用性仍由目标规范核验 |
+| 签名主体与条款 | Q05-C 授权入口核对签名主体摘要后，对选题和阈值条款重新严格解析，核对精确目标并复算 `approval-terms:v1` 域摘要。固定 Ed25519 测试中保持同一签名主体和摘要，替换 meaningful_delta 为 99 后拒绝。缺已审定的其他用途条款结构时明确阻塞 |
+| 结算与对账 | R08 执行迁移保留既有待结。继续运行依赖当前授权与租约，历史完成事实需绑定尝试、运行、外部身份和 fencing 的受信完成记录。R07 结算单独核对精确终态尝试和运行，记录结算引用并推进修订，精确重放返回同一状态。测试覆盖无结算依据、错误结算、失效租约、迟到证据及未结不重试 |
+| 终态更正 | 验证原记录与后继记录的类型、ID、租户／项目、精确下一修订、显式 supersedes 关系和领域写入方。论断与发布清单事实更正须保留保护内容摘要，改科学或签名内容走独立新版本流程。测试拒绝无关同型记录、错归属、错修订、错关系与替换签名内容 |
+| 数值与分母 | 四题分数按精确值输出。低 Decimal 精度下独立预期仍为 3/4=0.75、2/4=0.5。报告序列化区分 observed_count 与 denominator，缺题同时报告 3 和 4，状态 incomplete、分数为空，不能通过完整得分报告检查 |
+
+**仍待决定**。建议以独立的显式解标事件处理污染／撤销等标记清除，绑定原事件、拟清除标记、原因、支持证据与有权写入方。具体允许清除的标记、授权人及撤销是否只能走新版本，由 A0 后续审定。当前快照只允许延续或增加标记，清除返回 SPEC_UNRESOLVED。其他批准用途的签名条款结构、真实 R07/R08/R09 证据解析、生产密钥、发布和跨平台验收按既有边界跟踪。
+
+整改在 Ubuntu CPython 3.12.16 下执行 `bash scripts/verify.sh`，**192 项测试通过**。锁检查与锁定安装、Ruff、mypy、导入边界、源码包及 wheel 构建通过。[整改验证日志](evidence/p1-2-batch4-remediation-verify.log) · [原金样例及手算字节核对](evidence/p1-2-batch4-remediation-preservation.txt)。
+
+整改提交的远端手动 CI 待登记。运行 43207738623 覆盖整改前代码。

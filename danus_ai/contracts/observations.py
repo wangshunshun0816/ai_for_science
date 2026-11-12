@@ -1,12 +1,10 @@
 """Q-07: fixed four-item evaluation within one trusted run attempt and arm."""
 
-from decimal import Decimal
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, computed_field, model_validator
 
 from .base import AuthoritativeRecord, StrictContract
-from .canonicalization import decimal_string
 from .claims import Digest
 from .guards import ContractBlocked
 from .references import PositiveInt, RecordLocator, Revision, ScientificRef, Text
@@ -89,9 +87,15 @@ class EvaluationView(StrictContract):
     correct_count: Revision | None
     accuracy: str | None
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def denominator(self) -> int:
         return len(self.expected_unit_keys)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def observed_count(self) -> int:
+        return len(self.observed_unit_keys)
 
 
 def evaluate_fixed_four(
@@ -151,12 +155,14 @@ def evaluate_fixed_four(
         conflict_groups=conflicts,
         status=status,
         correct_count=correct if status == "valid" else None,
-        accuracy=decimal_string(str(Decimal(correct) / len(expected)))
-        if status == "valid"
-        else None,
+        # Four fixed units give exactly five scores, independent of Decimal context.
+        accuracy=("0", "0.25", "0.5", "0.75", "1")[correct] if status == "valid" else None,
     )
 
 
 def require_reported_unit_count(view: EvaluationView, reported: int) -> None:
-    if type(reported) is not int or reported != len(view.observed_unit_keys):
+    """Validate the locked evaluation denominator of a complete score report."""
+    if view.status != "valid" or view.correct_count is None or view.accuracy is None:
+        raise ContractBlocked("OBSERVATION_SCORE_UNAVAILABLE")
+    if type(reported) is not int or reported != view.denominator:
         raise ContractBlocked("OBSERVATION_UNIT_COUNT_MISMATCH")

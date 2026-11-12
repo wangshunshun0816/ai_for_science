@@ -1,5 +1,7 @@
 """Q-04: science identity, evidence records and audit-chain commitments."""
 
+from __future__ import annotations
+
 from hashlib import sha256
 from typing import Annotated, Literal, Self
 
@@ -152,8 +154,21 @@ class ClaimEvidenceRef(StrictContract):
 
 
 class EvidenceChange(StrictContract):
+    """Complete evidence snapshot, never a sparse patch."""
+
     strength: Strength | None
     status_flags: list[StatusFlag]
+
+    @model_validator(mode="after")
+    def unique_flags(self) -> Self:
+        if len(set(self.status_flags)) != len(self.status_flags):
+            raise ValueError("DUPLICATE_STATUS_FLAG")
+        return self
+
+
+class AuditPosition(StrictContract):
+    chain_id: Text
+    sequence: Annotated[int, Field(ge=1)]
 
 
 class EvidenceEvent(AuthoritativeRecord):
@@ -165,6 +180,8 @@ class EvidenceEvent(AuthoritativeRecord):
     report_refs: Annotated[list[RecordLocator], Field(min_length=1)]
     attempt_refs: list[RecordLocator]
     artifact_digests: list[Digest]
+    audit_ref: AuditPosition
+    previous_event_digest: Digest | None
     change: EvidenceChange
     reason: Text
 
@@ -173,21 +190,53 @@ class EvidenceEvent(AuthoritativeRecord):
         return record_digest("evidence-event:v1", self)
 
 
-def current_evidence(claim: ClaimRecord, events: list[EvidenceEvent]) -> EvidenceChange:
-    """Fold an ordered, accepted event history supplied by the trusted reader."""
+def verify_evidence_audit(claim: ClaimRecord, event: EvidenceEvent, entry: AuditEntry) -> None:
+    """Match a resolved audit entry without including its digest in the event."""
+    if (
+        (entry.tenant_id, entry.project_id) != (claim.tenant_id, claim.project_id)
+        or (entry.chain_id, entry.sequence) != (event.audit_ref.chain_id, event.audit_ref.sequence)
+        or entry.object_ref
+        != RecordLocator(
+            record_type="EvidenceEvent",
+            record_id=event.event_id,
+            revision=event.revision,
+        )
+        or entry.event_digest != event.digest
+    ):
+        raise ContractBlocked("EVIDENCE_AUDIT_MISMATCH")
+
+
+def current_evidence(
+    claim: ClaimRecord, events: list[EvidenceEvent], audit_entries: list[AuditEntry]
+) -> EvidenceChange:
+    """Project full snapshots against an ordered, trusted audit view."""
     if not events or events[0].event_kind != "accepted":
         raise ContractBlocked("INITIAL_EVIDENCE_REQUIRED")
+    audit_by_position = {(entry.chain_id, entry.sequence): entry for entry in audit_entries}
+    if len(audit_by_position) != len(audit_entries):
+        raise ContractBlocked("EVIDENCE_AUDIT_AMBIGUOUS")
     seen: set[str] = set()
-    for index, event in enumerate(events):
+    previous: EvidenceEvent | None = None
+    for event in events:
         if (
             event.claim_ref.locator != claim.locator
             or event.claim_ref.content_version != claim.content_version
             or event.event_id in seen
-            or (index > 0 and event.event_kind != "evidence_updated")
+            or (previous is not None and event.event_kind != "evidence_updated")
             or (claim.science.kind == "theorem_ref" and event.change.strength is not None)
+            or event.previous_event_digest != (previous.digest if previous is not None else None)
         ):
             raise ContractBlocked("INVALID_EVIDENCE_HISTORY")
+        if previous is not None and not set(previous.change.status_flags) <= set(
+            event.change.status_flags
+        ):
+            raise ContractBlocked("SPEC_UNRESOLVED: evidence flag removal authority")
+        entry = audit_by_position.get((event.audit_ref.chain_id, event.audit_ref.sequence))
+        if entry is None:
+            raise ContractBlocked("EVIDENCE_AUDIT_UNAVAILABLE")
+        verify_evidence_audit(claim, event, entry)
         seen.add(event.event_id)
+        previous = event
     return events[-1].change.model_copy(deep=True)
 
 

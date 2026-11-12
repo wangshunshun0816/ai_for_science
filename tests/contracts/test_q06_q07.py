@@ -1,6 +1,7 @@
 import json
+from decimal import localcontext
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 from pydantic import ValidationError
@@ -20,12 +21,16 @@ from danus_ai.contracts.transitions import (
     AttemptFacts,
     AttemptSnapshot,
     EngineeringStatus,
+    HistoricalCompletion,
     ResumeFacts,
     RetryFacts,
     RetryPolicyView,
+    SettlementFacts,
     TaskSnapshot,
     TaskTransition,
     TerminalCorrection,
+    TerminalFact,
+    apply_settlement,
     may_continue_paused_work,
     retry_attempt,
     scientific_qualification,
@@ -261,6 +266,26 @@ def test_protective_stop_and_infrastructure_retry() -> None:
         budget_current=True,
         selected_by_result=False,
     )
+    assert failed.billing_pending
+    with pytest.raises(ContractBlocked, match="RETRY_BLOCKED"):
+        retry_attempt(failed, new, policy, facts)
+    settlement = SettlementFacts(
+        settlement_ref=rec("Settlement"),
+        attempt_ref=failed.attempt_ref,
+        run_ref=failed.run_ref,
+        outcome="settled",
+    )
+    for invalid in [
+        settlement.model_copy(update={"outcome": "pending"}),
+        settlement.model_copy(update={"settlement_ref": rec("EvidenceReport")}),
+        settlement.model_copy(update={"attempt_ref": rec("Attempt", key="another")}),
+    ]:
+        with pytest.raises(ContractBlocked, match="SETTLEMENT_UNVERIFIED"):
+            apply_settlement(failed, invalid, "R07")
+    failed = apply_settlement(failed, settlement, "R07")
+    assert not failed.billing_pending and failed.settlement_ref == settlement.settlement_ref
+    assert apply_settlement(failed, settlement, "R07") == failed
+    facts = facts.model_copy(update={"prior_attempt_ref": failed.attempt_ref})
     assert retry_attempt(failed, new, policy, facts) == new
     assert failed.status == "failed"
     bad_retry: list[dict[str, object]] = [
@@ -282,10 +307,25 @@ def test_protective_stop_and_infrastructure_retry() -> None:
 
 
 def test_terminal_correction_and_independent_engineering_states() -> None:
-    original = rec("Attempt", 2)
+    original = TerminalFact(
+        locator=rec("Attempt", 2),
+        tenant_id="tenant",
+        project_id="project",
+        terminal=True,
+        supersedes_ref=None,
+        protected_content_digest=None,
+    )
+    corrected = original.model_copy(
+        update={
+            "locator": rec("Attempt", 3),
+            "supersedes_ref": original.locator,
+        }
+    )
     correction = TerminalCorrection(
         correction_ref=rec("TerminalCorrection"),
-        supersedes_ref=original,
+        supersedes_ref=original.locator,
+        tenant_id=original.tenant_id,
+        project_id=original.project_id,
         expected_revision=2,
         writer="R08",
         category="execution",
@@ -294,17 +334,29 @@ def test_terminal_correction_and_independent_engineering_states() -> None:
         corrected_fact_ref=rec("Attempt", 3),
         recorded_at="2026-11-12T12:00:00Z",
     )
-    validate_terminal_correction(original, correction, terminal=True)
+    validate_terminal_correction(original, correction, corrected)
     invalid_corrections: list[dict[str, object]] = [
         {"writer": "R07"},
         {"expected_revision": 1},
-        {"corrected_fact_ref": original},
+        {"corrected_fact_ref": original.locator},
+        {"tenant_id": "other"},
     ]
     for update in invalid_corrections:
         with pytest.raises(ContractBlocked, match="CORRECTION"):
+            validate_terminal_correction(original, correction.model_copy(update=update), corrected)
+    invalid_facts: list[dict[str, object]] = [
+        {"locator": rec("Attempt", 3, "unrelated")},
+        {"project_id": "other"},
+        {"supersedes_ref": rec("Attempt", 1)},
+        {"locator": rec("Attempt", 4)},
+    ]
+    for update in invalid_facts:
+        wrong = corrected.model_copy(update=update)
+        with pytest.raises(ContractBlocked, match="CORRECTION"):
             validate_terminal_correction(
-                original, correction.model_copy(update=update), terminal=True
+                original, correction.model_copy(update={"corrected_fact_ref": wrong.locator}), wrong
             )
+    assert original.locator.revision == 2
     base = EngineeringStatus(
         work_item_ref=rec("WorkItem"),
         scope_ref=rec("EngineeringScope"),
@@ -414,3 +466,107 @@ def test_fixed_four_golden_counts_exact_duplicates_conflicts_and_missing() -> No
 def test_observation_fields_strict(extra: dict[str, object]) -> None:
     with pytest.raises(ValidationError):
         ObservationRow.model_validate({"item_id": "q1", "prediction": 1} | extra)
+
+
+def test_reconcile_historical_completion_cannot_resume_or_clear_billing() -> None:
+    state = attempt().model_copy(update={"status": "reconciling"})
+    completed = observed(
+        state,
+        "completed",
+        lease_current=False,
+        authorization_current=False,
+        billing_pending=False,
+        artifacts_verified=True,
+    )
+    destinations: tuple[Literal["collecting"], Literal["succeeded"]] = ("collecting", "succeeded")
+    for dest in destinations:
+        with pytest.raises(ContractBlocked, match="TRANSITION_INVALID"):
+            transition_attempt(state, dest, completed, "R08Collector", protection_triggered=False)
+    historical = HistoricalCompletion(
+        evidence_ref=rec("CompletionEvidence"),
+        attempt_ref=state.attempt_ref,
+        run_ref=state.run_ref,
+        external_id="node-job",
+        execution_fencing_token=state.fencing_token,
+    )
+    trusted = completed.model_copy(update={"historical_completion": historical})
+    done = transition_attempt(
+        state, "succeeded", trusted, "R08Collector", protection_triggered=False
+    )
+    assert done.status == "succeeded" and done.billing_pending
+    with pytest.raises(ContractBlocked, match="TRANSITION_INVALID"):
+        transition_attempt(
+            state,
+            "running",
+            trusted.model_copy(update={"external_state": "running"}),
+            "R08Collector",
+            protection_triggered=False,
+        )
+    with pytest.raises(ContractBlocked, match="TRANSITION_INVALID"):
+        transition_attempt(
+            state,
+            "succeeded",
+            trusted.model_copy(
+                update={
+                    "historical_completion": historical.model_copy(
+                        update={"run_ref": sci("RunRequest", "2")}
+                    )
+                }
+            ),
+            "R08Collector",
+            protection_triggered=False,
+        )
+
+
+def test_release_correction_cannot_replace_signed_content() -> None:
+    original = TerminalFact(
+        locator=rec("ReleaseManifest", 2),
+        tenant_id="tenant",
+        project_id="project",
+        terminal=True,
+        supersedes_ref=None,
+        protected_content_digest="1" * 64,
+    )
+    next_ref = rec("ReleaseManifest", 3)
+    correction = TerminalCorrection(
+        correction_ref=rec("TerminalCorrection"),
+        supersedes_ref=original.locator,
+        tenant_id="tenant",
+        project_id="project",
+        expected_revision=2,
+        writer="R21",
+        category="release",
+        reason="correct metadata",
+        evidence_refs=[rec("EvidenceReport")],
+        corrected_fact_ref=next_ref,
+        recorded_at="2026-11-12T12:00:00Z",
+    )
+    next_fact = original.model_copy(
+        update={"locator": next_ref, "supersedes_ref": original.locator}
+    )
+    validate_terminal_correction(original, correction, next_fact)
+    with pytest.raises(ContractBlocked, match="CORRECTION"):
+        validate_terminal_correction(
+            original,
+            correction,
+            next_fact.model_copy(update={"protected_content_digest": "2" * 64}),
+        )
+
+
+def test_four_item_scores_are_exact_and_partial_reports_cannot_claim_score() -> None:
+    rows = golden_input("positive")["evaluator_only_rows"]
+    with localcontext() as context:
+        context.prec = 1
+        assert evaluate("method", rows).accuracy == "0.75"
+        assert evaluate("baseline", rows).accuracy == "0.5"
+    view = evaluate("method", rows[:3])
+    report = view.model_dump()
+    assert (report["observed_count"], report["denominator"], report["status"]) == (
+        3,
+        4,
+        "incomplete",
+    )
+    assert report["accuracy"] is None and report["correct_count"] is None
+    for reported in (3, 4):
+        with pytest.raises(ContractBlocked, match="SCORE_UNAVAILABLE"):
+            require_reported_unit_count(view, reported)

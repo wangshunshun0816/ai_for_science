@@ -25,6 +25,7 @@ from danus_ai.contracts.claims import (
     record_digest,
     verify_audit_chain,
 )
+from danus_ai.contracts.first_objects import SelectionTerms
 from danus_ai.contracts.guards import (
     ApprovalState,
     BudgetState,
@@ -132,7 +133,9 @@ def test_claim_version_binds_science_and_not_evidence() -> None:
             "report_refs": [loc("EvidenceReport")],
             "attempt_refs": [loc("Attempt")],
             "artifact_digests": [HASH],
-            "change": {"strength": "supported", "status_flags": []},
+            "audit_ref": {"chain_id": "chain", "sequence": 1},
+            "previous_event_digest": None,
+            "change": {"strength": "supported", "status_flags": ["needs_reaudit"]},
             "reason": "accepted",
         }
     )
@@ -141,15 +144,76 @@ def test_claim_version_binds_science_and_not_evidence() -> None:
         | {
             "event_id": "e2",
             "event_kind": "evidence_updated",
+            "audit_ref": {"chain_id": "chain", "sequence": 2},
+            "previous_event_digest": first.digest,
             "change": {"strength": "replicated", "status_flags": ["needs_reaudit"]},
         }
     )
-    assert current_evidence(claim, [first]).strength == "supported"
-    assert current_evidence(claim, [first, later]) == later.change
+
+    def audit(event: EvidenceEvent) -> AuditEntry:
+        return AuditEntry.model_validate(
+            {
+                "schema_version": 1,
+                "chain_id": event.audit_ref.chain_id,
+                "sequence": event.audit_ref.sequence,
+                "previous_chain_digest": None,
+                "event_digest": event.digest,
+                "object_digest": {
+                    "object_type": "EvidenceEvent",
+                    "schema_version": 1,
+                    "digest": event.digest,
+                },
+                "timestamp": ISSUED,
+                "tenant_id": claim.tenant_id,
+                "project_id": claim.project_id,
+                "on_behalf_of_account": "account",
+                "actor": "collector",
+                "task_ref": None,
+                "plan_revision": None,
+                "operation": "append",
+                "object_ref": {
+                    "record_type": "EvidenceEvent",
+                    "record_id": event.event_id,
+                    "revision": event.revision,
+                },
+                "result": "ok",
+                "cost_ref": None,
+            }
+        )
+
+    entries = [audit(first), audit(later)]
+    assert current_evidence(claim, [first], entries[:1]).strength == "supported"
+    assert current_evidence(claim, [first, later], entries) == later.change
     assert first.digest != later.digest
     claim.verify(CTX, Port())
     with pytest.raises(ContractBlocked, match="INVALID_EVIDENCE_HISTORY"):
-        current_evidence(claim, [first, later, later])
+        current_evidence(claim, [first, later, later], entries)
+    with pytest.raises(ContractBlocked, match="EVIDENCE_AUDIT_UNAVAILABLE"):
+        current_evidence(claim, [first, later], entries[:1])
+    for field, value in [
+        ("event_digest", HASH),
+        ("project_id", "other"),
+        ("object_ref", loc("EvidenceEvent", 9)),
+    ]:
+        with pytest.raises(ContractBlocked, match="EVIDENCE_AUDIT_MISMATCH"):
+            current_evidence(
+                claim, [first, later], [entries[0], entries[1].model_copy(update={field: value})]
+            )
+    for omitted in ("status_flags", "strength"):
+        sparse = {k: v for k, v in later.change.model_dump().items() if k != omitted}
+        with pytest.raises(ValidationError):
+            EvidenceEvent.model_validate(later.model_dump() | {"change": sparse})
+    cleared = EvidenceEvent.model_validate(
+        later.model_dump()
+        | {
+            "change": {"strength": "replicated", "status_flags": []},
+        }
+    )
+    with pytest.raises(ContractBlocked, match="flag removal"):
+        current_evidence(claim, [first, cleared], [entries[0], audit(cleared)])
+    stale = later.model_copy(update={"previous_event_digest": HASH})
+    with pytest.raises(ContractBlocked, match="INVALID_EVIDENCE_HISTORY"):
+        current_evidence(claim, [first, stale], [entries[0], audit(stale)])
     for changed in [
         data | {"statement": "changed finding"},
         data | {"origin_binding": data["origin_binding"] | {"run_refs": [sci("RunRequest", "2")]}},
@@ -330,6 +394,12 @@ def manifest() -> ReleaseManifestBody:
     )
 
 
+def selection_terms() -> SelectionTerms:
+    return SelectionTerms(
+        candidate_ref=sci("CandidateHypothesis"), scope_ref=sci("Scope"), meaningful_delta="0.1"
+    )
+
+
 def approval_subject(revision: int = 1) -> ApprovalSubject:
     return ApprovalSubject(
         locator=ApprovalLocator(
@@ -338,7 +408,7 @@ def approval_subject(revision: int = 1) -> ApprovalSubject:
         tenant_id="tenant",
         project_id="project",
         target=sci("CandidateHypothesis"),
-        terms_digest=HASH,
+        terms_digest=record_digest("approval-terms:v1", selection_terms()),
     )
 
 
@@ -477,6 +547,41 @@ def test_valid_approval_signature_cannot_authorize_another_domain(tmp_path: Path
             envelope, subject.model_copy(update={"terms_digest": "2" * 64}), scope, key, NOW, crypto
         )
 
+    # A signed, exact subject digest cannot authenticate a substituted terms DTO.
+    evidence = ApprovalEvidence(
+        subject=subject, envelope_digest=envelope.digest, source_ref=loc("ApprovalSource")
+    )
+    state = ApprovalState(
+        subject.locator,
+        sci("CandidateHypothesis"),
+        "tenant",
+        "project",
+        True,
+        False,
+        terms=selection_terms(),
+        subject_digest=signing.subject_digest,
+    )
+    port = Port(state)
+
+    def authorize() -> ApprovalState:
+        return require_unambiguous_approval(
+            CTX,
+            [evidence],
+            [],
+            lambda *_: False,
+            subject.locator,
+            sci("CandidateHypothesis"),
+            "candidate_selection",
+            port,
+        )
+
+    assert authorize().terms == selection_terms()
+    port.state = replace(
+        state, terms=selection_terms().model_copy(update={"meaningful_delta": "99"})
+    )
+    with pytest.raises(ContractBlocked, match="APPROVAL_TERMS_MISMATCH"):
+        authorize()
+
 
 def test_approval_conflict_requires_explicit_authorized_disposition() -> None:
     first = ApprovalEvidence(
@@ -500,6 +605,7 @@ def test_approval_conflict_requires_explicit_authorized_disposition() -> None:
             "project",
             True,
             False,
+            terms=selection_terms(),
             subject_digest=record_digest("approval-subject:v1", newer.subject),
         )
     )
@@ -603,6 +709,7 @@ def test_distinct_approval_revisions_do_not_select_newest() -> None:
             "project",
             True,
             False,
+            terms=selection_terms(),
             subject_digest=record_digest("approval-subject:v1", old.subject),
         )
     )
@@ -619,3 +726,40 @@ def test_distinct_approval_revisions_do_not_select_newest() -> None:
         ).locator
         == old.subject.locator
     )
+
+
+@pytest.mark.parametrize(
+    ("purpose", "good", "bad"),
+    [
+        ("candidate_selection", sci("CandidateHypothesis"), sci("Protocol")),
+        ("protocol_use", sci("Protocol"), sci("CandidateHypothesis")),
+        (
+            "meaningful_threshold",
+            {
+                "object_type": "ResearchQuestion",
+                "entity_id": "q",
+                "content_version": "test:v1:" + HASH,
+            },
+            sci("ResearchQuestion"),
+        ),
+        (
+            "family_confirmation",
+            {
+                "object_type": "FamilyDeclaration",
+                "entity_id": "family",
+                "content_version": "test:v1:" + HASH,
+            },
+            sci("FamilyDeclaration"),
+        ),
+        ("budget_use", loc("Budget", 1), sci("Budget")),
+        ("data_use", sci("DataPolicy"), loc("Budget")),
+        ("data_use", loc("SendPermit", 1), sci("Scope")),
+        ("public_admission", sci("Protocol"), loc("Protocol")),
+    ],
+)
+def test_approval_purpose_target_matrix(purpose: str, good: object, bad: object) -> None:
+    data = approval_subject().model_dump()
+    data["locator"]["purpose"] = purpose
+    ApprovalSubject.model_validate(data | {"target": good})
+    with pytest.raises(ValidationError, match="APPROVAL_TARGET_TYPE_MISMATCH"):
+        ApprovalSubject.model_validate(data | {"target": bad})
