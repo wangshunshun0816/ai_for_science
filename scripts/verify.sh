@@ -3,7 +3,7 @@ set -euo pipefail
 cd -- "$(dirname -- "$0")/.."
 uv lock --check
 uv sync --locked --no-install-project
-uv sync --locked --no-build-isolation --no-editable
+uv sync --locked --no-build-isolation --no-editable --reinstall-package danus-ai
 uv run --no-sync python --version
 uv run --no-sync ruff check danus_ai scripts/check_import_boundaries.py tests
 uv run --no-sync ruff format --check danus_ai scripts/check_import_boundaries.py tests
