@@ -27,4 +27,4 @@
 
 历史标记清除权限、跨 Scope 科研映射、其他用途条款、采样及描述型分支仍按原决定处理。真实服务接入、完整 I-SCHEMA、其余金样例及 Linux 正式运行仍待对应阶段。第六批人工验收待 A0。
 
-远端使用既有免费手动工作流，具体运行链接、实际 SHA 与结果待核实后登记。
+GitHub Actions [运行 43318093230](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230) 已完成，结果为 **Success**，运行记录从开始到完成更新用时 23 秒。该运行在 `main` 手动触发，实际 SHA 为 `df85e6c00928ffdfdfc5463eb322c564c281009e`，与第六批交付提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230/job/131531276420) 的锁定工具安装、Python 安装、`Locked local checks and build` 均成功。Checkout 步骤成功，运行注解记录了 `actions/checkout` 的 Node.js 20 弃用警告，runner 使用 Node.js 24 执行。
