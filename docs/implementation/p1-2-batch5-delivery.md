@@ -25,4 +25,4 @@ Windows 原生验证环境位于 `%TEMP%\danus-r02-batch5`，使用现有 uv 0.1
 
 [Ubuntu 验证日志](evidence/p1-2-batch5-verify.log) · [Windows/Linux 向量实测](evidence/p1-2-batch5-cross-platform.json) · [保留文件字节核对](evidence/p1-2-batch5-preservation.txt)
 
-第五批远端 CI 待登记，沿用现有免费手动工作流。
+第五批远端 CI [运行 43261216047](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43261216047) 由 `workflow_dispatch` 触发，已完成，结果为 **Success**，总用时 25 秒。GitHub 运行页指向 `4cbc58651fc88489d510201263b2538611ee0e76`，与第五批交付提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43261216047/job/131332722045) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 仍有 Node.js 20 弃用警告，runner 使用 Node.js 24 执行，Checkout 成功。
