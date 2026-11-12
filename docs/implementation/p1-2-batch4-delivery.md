@@ -39,4 +39,6 @@ Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`。锁检查、锁定安�
 
 整改在 Ubuntu CPython 3.12.16 下执行 `bash scripts/verify.sh`，**192 项测试通过**。锁检查与锁定安装、Ruff、mypy、导入边界、源码包及 wheel 构建通过。[整改验证日志](evidence/p1-2-batch4-remediation-verify.log) · [原金样例及手算字节核对](evidence/p1-2-batch4-remediation-preservation.txt)。
 
-整改提交的远端手动 CI 待登记。运行 43207738623 覆盖整改前代码。
+整改 CI [运行 43211691224](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43211691224) 已完成，结果为 **Success**，总用时 18 秒。实际运行 SHA 为 `00cbfe7c2d3ca2404744a6914a2611eaa38b80ff`，与整改提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43211691224/job/131160644397) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 有 Node.js 20 弃用警告，由 runner 使用 Node.js 24 执行，Checkout 成功。
+
+历史标记清除权限仍待 A0 决定，当前清除请求返回 `SPEC_UNRESOLVED`。其他批准用途缺少已审定条款结构时继续阻断。
