@@ -59,3 +59,13 @@ https://github.com/wangshunshun0816/ai_for_science/actions/runs/43036783370 。
 完成同步后人工触发步骤：进入仓库 Actions → P1-1 foundation checks → Run workflow → main；核对实际 head SHA 为本批代码提交或包含它的后续提交；提供 run URL 后跟踪全部 jobs 到 completed，记录实际 SHA/结论/警告。本次本地成功不能代替远端证据。提交/推送实际结果在本轮最终报告中给出；提交日志按前一 HEAD 登记，当前提交下次补登。
 
 未改三份设计基线与九个金样例，未创建数据库或运行上游代码；P0/R01 后续验收、P1-2 整体验收均不升级为通过。
+
+## 6. 第二批验证收尾核对（2026-11-12）
+
+- 同步已核实：本轮开始 git rev-parse HEAD 与 git ls-remote origin refs/heads/main 均为 f538edddc065b98445026e5f23088a3a52162e47，git status 为 main...origin/main 且无文件变动。第二批此前推送受阻是历史状态，现已同步。
+- CI 查询：匿名 REST actions/runs 返回 HTTP 403 rate limit exceeded，改读公开 Actions 页面及 branch:main 过滤页，两次均显示 totalCount=1，仅运行 #1（43036783370）。
+- 直接核对 [运行 #1](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43036783370)：Status Success，24s，foundation 15s；页面 commit 链接明确为 **30e97ad85c5333d92ee8cac8aa7ec2f27e0e17f3**，不是 f538edd。警告为固定 actions/checkout 仍声明 Node.js 20、被平台强制使用 Node.js 24。
+- 用户随后提供的本次运行链接正是上述 #1（43036783370）。已直接核实它已结束且成功，但实际 SHA 与目标 f538edddc065b98445026e5f23088a3a52162e47 不匹配。**所提供运行的核对已完成；第二批 CI 仍待新运行验证**。这不是第二批代码失败，也不能把旧运行成功写成两批通过；未改代码或重跑本地工程测试。
+- 下一步：在 Actions → P1-1 foundation checks → Run workflow 选择 main 创建新运行，不在旧 #1 页面点 Re-run jobs。重跑旧 run 仍绑定旧提交。新运行需核对完整 head SHA、event、run attempt、workflow/job 状态和结论；本轮文档提交包含 f538edd 的全部代码，可作为当前 main 的代码覆盖证据，但须记录实际新 SHA，不冒充精确 f538edd 运行。失败时再按日志修复本批范围、重验并记录新的代码/运行版本。
+- [A0 决策清单](decisions/A0-R02-first-contracts-checklist.md) 整理 Q03-1～3、Q01-1～5、Q02-1～3 的决定内容、推荐/备选、字段、后果和设计出处，并显式登记未闭合结构。所有选择、确认人、日期、意见与结论保持待审/空白；不改变首组提案或设计基线。
+- Windows Python 3.12 缺失及 Windows/Linux 纯契约字节一致性仍待办；本轮没有安装解释器或依赖。既有 122 项本地测试是第二批代码交付证据，本轮文档核对没有把它记成新测试运行。
