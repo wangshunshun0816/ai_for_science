@@ -93,4 +93,4 @@ GitHub 注释记录了 Node.js 20 弃用警告。固定版本的 `actions/checko
 
 本轮在 Ubuntu CPython 3.12.16 下运行 `bash scripts/verify.sh`，165 项测试通过，锁检查与锁定安装、Ruff、mypy、导入边界、源码包和 wheel 构建通过。[整改本地验证日志](evidence/p1-2-batch3-remediation-verify.log)
 
-整改提交的远端手动 CI 待登记。§5 的运行 43184083094 覆盖整改前的代码。
+整改 CI [运行 43187790171](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43187790171) 已完成，结果为 **Success**，用时 26 秒。GitHub 运行页指向实际提交 `56847f4ac38e16c80da608cad194b1aea5d6013a`，与整改代码提交完全一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43187790171/job/131079233482) 的 `Locked local checks and build` 步骤成功。`actions/checkout` 仍有 Node.js 20 弃用警告，runner 使用 Node.js 24 执行，Checkout 步骤成功。
