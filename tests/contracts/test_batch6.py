@@ -27,6 +27,7 @@ from danus_ai.contracts.fixed_four import (
     FixedFour,
     ResolvedTarget,
     SanitySnapshot,
+    TrustedFixedTargetPort,
 )
 from danus_ai.contracts.guards import (
     ApprovalState,
@@ -60,7 +61,9 @@ NA = {"state": "not_applicable", "reason": "Appendix C fixed set"}
 
 
 def reference_bytes(data: object) -> bytes:
-    return json.dumps(data, ensure_ascii=True, separators=(",", ":"), sort_keys=True).encode()
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode(
+        "utf-8"
+    )
 
 
 def version(kind: str, projection: object) -> str:
@@ -73,6 +76,23 @@ def scientific(ref: ScientificRef) -> dict[str, str]:
 
 def known(value: object) -> dict[str, object]:
     return {"state": "known", "value": value}
+
+
+DOMAINS = {
+    "ApplicabilityBasis": "applicability_basis",
+    "UnitSpec": "unit_spec",
+    "MissingPolicy": "missing_policy",
+    "MethodSpec": "method_spec",
+    "CheckSuite": "check_suite",
+    "ResearchQuestion": "research_question",
+    "FamilyDeclaration": "family_declaration",
+    "SelectionHistory": "selection_history",
+    "FailurePolicy": "failure_policy",
+    "RetryPolicy": "retry_policy",
+    "FeedbackPolicy": "feedback_policy",
+    "SelectionRule": "selection_rule",
+    "ValidationProfile": "validation_profile",
+}
 
 
 class SyntheticReader:
@@ -95,13 +115,17 @@ class SyntheticReader:
         self, kind: str, name: str, body: dict[str, Any], *, digest: str | None = None
     ) -> ScientificRef:
         ref = ScientificRef(
-            object_type=kind, object_id=name, content_version=digest or version("test", body)
+            object_type=kind,
+            object_id=name,
+            content_version=digest or version(DOMAINS.get(kind, kind.lower()), body),
         )
         self._put(ref, body)
         return ref
 
     def historical(self, kind: str, name: str, body: dict[str, Any]) -> HistoricalRef:
-        ref = HistoricalRef(object_type=kind, entity_id=name, content_version=version("test", body))
+        ref = HistoricalRef(
+            object_type=kind, entity_id=name, content_version=version(DOMAINS[kind], body)
+        )
         self._put(ref, body)
         return ref
 
@@ -159,11 +183,19 @@ class Chain:
         data = reader.add(
             "Dataset",
             "four-data",
-            {"population_ref": pop.model_dump(), "manifest_sha256": "3" * 64},
+            {"population_ref": pop.model_dump(), "manifest_sha256": "3" * 64, "item_ids": ITEMS},
         )
         metric = reader.add("Metric", "accuracy", {"implementation": "exact item accuracy"})
-        candidate_method = reader.add("MethodSpec", "candidate-method", {"method": "candidate"})
-        baseline_method = reader.add("MethodSpec", "baseline-method", {"method": "reference"})
+        candidate_method = reader.add(
+            "MethodSpec",
+            "candidate-method",
+            {"deterministic": True, "evidence_ref": metric.model_dump()},
+        )
+        baseline_method = reader.add(
+            "MethodSpec",
+            "baseline-method",
+            {"deterministic": True, "evidence_ref": pop.model_dump()},
+        )
         baseline = reader.add(
             "Baseline", "baseline", {"method_spec_ref": baseline_method.model_dump()}
         )
@@ -365,12 +397,24 @@ class Chain:
         candidate_method: ScientificRef,
     ) -> None:
         others = {
-            field: self.reader.add(kind, field, {"description": field})
-            for field, kind in (
-                ("analysis_ref", "Analysis"),
-                ("failure_policy_ref", "FailurePolicy"),
-                ("retry_policy_ref", "RetryPolicy"),
-                ("selection_feedback_policy_ref", "FeedbackPolicy"),
+            field: self.reader.add(kind, field, body)
+            for field, kind, body in (
+                ("analysis_ref", "Analysis", {"analysis": "exact ratio difference"}),
+                (
+                    "failure_policy_ref",
+                    "FailurePolicy",
+                    {"attempt_selection": "first_valid_complete"},
+                ),
+                (
+                    "retry_policy_ref",
+                    "RetryPolicy",
+                    {"infrastructure_only": True, "max_automatic_retries": 2},
+                ),
+                (
+                    "selection_feedback_policy_ref",
+                    "FeedbackPolicy",
+                    {"evaluation": "one_locked_evaluation"},
+                ),
             )
         } | {"missing_policy_ref": missing}
         arms = [
@@ -669,15 +713,20 @@ def test_independent_chain() -> None:
 
 def test_production_requires_bound_applicability_evidence() -> None:
     c = Chain()
-    api = FixedFour(CTX, c.reader)
-    with pytest.raises(ContractBlocked, match="TARGET_SPEC_MISSING: applicability"):
-        api.protocol(c.protocol, c.unit)
-    assert (
-        api.protocol(c.protocol, c.unit, basis_ref=c.basis).version
-        == c.protocol_ref.content_version
-    )
+    with pytest.raises(ContractBlocked, match="TRUSTED_TARGET_PORT_REQUIRED"):
+        FixedFour(CTX, c.reader)
+
+    class UnverifiedReader(SyntheticReader, TrustedFixedTargetPort):
+        def verify_source(self, context: RequestContext, target: ResolvedTarget) -> bool:
+            return False
+
+    reader = UnverifiedReader()
+    reader.states = c.reader.states
+    reader.targets = c.reader.targets
+    with pytest.raises(ContractBlocked, match="TARGET_SOURCE_UNVERIFIED"):
+        FixedFour(CTX, reader).protocol(c.protocol, c.unit, basis_ref=c.basis)
     with pytest.raises(ContractBlocked, match="TARGET_CONTENT_MISMATCH"):
-        api.protocol(
+        c.api.protocol(
             c.protocol.model_copy(update={"split_not_applicable_reason": "changed"}),
             c.unit,
             basis_ref=c.basis,
@@ -855,5 +904,300 @@ def test_binding_rejects_dependency_mismatch_and_method_changes_rehash() -> None
         c.api.binding(change)
 
 
+def test_remediation_target_domain_and_fixture_boundary() -> None:
+    from danus_ai.contracts.protocol_targets import FixedUnitSpec
+
+    c = Chain()
+    wrong = c.reader.add("Unrelated", "wrong-unit", c.reader.targets[c.unit.object_id].content)
+    with pytest.raises(ContractBlocked, match="TARGET_TYPE_MISMATCH"):
+        c.api.target(wrong, FixedUnitSpec)
+    alt = c.binding_ref.model_copy(
+        update={
+            "content_version": c.binding_ref.content_version.replace(
+                "execution_binding:v1:", "other:v9:"
+            )
+        }
+    )
+    c.reader._put(alt, c.binding.model_dump())
+    with pytest.raises(ContractBlocked, match="TARGET_VERSION_MISMATCH"):
+        c.api.confirmation(c.run, alt)
+    with pytest.raises(ContractBlocked, match="TRUSTED_TARGET_PORT_REQUIRED"):
+        FixedFour(CTX, c.reader).protocol(c.protocol, c.unit, basis_ref=c.basis)
+
+
+def test_remediation_authoritative_protocol_and_tenant_grant() -> None:
+    from danus_ai.contracts.first_objects import ProtocolRecord
+
+    c = Chain()
+    key = c.protocol_ref.object_id
+    record = ProtocolRecord.model_validate(c.reader.targets[key].content)
+    invalid = record.model_copy(update={"status": "approved", "approval_ref": None})
+    with pytest.raises(ValueError, match="Approval reference required"):
+        c.api.protocol(invalid, c.unit)
+    c.reader.targets[key] = replace(
+        c.reader.targets[key],
+        project_id=None,
+        content=record.model_dump() | {"project_id": None, "ownership_scope": "tenant"},
+    )
+    c.reader.states[key] = replace(
+        c.reader.states[key], project_id=None, allowed_projects=frozenset({CTX.project_id})
+    )
+    assert c.api.binding(c.binding, protocol_basis=c.basis).version == c.binding_ref.content_version
+    c.reader.states[key] = replace(c.reader.states[key], allowed_projects=frozenset())
+    with pytest.raises(ContractBlocked, match="TARGET_OWNERSHIP_MISMATCH"):
+        c.api.binding(c.binding, protocol_basis=c.basis)
+
+
+def test_remediation_secondary_candidate_body() -> None:
+    c = Chain()
+    candidate = c.reader.add(
+        "CandidateHypothesis",
+        "second",
+        c.reader.targets[c.candidate.object_id].content
+        | {
+            "tenant_id": "foreign",
+            "project_id": "foreign",
+            "object_id": "second",
+        },
+        digest=c.candidate.content_version,
+    )
+    history = c.reader.historical(
+        "SelectionHistory",
+        "new-history",
+        c.reader.targets[c.history.entity_id].content
+        | {
+            "considered_candidates": [c.candidate.model_dump(), candidate.model_dump()],
+        },
+    )
+    with pytest.raises(ContractBlocked, match="TARGET_OWNERSHIP_MISMATCH"):
+        c.api.prereg(
+            c.prereg.model_copy(update={"selection_history_ref": history}), c.selection, c.threshold
+        )
+
+
+def test_remediation_units_policies_and_determinism() -> None:
+    c = Chain()
+    bad = c.reader.add(
+        "UnitSpec",
+        "bad-unit",
+        c.reader.targets[c.unit.object_id].content | {"unit_key_fields": ["unrelated_id"]},
+    )
+    ref = c.protocol.missing_policy_ref
+    missing = c.reader.add(
+        "MissingPolicy",
+        "bad-missing",
+        c.reader.targets[ref.object_id].content | {"evaluation_unit_ref": bad.model_dump()},
+    )
+    with pytest.raises(ContractBlocked, match="FIXED_UNIT_KEY_MISMATCH"):
+        c.api.protocol(c.protocol.model_copy(update={"missing_policy_ref": missing}), bad)
+    policy = c.reader.add("FailurePolicy", "bad-policy", {"opaque": "choose best attempt"})
+    with pytest.raises(ContractBlocked, match="FailurePolicy"):
+        c.api.prereg(
+            c.prereg.model_copy(update={"failure_policy_ref": policy}), c.selection, c.threshold
+        )
+    method = c.prereg.arms[1].method_spec_ref
+    c.reader.targets[method.object_id] = replace(
+        c.reader.targets[method.object_id], content={"method": "candidate"}
+    )
+    with pytest.raises(ContractBlocked, match="MethodSpec"):
+        c.api.confirmation(c.run, c.binding_ref)
+
+
+def test_remediation_sanity_profile_and_binding() -> None:
+    c = Chain()
+    profile = c.reader.add(
+        "ValidationProfile",
+        "unrelated-profile",
+        {
+            "name": "confirmation_full",
+            "suite_ref": c.suite.model_dump(),
+            "required_checks": ["unrelated"],
+        },
+    )
+    binding = c.binding.model_copy(update={"validation_profile_ref": profile})
+    with pytest.raises(ContractBlocked, match="SANITY_PROFILE_MISMATCH"):
+        c.api.binding(binding)
+    c.reader.report = c.report.model_copy(
+        update={
+            "profile_ref": profile,
+            "checks": {"unrelated": "pass", "no-leak": "defect"},
+        }
+    )
+    with pytest.raises(ContractBlocked, match="EXECUTION_BINDING_MISMATCH"):
+        c.api.check_sanity(c.run_record, binding)
+
+
+def test_remediation_arm_alias_and_nfc() -> None:
+    c = Chain()
+    arm = c.prereg.arms[1]
+    original = arm.method_spec_ref
+    alias = c.reader.add(
+        "MethodSpec",
+        "same-method",
+        c.reader.targets[original.object_id].content,
+        digest=original.content_version,
+    )
+    duplicate = arm.model_copy(update={"method_spec_ref": alias})
+    draft = c.prereg.model_copy(update={"arms": [*c.prereg.arms, duplicate]})
+    assert c.api.prereg(draft, c.selection, c.threshold).version == c.prereg_ref.content_version
+    del c.reader.states[alias.object_id]
+    with pytest.raises(ContractBlocked, match="TARGET_UNAVAILABLE"):
+        c.api.prereg(draft, c.selection, c.threshold)
+    conflicting = arm.model_copy(update={"method_spec_ref": c.prereg.arms[0].method_spec_ref})
+    with pytest.raises(ValueError, match="CONTRACT_CONFLICT"):
+        c.api.prereg(
+            c.prereg.model_copy(update={"arms": [*c.prereg.arms, conflicting]}),
+            c.selection,
+            c.threshold,
+        )
+    arms = [c.prereg.arms[0], arm.model_copy(update={"arm_id": "café"})]
+    prereg = c.api.prereg(c.prereg.model_copy(update={"arms": arms}), c.selection, c.threshold)
+    ref = c.reader.add(
+        "Prereg",
+        "prereg",
+        c.prereg_record.model_copy(update={"arms": arms}).model_dump()
+        | {"content_version": prereg.version},
+        digest=prereg.version,
+    )
+    a = c.run.model_copy(update={"prereg_ref": ref, "arm_id": "café"})
+    b = a.model_copy(update={"arm_id": "cafe\u0301"})
+    assert c.api.confirmation(a, c.binding_ref) == c.api.confirmation(b, c.binding_ref)
+
+
+def test_remediation_dataset_policy_and_sanity_negatives() -> None:
+    c = Chain()
+    raw = c.reader.targets[c.protocol.dataset_ref.object_id].content
+    bad = c.reader.add("Dataset", "wrong-items", raw | {"item_ids": ["q1", "q2", "q3", "q99"]})
+    with pytest.raises(ContractBlocked, match="FIXED_POPULATION_MISMATCH"):
+        c.api.protocol(c.protocol.model_copy(update={"dataset_ref": bad}), c.unit)
+    retry = c.reader.add(
+        "RetryPolicy",
+        "too-many",
+        {
+            "infrastructure_only": True,
+            "max_automatic_retries": 3,
+        },
+    )
+    with pytest.raises(ContractBlocked, match="RetryPolicy"):
+        c.api.prereg(
+            c.prereg.model_copy(update={"retry_policy_ref": retry}), c.selection, c.threshold
+        )
+    for result in ("defect", "error", "not_covered", "not_applicable"):
+        c.reader.report = c.report.model_copy(update={"checks": {"no-leak": result}})
+        with pytest.raises(ContractBlocked, match="SANITY_BINDING_OR_RESULT_MISMATCH"):
+            c.api.check_sanity(c.run_record, c.binding)
+    c.reader.report = c.report.model_copy(
+        update={
+            "approval_bindings": [c.prereg_record.selection_ref],
+        }
+    )
+    with pytest.raises(ContractBlocked, match="SANITY_APPROVALS_NOT_CURRENT"):
+        c.api.check_sanity(c.run_record, c.binding)
+
+
+def test_remediation_method_claim_and_authorized_normalized_arm() -> None:
+    from danus_ai.contracts.guards import validate_mode_preconditions
+
+    c = Chain()
+    ref = c.binding.method_config_ref
+    method = c.prereg.arms[1].method_spec_ref
+    nondeterministic = c.reader.add(
+        "MethodSpec",
+        "random-method",
+        c.reader.targets[method.object_id].content | {"deterministic": False},
+    )
+    code = c.reader.add(
+        "Code",
+        "random-code",
+        c.reader.targets[c.binding.code_ref.object_id].content
+        | {"method_spec_ref": nondeterministic.model_dump()},
+    )
+    config = c.reader.add(
+        "MethodConfig",
+        "random-config",
+        c.reader.targets[ref.object_id].content
+        | {"method_spec_ref": nondeterministic.model_dump()},
+        digest=version(
+            "method_config", c.config_body | {"method_spec_ref": scientific(nondeterministic)}
+        ),
+    )
+    with pytest.raises(ContractBlocked, match="METHOD_DETERMINISM_MISMATCH"):
+        c.api.binding(c.binding.model_copy(update={"method_config_ref": config, "code_ref": code}))
+    assert c.reader.policy is not None
+    c.reader.policy = replace(c.reader.policy, arm_ids=frozenset({"café"}))
+    validate_mode_preconditions(c.run.model_copy(update={"arm_id": "cafe\u0301"}), CTX, c.reader)
+
+
+def remediation_vectors() -> dict[str, dict[str, str]]:
+    c = Chain()
+    changed = c.protocol.model_copy(update={"split_not_applicable_reason": "exact full set"})
+    planned = c.api.protocol(changed, c.unit)
+    arms = [c.prereg.arms[0], c.prereg.arms[1].model_copy(update={"arm_id": "cafe\u0301"})]
+    plan = c.api.prereg(c.prereg.model_copy(update={"arms": arms}), c.selection, c.threshold)
+    expected_arms = [dict(item) for item in c.prereg_expected["arms"]]
+    expected_arms[1]["arm_id"] = "café"
+    locked = c.reader.add(
+        "Prereg",
+        "prereg",
+        c.prereg_record.model_copy(update={"arms": arms}).model_dump()
+        | {"content_version": plan.version},
+        digest=plan.version,
+    )
+    changed_run = c.run.model_copy(
+        update={
+            "prereg_ref": locked,
+            "arm_id": "cafe\u0301",
+            "budget_request": c.run.budget_request.model_copy(
+                update={"purpose": "different budget"}
+            ),
+        }
+    )
+    run = c.api.confirmation(changed_run, c.binding_ref)
+    evidence = {}
+    for name, kind, value, expected in (
+        (
+            "protocol_science_change",
+            "protocol",
+            planned,
+            c.protocol_expected | {"split_not_applicable_reason": "exact full set"},
+        ),
+        ("prereg_nfc", "prereg", plan, c.prereg_expected | {"arms": expected_arms}),
+        (
+            "run_nfc_and_budget",
+            "run_request",
+            run,
+            c.run_expected | {"arm_id": "café", "prereg_ref": scientific(locked)},
+        ),
+    ):
+        expected_utf8 = reference_bytes(expected)
+        assert value.fixture and value.canonical_utf8 == expected_utf8
+        assert value.version == version(kind, expected)
+        evidence[name] = {
+            "utf8_hex": expected_utf8.hex(),
+            "sha256": sha256(expected_utf8).hexdigest(),
+        }
+    return evidence
+
+
+def test_remediation_independent_vectors() -> None:
+    assert len(remediation_vectors()) == 3
+
+
 if __name__ == "__main__":
-    print(json.dumps(cross_platform_results(), sort_keys=True))
+    report = cross_platform_results()
+    report["remediation_vectors"] = remediation_vectors()
+    checks = (
+        test_remediation_target_domain_and_fixture_boundary,
+        test_production_requires_bound_applicability_evidence,
+        test_remediation_authoritative_protocol_and_tenant_grant,
+        test_remediation_secondary_candidate_body,
+        test_remediation_units_policies_and_determinism,
+        test_remediation_sanity_profile_and_binding,
+        test_remediation_arm_alias_and_nfc,
+        test_remediation_dataset_policy_and_sanity_negatives,
+        test_remediation_method_claim_and_authorized_normalized_arm,
+    )
+    for check in checks:
+        check()
+    report["remediation_checks"] = [check.__name__ for check in checks]
+    print(json.dumps(report, sort_keys=True))

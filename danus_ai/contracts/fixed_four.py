@@ -4,6 +4,7 @@ The reader is a trusted service boundary. A calculated version conveys neither
 a lock nor permission to run. Fixture material is accepted only explicitly.
 """
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import Annotated, Literal, Protocol, TypeVar
@@ -16,7 +17,7 @@ from .approval_conflicts import (
     require_unambiguous_approval,
 )
 from .base import StrictContract
-from .canonicalization import canonicalize
+from .canonicalization import canonicalize, normalize
 from .first_objects import (
     CandidateRecord,
     PreregDraft,
@@ -26,6 +27,7 @@ from .first_objects import (
     ProtocolRecord,
     SelectionTerms,
     ThresholdTerms,
+    arm_projection,
 )
 from .guards import (
     ContractBlocked,
@@ -84,12 +86,35 @@ Commit = Annotated[str, Field(pattern=r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")]
 class FixedDataset(StrictContract):
     population_ref: ScientificRef
     manifest_sha256: Digest
+    item_ids: list[Text]
 
 
 class FixedSplit(StrictContract):
     dataset_ref: ScientificRef
     population_ref: ScientificRef
     manifest_sha256: Digest
+
+
+class FixedMethod(StrictContract):
+    deterministic: bool
+    evidence_ref: ScientificRef
+
+
+class FixedFailurePolicy(StrictContract):
+    attempt_selection: Literal["first_valid_complete"]
+
+
+class FixedRetryPolicy(StrictContract):
+    infrastructure_only: Literal[True]
+    max_automatic_retries: Annotated[int, Field(ge=0, le=2)]
+
+
+class FixedFeedbackPolicy(StrictContract):
+    evaluation: Literal["one_locked_evaluation"]
+
+
+class FixedSanitySuite(StrictContract):
+    checks: Annotated[list[Text], Field(min_length=1)]
 
 
 class FixedQuestion(StrictContract):
@@ -178,6 +203,45 @@ class FixedTargetPort(ReadOnlyPort, Protocol):
     def sanity(self, context: RequestContext, locator: RecordLocator) -> SanitySnapshot | None: ...
 
 
+class TrustedFixedTargetPort(ABC):
+    """Service-assembled trust boundary. Only trusted application code supplies adapters."""
+
+    @abstractmethod
+    def verify_source(self, context: RequestContext, target: ResolvedTarget) -> bool:
+        """Authenticate the authoritative target and its exact locator and provenance."""
+        raise NotImplementedError
+
+
+_TARGET_TYPES: dict[type[StrictContract], tuple[str, str]] = {
+    ApplicabilityBasis: ("ApplicabilityBasis", "applicability_basis"),
+    FixedPopulation: ("Population", "population"),
+    FixedDataset: ("Dataset", "dataset"),
+    FixedSplit: ("Split", "split"),
+    FixedMethod: ("MethodSpec", "method_spec"),
+    FixedFailurePolicy: ("FailurePolicy", "failure_policy"),
+    FixedRetryPolicy: ("RetryPolicy", "retry_policy"),
+    FixedFeedbackPolicy: ("FeedbackPolicy", "feedback_policy"),
+    FixedSanitySuite: ("CheckSuite", "check_suite"),
+    FixedQuestion: ("ResearchQuestion", "research_question"),
+    FixedFamily: ("FamilyDeclaration", "family_declaration"),
+    FixedSelectionHistory: ("SelectionHistory", "selection_history"),
+    FixedBaseline: ("Baseline", "baseline"),
+    CodeEvidence: ("Code", "code"),
+    ImageEvidence: ("Image", "image"),
+    DependencyEvidence: ("Dependencies", "dependencies"),
+    ConfirmationProfile: ("ValidationProfile", "validation_profile"),
+    FixedUnitSpec: ("UnitSpec", "unit_spec"),
+    FixedMissingPolicy: ("MissingPolicy", "missing_policy"),
+    SelectionRule: ("SelectionRule", "selection_rule"),
+    Scope: ("Scope", "scope"),
+    CandidateRecord: ("CandidateHypothesis", "candidate"),
+    ProtocolRecord: ("Protocol", "protocol"),
+    PreregRecord: ("Prereg", "prereg"),
+    ExecutionBinding: ("ExecutionBinding", "execution_binding"),
+    MethodConfig: ("MethodConfig", "method_config"),
+}
+
+
 T = TypeVar("T", bound=StrictContract)
 
 
@@ -185,10 +249,11 @@ T = TypeVar("T", bound=StrictContract)
 class SciencePreimage:
     canonical_utf8: bytes
     version: str
+    fixture: bool
 
 
-def preimage(kind: str, data: bytes) -> SciencePreimage:
-    return SciencePreimage(data, f"{kind}:v1:{sha256(data).hexdigest()}")
+def preimage(kind: str, data: bytes, *, fixture: bool) -> SciencePreimage:
+    return SciencePreimage(data, f"{kind}:v1:{sha256(data).hexdigest()}", fixture)
 
 
 class FixedFour:
@@ -200,6 +265,11 @@ class FixedFour:
         self.context = context
         self.port = port
         self.allow_fixture = allow_fixture
+        if not allow_fixture and not isinstance(port, TrustedFixedTargetPort):
+            raise ContractBlocked("TRUSTED_TARGET_PORT_REQUIRED")
+
+    def _preimage(self, kind: str, data: bytes) -> SciencePreimage:
+        return preimage(kind, data, fixture=self.allow_fixture)
 
     def _read(self, ref: Ref) -> ResolvedTarget:
         state = self.port.resolve(self.context, ref)
@@ -221,9 +291,22 @@ class FixedFour:
             raise ContractBlocked(f"TARGET_VERSION_MISMATCH: {ref.object_type}")
         if target.tenant_id != state.tenant_id or target.project_id != state.project_id:
             raise ContractBlocked(f"TARGET_OWNERSHIP_MISMATCH: {ref.object_type}")
+        if not self.allow_fixture and (
+            not isinstance(self.port, TrustedFixedTargetPort)
+            or self.port.verify_source(self.context, target) is not True
+        ):
+            raise ContractBlocked(f"TARGET_SOURCE_UNVERIFIED: {ref.object_type}")
         return target
 
     def _typed(self, ref: Ref, shape: type[T]) -> T:
+        expected = _TARGET_TYPES.get(shape)
+        if expected is None:
+            raise ContractBlocked(f"TARGET_SPEC_MISSING: {ref.object_type}")
+        kind, domain = expected
+        if ref.object_type != kind:
+            raise ContractBlocked(f"TARGET_TYPE_MISMATCH: expected {kind}")
+        if not ref.content_version.startswith(f"{domain}:v1:"):
+            raise ContractBlocked(f"TARGET_VERSION_MISMATCH: {kind}")
         content = self._read(ref).content
         try:
             return shape.model_validate(content)
@@ -241,6 +324,10 @@ class FixedFour:
         return target
 
     def material(self, ref: ScientificRef) -> None:
+        domains = {kind: domain for kind, domain in _TARGET_TYPES.values()}
+        domain = domains.get(ref.object_type)
+        if domain is not None and not ref.content_version.startswith(f"{domain}:v1:"):
+            raise ContractBlocked(f"TARGET_VERSION_MISMATCH: {ref.object_type}")
         target = self._read(ref)
         if not target.content:
             raise ContractBlocked(f"TARGET_SPEC_MISSING: {ref.object_type}")
@@ -281,12 +368,15 @@ class FixedFour:
         *,
         basis_ref: ScientificRef | None = None,
     ) -> SciencePreimage:
+        value = type(value).model_validate(value.model_dump())
         draft = ProtocolDraft.model_validate(
             value.model_dump(include=set(ProtocolFields.model_fields))
         )
         dataset = self.target(draft.dataset_ref, FixedDataset)
         self.material(draft.dataset_ref)
         unit = self.target(unit_ref, FixedUnitSpec)
+        if unit.unit_key_fields != ["item_id"]:
+            raise ContractBlocked("FIXED_UNIT_KEY_MISMATCH")
         population = self.target(unit.population_ref, FixedPopulation)
         items = canonical_set(population.items)
         if (
@@ -294,6 +384,8 @@ class FixedFour:
             or len(population.items) != 4
             or items != canonical_set(draft.required_items)
             or dataset.population_ref != unit.population_ref
+            or len(dataset.item_ids) != 4
+            or canonical_set(dataset.item_ids) != items
         ):
             raise ContractBlocked("FIXED_POPULATION_MISMATCH")
         if draft.split_ref is not None:
@@ -323,7 +415,7 @@ class FixedFour:
             baseline = self.target(ref, FixedBaseline)
             self.material(baseline.method_spec_ref)
         self.material(draft.metric.implementation_ref)
-        self.material(draft.sanity_suite_ref)
+        self.target(draft.sanity_suite_ref, FixedSanitySuite)
         scope = self._scope(draft.applicability_template)
         if (
             scope.design_type != draft.design_type
@@ -343,7 +435,7 @@ class FixedFour:
             duplicate_policy="deduplicate_identical_reject_conflicts",
             selection_rules=list(rules.values()),
         )
-        result = preimage("protocol", protocol_science_preview(draft, targets))
+        result = self._preimage("protocol", protocol_science_preview(draft, targets))
         if isinstance(value, ProtocolRecord):
             self._check_record(value, result)
             self._check_basis(self._record_ref("Protocol", value), basis_ref)
@@ -370,7 +462,13 @@ class FixedFour:
     def _check_record(
         self, value: ProtocolRecord | PreregRecord | RunRequestRecord, result: SciencePreimage
     ) -> None:
-        if value.tenant_id != self.context.tenant_id or value.project_id != self.context.project_id:
+        if isinstance(value, ProtocolRecord) and value.ownership_scope == "tenant":
+            target = self._read(self._record_ref("Protocol", value))
+            if target.project_id is not None or target.content != value.model_dump():
+                raise ContractBlocked("TARGET_OWNERSHIP_MISMATCH: Protocol")
+        elif value.project_id != self.context.project_id:
+            raise ContractBlocked("TARGET_OWNERSHIP_MISMATCH: record")
+        if value.tenant_id != self.context.tenant_id:
             raise ContractBlocked("TARGET_OWNERSHIP_MISMATCH: record")
         if value.content_version != result.version:
             raise ContractBlocked("TARGET_VERSION_MISMATCH: record")
@@ -382,6 +480,23 @@ class FixedFour:
         missing = self.target(record.missing_policy_ref, FixedMissingPolicy)
         self.protocol(record, missing.evaluation_unit_ref, basis_ref=basis_ref)
         return record
+
+    def _candidate(self, ref: ScientificRef) -> CandidateRecord:
+        candidate = self._typed(ref, CandidateRecord)
+        self._match(ref, canonicalize(candidate_projection(candidate)))
+        if candidate.content_version != ref.content_version or candidate.object_id != ref.object_id:
+            raise ContractBlocked("TARGET_VERSION_MISMATCH: candidate")
+        if (
+            candidate.tenant_id != self.context.tenant_id
+            or candidate.project_id != self.context.project_id
+        ):
+            raise ContractBlocked("TARGET_OWNERSHIP_MISMATCH: candidate")
+        for source in candidate.sources:
+            self.material(source.snapshot_ref)
+        if candidate.original_source is not None:
+            self.material(candidate.original_source.snapshot_ref)
+        self._scope(candidate.scope_ref)
+        return candidate
 
     def prereg(
         self,
@@ -395,29 +510,12 @@ class FixedFour:
         selection = SelectionTerms.model_validate(selection)
         threshold = ThresholdTerms.model_validate(threshold)
         protocol = self._protocol(value.protocol_ref, protocol_basis)
-        candidate = self._typed(value.candidate_ref, CandidateRecord)
-        self._match(value.candidate_ref, canonicalize(candidate_projection(candidate)))
-        if (
-            candidate.content_version != value.candidate_ref.content_version
-            or candidate.object_id != value.candidate_ref.object_id
-        ):
-            raise ContractBlocked("TARGET_VERSION_MISMATCH: candidate")
-        if (
-            candidate.tenant_id != self.context.tenant_id
-            or candidate.project_id != self.context.project_id
-        ):
-            raise ContractBlocked("TARGET_OWNERSHIP_MISMATCH: candidate")
-        for source in candidate.sources:
-            self.material(source.snapshot_ref)
-        if candidate.original_source is not None:
-            self.material(candidate.original_source.snapshot_ref)
+        candidate = self._candidate(value.candidate_ref)
         question = self.target(value.question_ref, FixedQuestion)
         family = self.target(value.family_ref, FixedFamily)
         history = self.target(value.selection_history_ref, FixedSelectionHistory)
         for candidate_ref in (*family.candidate_refs, *history.considered_candidates):
-            if candidate_ref != value.candidate_ref:
-                other = self._typed(candidate_ref, CandidateRecord)
-                self._match(candidate_ref, canonicalize(candidate_projection(other)))
+            self._candidate(candidate_ref)
         for exposure in history.test_exposures:
             self.material(exposure)
         if (
@@ -465,39 +563,52 @@ class FixedFour:
         ):
             raise ContractBlocked("THRESHOLD_OR_SCOPE_MISMATCH")
         self.material(threshold.rationale_ref)
-        for ref in (
-            value.analysis_ref,
-            value.failure_policy_ref,
-            value.retry_policy_ref,
-            value.selection_feedback_policy_ref,
-        ):
-            self.material(ref)
+        if value.analysis_ref.object_type != "Analysis":
+            raise ContractBlocked("TARGET_TYPE_MISMATCH: expected Analysis")
+        self.material(value.analysis_ref)
+        self.target(value.failure_policy_ref, FixedFailurePolicy)
+        self.target(value.retry_policy_ref, FixedRetryPolicy)
+        self.target(value.selection_feedback_policy_ref, FixedFeedbackPolicy)
         arms = []
-        seen: set[bytes] = set()
+        by_id: dict[str, bytes] = {}
         for arm in value.arms:
-            self.material(arm.method_spec_ref)
+            method = self.target(arm.method_spec_ref, FixedMethod)
+            self.material(method.evidence_ref)
             if arm.baseline_ref is not None:
                 baseline = self.target(arm.baseline_ref, FixedBaseline)
-                if (
-                    arm.baseline_ref not in protocol.baseline_refs
-                    or baseline.method_spec_ref != arm.method_spec_ref
-                ):
+                self.material(baseline.method_spec_ref)
+                if arm.baseline_ref not in protocol.baseline_refs or scientific_projection(
+                    baseline.method_spec_ref
+                ) != scientific_projection(arm.method_spec_ref):
                     raise ContractBlocked("ARM_BASELINE_MISMATCH")
             elif arm.role == "reference":
                 raise ContractBlocked("ARM_BASELINE_MISMATCH")
-            raw = canonicalize(arm.model_dump())
-            if raw not in seen:
-                arms.append(
-                    {
-                        "arm_id": arm.arm_id,
-                        "role": arm.role,
-                        "method_spec_ref": scientific_projection(arm.method_spec_ref),
-                        "baseline_ref": scientific_projection(arm.baseline_ref)
-                        if arm.baseline_ref
-                        else None,
-                    }
-                )
-                seen.add(raw)
+            arm_id = str(normalize(arm.arm_id))
+            item = arm_projection(arm)
+            raw = canonicalize(item)
+            if arm_id not in by_id:
+                by_id[arm_id] = raw
+                arms.append(item)
+            elif by_id[arm_id] != raw:
+                raise ContractBlocked("CONTRACT_CONFLICT: different arms share an arm_id")
+        if (
+            not isinstance(scope.method_ref, Known)
+            or not isinstance(scope.baseline_ref, Known)
+            or not isinstance(scope.measurement_ref, Known)
+            or scope.measurement_ref.value != protocol.metric.implementation_ref
+            or any(
+                scientific_projection(arm.method_spec_ref)
+                != scientific_projection(scope.method_ref.value)
+                for arm in value.arms
+                if arm.role == "candidate"
+            )
+            or any(
+                arm.baseline_ref != scope.baseline_ref.value
+                for arm in value.arms
+                if arm.role == "reference"
+            )
+        ):
+            raise ContractBlocked("ARM_SCOPE_MISMATCH")
         projected = value.model_dump(include=set(PreregDraft.model_fields))
         for field in (
             "candidate_ref",
@@ -524,7 +635,7 @@ class FixedFour:
             "scope_ref": scientific_projection(threshold.scope_ref),
             "rationale_ref": scientific_projection(threshold.rationale_ref),
         }
-        result = preimage("prereg", canonicalize(projected))
+        result = self._preimage("prereg", canonicalize(projected))
         if isinstance(value, PreregRecord):
             if value.selection_terms != selection or value.threshold_terms != threshold:
                 raise ContractBlocked("APPROVAL_TERMS_MISMATCH")
@@ -549,7 +660,10 @@ class FixedFour:
         self.material(value.data_ref)
         config = self._typed(value.method_config_ref, MethodConfig)
         self._match(value.method_config_ref, canonicalize(method_projection(config)))
-        self.material(config.method_spec_ref)
+        method = self.target(config.method_spec_ref, FixedMethod)
+        self.material(method.evidence_ref)
+        if not method.deterministic:
+            raise ContractBlocked("METHOD_DETERMINISM_MISMATCH")
         if config.hardware_semantics_ref is not None:
             self.material(config.hardware_semantics_ref)
         if (
@@ -563,9 +677,14 @@ class FixedFour:
         self.target(value.image_ref, ImageEvidence)
         self.material(value.image_ref)
         profile = self.target(value.validation_profile_ref, ConfirmationProfile)
-        if profile.suite_ref != value.suite_ref or not profile.required_checks:
+        suite = self.target(value.suite_ref, FixedSanitySuite)
+        if (
+            profile.suite_ref != value.suite_ref
+            or not set(suite.checks).issubset(profile.required_checks)
+            or len(set(profile.required_checks)) != len(profile.required_checks)
+        ):
             raise ContractBlocked("SANITY_PROFILE_MISMATCH")
-        return preimage(
+        return self._preimage(
             "execution_binding",
             canonicalize(
                 {
@@ -615,11 +734,15 @@ class FixedFour:
         )
         if prereg.protocol_ref != binding.protocol_ref:
             raise ContractBlocked("LOCKED_PLAN_MISMATCH")
-        arm = next((arm for arm in prereg.arms if arm.arm_id == value.arm_id), None)
+        arm_id = str(normalize(value.arm_id))
+        arm = next((arm for arm in prereg.arms if normalize(arm.arm_id) == arm_id), None)
         method = self._typed(binding.method_config_ref, MethodConfig)
-        if arm is None or arm.method_spec_ref != method.method_spec_ref:
+        self._match(binding.method_config_ref, canonicalize(method_projection(method)))
+        if arm is None or scientific_projection(arm.method_spec_ref) != scientific_projection(
+            method.method_spec_ref
+        ):
             raise ContractBlocked("ARM_METHOD_MISMATCH")
-        result = preimage(
+        result = self._preimage(
             "run_request",
             canonicalize(
                 {
@@ -630,7 +753,7 @@ class FixedFour:
                     "method_config_ref": scientific_projection(value.method_config_ref),
                     "seed": value.seed,
                     "deterministic": value.deterministic,
-                    "arm_id": value.arm_id,
+                    "arm_id": arm_id,
                     "prereg_ref": scientific_projection(value.prereg_ref),
                     "replicate_index": value.replicate_index,
                     "mode_inputs": {
@@ -646,7 +769,28 @@ class FixedFour:
             self._check_record(value, result)
         return result
 
-    def check_sanity(self, value: RunRequestRecord, binding: ExecutionBinding) -> None:
+    def check_sanity(
+        self,
+        value: RunRequestRecord,
+        binding: ExecutionBinding,
+        *,
+        protocol_basis: ScientificRef | None = None,
+    ) -> None:
+        value = RunRequestRecord.model_validate(value)
+        resolved = self._typed(value.execution_binding_ref, ExecutionBinding)
+        if (
+            ExecutionBinding.model_validate(binding) != resolved
+            or value.code_ref != resolved.code_ref
+            or value.image_ref != resolved.image_ref
+            or value.data_ref != resolved.data_ref
+            or value.method_config_ref != resolved.method_config_ref
+            or not isinstance(value.mode_inputs, ConfirmationInputs)
+            or value.mode_inputs.protocol_ref != resolved.protocol_ref
+        ):
+            raise ContractBlocked("EXECUTION_BINDING_MISMATCH")
+        result = self.binding(resolved, protocol_basis=protocol_basis)
+        if result.version != value.execution_binding_ref.content_version:
+            raise ContractBlocked("TARGET_VERSION_MISMATCH: ExecutionBinding")
         if value.sanity_ref is None:
             raise ContractBlocked("SANITY_NOT_READY")
         report = self.port.sanity(self.context, value.sanity_ref)
@@ -719,7 +863,7 @@ class FixedFour:
             self.port,
         )
         binding = self._typed(value.execution_binding_ref, ExecutionBinding)
-        self.check_sanity(value, binding)
+        self.check_sanity(value, binding, protocol_basis=protocol_basis)
         if value.prereg_ref is None:
             raise ContractBlocked("LOCKED_PLAN_MISMATCH")
         prereg = self._typed(value.prereg_ref, PreregRecord)

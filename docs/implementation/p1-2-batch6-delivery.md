@@ -28,3 +28,22 @@
 历史标记清除权限、跨 Scope 科研映射、其他用途条款、采样及描述型分支仍按原决定处理。真实服务接入、完整 I-SCHEMA、其余金样例及 Linux 正式运行仍待对应阶段。第六批人工验收待 A0。
 
 GitHub Actions [运行 43318093230](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230) 已完成，结果为 **Success**，运行记录从开始到完成更新用时 23 秒。该运行在 `main` 手动触发，实际 SHA 为 `df85e6c00928ffdfdfc5463eb322c564c281009e`，与第六批交付提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230/job/131531276420) 的锁定工具安装、Python 安装、`Locked local checks and build` 均成功。Checkout 步骤成功，运行注解记录了 `actions/checkout` 的 Node.js 20 弃用警告，runner 使用 Node.js 24 执行。
+
+
+## 5. 第六批验收整改
+
+先将验收草稿中的五组问题写成六个回归用例。整改前运行 `pytest -k remediation` 得到 6 failed，以下测试将其固化。
+
+| 事项及依据 | 原复现及本次处置 |
+| --- | --- |
+| 目标解析，首组 §2、§6.2 | 错 UnitSpec 类型、Binding 摘要相同但版本域错误、夹具端口进默认入口。目标类型注册及版本域校验后均拒绝。受信服务需要显式装配端口并逐目标核验来源，缺来源拒绝；夹具预映像带标识。任意拥有进程内代码执行权限的代码仍属于信任边界，真实适配器的来源验证由权威服务实现。 |
+| 权威记录，首组 P1、P4 和 §1.2 | approved Protocol 缺批准定位仍可计算、租户级项目授权误拒、次要候选正文错归属。完整模型复验、授权项目归属分流、对族及历史逐候选核验后，合法租户共享可计算，错归属和无授权拒绝。科学计算仍可先于批准，不据此认定批准有效。 |
+| 跨对象，附录 C、Q-06、Q-07、首组 §4 | 错单位键、manifest 错题、择优尝试正文、超额重试或方法缺确定性依据。核对固定 `item_id`、manifest 声明题集合和总体，核验第一个有效完整尝试、基础设施自动重试上限、单次锁定评价及独立方法依据，比较 Arm、度量、基线和 Scope。缺少受信方法依据、非确定性方法和越界规则均拒绝。 |
+| Sanity，大方案 §6.16 | 替换 profile 跳过套件必需项，单独传入错 Binding 也通过。现在从协议精确套件确定必需项，在独立守卫解析并重算 Binding、比对请求和报告。漏项、缺陷、错误、未覆盖、缺适用批准及批准不再有效时拒绝。 |
+| Arm，首组 §6.2、规范化 §5.2 | 同科学版本的不同 locator 被误拒，NFC/NFD 查询结果不一致。两侧采用同一 Arm 科学投影，先核所有原始引用，再保留有序列表中首个相同项；同名异科学内容拒绝，未授权的同摘要引用亦拒绝。运行与任务授权都用规范化局部 ID。 |
+
+复验使用原锁。Ubuntu CPython 3.12.16 执行 `bash scripts/verify.sh`，229 项通过，锁定安装、Ruff、mypy、导入边界、Schema 和构建均通过。[Ubuntu 日志](evidence/p1-2-batch6-remediation-verify.log) Windows 原生 CPython 3.12.14 在第六批临时环境以 UNC 源码为 `PYTHONPATH` 执行 `python -B -m pytest -q -p no:cacheprovider <repo>\tests\contracts\test_batch6.py`，21 项通过。两侧再运行 `python -B tests/contracts/test_batch6.py`，原始输出除 Python 版本外一致。复算 7 个规范字节和完整 SHA-256，包含 4 个现行主链和 3 个整改向量，另有原 7 个拒绝标签、9 组整改检查和 2 个 Schema 摘要一致。预期按附录 C 及签收字段表手列投影，使用标准库序列化 ASCII 与显式 NFC 字面量。原九个金样例及手算记录对比 `412e67e` 无字节差异。[Ubuntu 原始输出](evidence/p1-2-batch6-remediation-ubuntu.json) · [Windows 原始输出](evidence/p1-2-batch6-remediation-windows.json)
+
+完整族选择和数据暴露事实、分析独立校准与实际工件核验仍由对应权威来源提供。本批只支持固定四题已明确的尝试选择和反馈规则；其他预注册策略缺规范时阻断。未注册目标域、未审定批准用途、跨 Scope 映射、历史标记清除、采样／描述型启用继续按既有边界处理。生产服务装配和实际运行另验收。
+
+整改远端 CI 待登记准确运行 SHA 及结果。A0 签收待填写。

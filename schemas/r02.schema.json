@@ -2161,6 +2161,14 @@
     "FixedDataset": {
       "additionalProperties": false,
       "properties": {
+        "item_ids": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Item Ids",
+          "type": "array"
+        },
         "manifest_sha256": {
           "pattern": "^[0-9a-f]{64}$",
           "title": "Manifest Sha256",
@@ -2172,7 +2180,8 @@
       },
       "required": [
         "population_ref",
-        "manifest_sha256"
+        "manifest_sha256",
+        "item_ids"
       ],
       "title": "FixedDataset",
       "type": "object"
@@ -2241,6 +2250,21 @@
       "title": "FixedDiscrimination",
       "type": "object"
     },
+    "FixedFailurePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt_selection": {
+          "const": "first_valid_complete",
+          "title": "Attempt Selection",
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempt_selection"
+      ],
+      "title": "FixedFailurePolicy",
+      "type": "object"
+    },
     "FixedFamily": {
       "additionalProperties": false,
       "properties": {
@@ -2260,6 +2284,21 @@
         "candidate_refs"
       ],
       "title": "FixedFamily",
+      "type": "object"
+    },
+    "FixedFeedbackPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation": {
+          "const": "one_locked_evaluation",
+          "title": "Evaluation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evaluation"
+      ],
+      "title": "FixedFeedbackPolicy",
       "type": "object"
     },
     "FixedFourPolicy": {
@@ -2310,6 +2349,24 @@
         "expected_labels"
       ],
       "title": "FixedFourPolicy",
+      "type": "object"
+    },
+    "FixedMethod": {
+      "additionalProperties": false,
+      "properties": {
+        "deterministic": {
+          "title": "Deterministic",
+          "type": "boolean"
+        },
+        "evidence_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "deterministic",
+        "evidence_ref"
+      ],
+      "title": "FixedMethod",
       "type": "object"
     },
     "FixedMissingPolicy": {
@@ -2499,6 +2556,47 @@
         "reason"
       ],
       "title": "FixedRandomness",
+      "type": "object"
+    },
+    "FixedRetryPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "infrastructure_only": {
+          "const": true,
+          "title": "Infrastructure Only",
+          "type": "boolean"
+        },
+        "max_automatic_retries": {
+          "maximum": 2,
+          "minimum": 0,
+          "title": "Max Automatic Retries",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "infrastructure_only",
+        "max_automatic_retries"
+      ],
+      "title": "FixedRetryPolicy",
+      "type": "object"
+    },
+    "FixedSanitySuite": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Checks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "checks"
+      ],
+      "title": "FixedSanitySuite",
       "type": "object"
     },
     "FixedSelectionHistory": {
@@ -6049,6 +6147,7 @@
       ]
     },
     "fixed_four_preimage": {
+      "fixture_result_marked": true,
       "lock_and_admission": "blocked_pending_signed_terms_and_service_authority",
       "objects": [
         "Protocol",
@@ -6056,6 +6155,7 @@
         "ExecutionBinding",
         "RunRequest"
       ],
+      "requires_authoritative_target_source": true,
       "requires_typed_targets_and_applicability": true,
       "run_modes": [
         "deterministic_confirmation"
@@ -6089,12 +6189,17 @@
       "ExecutionBinding": "service_owned",
       "FixedBaseline": "service_owned",
       "FixedDataset": "service_owned",
+      "FixedFailurePolicy": "service_owned",
       "FixedFamily": "service_owned",
+      "FixedFeedbackPolicy": "service_owned",
       "FixedFourPolicy": "service_owned",
+      "FixedMethod": "service_owned",
       "FixedMissingPolicy": "service_owned",
       "FixedPopulation": "service_owned",
       "FixedProtocolTargets": "service_owned",
       "FixedQuestion": "service_owned",
+      "FixedRetryPolicy": "service_owned",
+      "FixedSanitySuite": "service_owned",
       "FixedSelectionHistory": "service_owned",
       "FixedSplit": "service_owned",
       "FixedUnitSpec": "service_owned",
@@ -6223,11 +6328,20 @@
     "FixedDataset": {
       "$ref": "#/$defs/FixedDataset"
     },
+    "FixedFailurePolicy": {
+      "$ref": "#/$defs/FixedFailurePolicy"
+    },
     "FixedFamily": {
       "$ref": "#/$defs/FixedFamily"
     },
+    "FixedFeedbackPolicy": {
+      "$ref": "#/$defs/FixedFeedbackPolicy"
+    },
     "FixedFourPolicy": {
       "$ref": "#/$defs/FixedFourPolicy"
+    },
+    "FixedMethod": {
+      "$ref": "#/$defs/FixedMethod"
     },
     "FixedMissingPolicy": {
       "$ref": "#/$defs/FixedMissingPolicy"
@@ -6240,6 +6354,12 @@
     },
     "FixedQuestion": {
       "$ref": "#/$defs/FixedQuestion"
+    },
+    "FixedRetryPolicy": {
+      "$ref": "#/$defs/FixedRetryPolicy"
+    },
+    "FixedSanitySuite": {
+      "$ref": "#/$defs/FixedSanitySuite"
     },
     "FixedSelectionHistory": {
       "$ref": "#/$defs/FixedSelectionHistory"

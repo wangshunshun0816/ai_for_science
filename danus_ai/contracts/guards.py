@@ -7,7 +7,7 @@ views. Test doubles establish contract behavior only, not service acceptance.
 from dataclasses import dataclass
 from typing import Protocol
 
-from .canonicalization import canonicalize
+from .canonicalization import canonicalize, normalize
 from .first_objects import PreregRecord, SelectionTerms, ThresholdTerms
 from .references import ApprovalLocator, HistoricalRef, ScientificRef
 from .runs import RunRequestDraft
@@ -180,7 +180,9 @@ def validate_mode_preconditions(
         if policy.requires_prereg != (run.prereg_ref is not None):
             raise ContractBlocked("TASK_PREREG_MISMATCH")
     if run.prereg_ref is not None:
-        if run.prereg_ref != policy.prereg_ref or run.arm_id not in policy.arm_ids:
+        if run.prereg_ref != policy.prereg_ref or normalize(run.arm_id) not in {
+            normalize(arm_id) for arm_id in policy.arm_ids
+        }:
             raise ContractBlocked("LOCKED_PLAN_MISMATCH")
         require_reference(ctx, run.prereg_ref, port)
     if run.mode == "replication":

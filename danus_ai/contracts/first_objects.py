@@ -18,6 +18,7 @@ from .references import (
     UTCTime,
     Version,
     require_unique_names,
+    scientific_projection,
     source_projection,
 )
 
@@ -225,6 +226,15 @@ class Arm(StrictContract):
     baseline_ref: ScientificRef | None
 
 
+def arm_projection(arm: Arm) -> dict[str, object]:
+    return {
+        "arm_id": normalize(arm.arm_id),
+        "role": arm.role,
+        "method_spec_ref": scientific_projection(arm.method_spec_ref),
+        "baseline_ref": scientific_projection(arm.baseline_ref) if arm.baseline_ref else None,
+    }
+
+
 class PreregFields(StrictContract):
     candidate_ref: ScientificRef
     protocol_ref: ScientificRef
@@ -251,7 +261,7 @@ class PreregFields(StrictContract):
         arms_by_id: dict[str, bytes] = {}
         for arm in self.arms:
             key = str(normalize(arm.arm_id))
-            content = canonicalize(arm.model_dump())
+            content = canonicalize(arm_projection(arm))
             if arms_by_id.setdefault(key, content) != content:
                 raise ValueError("CONTRACT_CONFLICT: different arms share an arm_id")
         if not {"reference", "candidate"}.issubset({a.role for a in self.arms}):
