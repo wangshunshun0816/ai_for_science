@@ -63,9 +63,13 @@ bash scripts/verify.sh > /tmp/danus-p1-2-batch3.log 2>&1
 ```text
 fatal: could not read Username for 'https://github.com': terminal prompts disabled
 ```
-本批提交后仍须尝试实际推送，结果以交付回复为准。未读取/输出令牌，未更改仓库身份配置。
+本批代码提交为 a4d0553233c62613afb90cb0202618d01f5e5dd9。首次实际推送同样失败；随后发现 Windows 已有 Git Credential Manager，Ubuntu 未配置 credential.helper。通过以下命令级配置调用现有凭据后推送成功，git ls-remote 确认远端 main 为该提交。未读取/输出令牌，未更改仓库身份或凭据配置。
 
-沿用现有免费手动 CI：公开仓库、标准 ubuntu-24.04 runner、contents: read、workflow_dispatch，无付费调用。本批未改工作流。当前 Ubuntu 无 gh，HTTPS 认证预检失败，**本批尚无远端运行证据**；不得沿用第二批 run 43147247201 作为本批通过。
-恢复现有认证并推送本批提交后，在 Actions → P1-1 foundation checks → Run workflow 选择 main；核对运行 head_sha 等于本批代码提交（或明确包含该代码的后续证据提交），跟踪到结束并另登链接/结果。此前 CI 的 Node.js 警告不在本批变更范围。
+```bash
+GIT_TERMINAL_PROMPT=0 GCM_INTERACTIVE=never git -c credential.helper= -c credential.helper=/mnt/d/Git/mingw64/bin/git-credential-manager.exe push origin main
+```
+
+沿用现有免费手动 CI：公开仓库、标准 ubuntu-24.04 runner、contents: read、workflow_dispatch，无付费调用。本批未改工作流。当前 Ubuntu 无 gh，Git 推送已通过现有 Windows 凭据助手完成；浏览器控制工具初始化失败（failed to write kernel assets，系统找不到指定的路径），无法代为点击 workflow_dispatch。已请求用户手动触发并提供运行链接，**本批尚无远端运行证据**；不得沿用第二批 run 43147247201 作为本批通过。
+在 Actions → P1-1 foundation checks → Run workflow 选择 main；核对运行 head_sha 等于本批代码提交（或明确包含该代码的后续证据提交），跟踪到结束并另登链接/结果。此前 CI 的 Node.js 警告不在本批变更范围。
 
 本批工程验收仅限上述已实现纯契约及本地检查；真实服务、跨平台、R02 全部验收及人工签收另行处理。
