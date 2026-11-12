@@ -47,6 +47,7 @@ class ApprovalState:
     active: bool
     expired: bool
     terms: SelectionTerms | ThresholdTerms | None = None
+    subject_digest: str | None = None
 
 
 @dataclass(frozen=True)

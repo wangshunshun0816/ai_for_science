@@ -1,0 +1,15 @@
+Compared with approval commit 412e67e0586fe21837916111eefb89c9223f01fa
+Operation: git show <commit>:<path> bytes == Path(path).read_bytes(); SHA-256 of preserved bytes.
+e6be4f79356e59f76dc2afcd62f31de659ccfd05f939765564864db7d44080af  docs/implementation/p0-2/golden/README.md  MATCH
+d8b3eb5aa104efda59683720944009f9efebc4de9d039d63326eb23ddafbe0c2  docs/implementation/p0-2/golden/bounded-negative.json  MATCH
+88922bc91e618ef954cc07013cca6c1876c69b9924731b5bc9ba5442775122d9  docs/implementation/p0-2/golden/error-audit-timeout.json  MATCH
+47bf812138cd1e8f225e9020c7793561a7c9d09a37a829ebfac512aa9567c202  docs/implementation/p0-2/golden/incomplete-missing-q4.json  MATCH
+98f554d8130f2e05bc0c2b68bb44e072168bc0bd237e64919137f49feedc1619  docs/implementation/p0-2/golden/positive.json  MATCH
+a44e003fe5c1603433cafe99086d43fc8d7c5e3a81287cc1f43ffaec0e2d98e5  docs/implementation/p0-2/golden/recovery-collector-crash.json  MATCH
+6221e7f87737eb21b346d5806b9ef29fa1a9e98632f1b12ce60a18e2fc4c3151  docs/implementation/p0-2/golden/recovery-idempotent-submission.json  MATCH
+78a7b3ca618444620ef86178a09bad4a35cb1102eb91a68b78196805c4a50354  docs/implementation/p0-2/golden/rejected-duplicate-q3.json  MATCH
+2feabd6fdf8eac55ca380a73297ec2fe95a4341d804cd29ce3f239c053727b9d  docs/implementation/p0-2/golden/rejected-number-mismatch.json  MATCH
+4e318f7d07947ac715ce0cd87a87350c8481a3d0434308b9ceac7e46bf69ac25  docs/implementation/p0-2/golden/rejected-overbroad-scope.json  MATCH
+298b17bcabd4e7c5f8ec14c3babbb94c0cce0905139c5b5ebe8d8fa4ff0f384e  docs/Danus-AI 科研智能体产品架构与落地执行方案 v1.2 最终确认稿.md  MATCH
+021492f8acfe4122704012e2185eed42445511d567063a1f7249cd388a5c25a5  docs/Danus-AI 落地开发指南：模块顺序、接口衔接与验收.md  MATCH
+addf685203531d221ac5bd6739848bb04887be186ec9454cf707bc5a4b93bdfe  docs/Danus-AI Agent 角色实现与验收规格.md  MATCH
