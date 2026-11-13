@@ -18,6 +18,49 @@
         "title": "AnalysisInputs",
         "type": "object"
       },
+      "AnalysisOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "data_need": {
+            "minLength": 1,
+            "title": "Data Need",
+            "type": "string"
+          },
+          "design": {
+            "$ref": "#/components/schemas/PreregDraft"
+          },
+          "estimate_basis": {
+            "minLength": 1,
+            "title": "Estimate Basis",
+            "type": "string"
+          },
+          "failure_criterion": {
+            "minLength": 1,
+            "title": "Failure Criterion",
+            "type": "string"
+          },
+          "prediction": {
+            "minLength": 1,
+            "title": "Prediction",
+            "type": "string"
+          },
+          "role": {
+            "const": "A4",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "design",
+          "prediction",
+          "failure_criterion",
+          "data_need",
+          "estimate_basis"
+        ],
+        "title": "AnalysisOutput",
+        "type": "object"
+      },
       "ApplicabilityBasis": {
         "additionalProperties": false,
         "description": "Trusted evidence projection, scoped to an exact target and project.",
@@ -832,6 +875,58 @@
         "title": "AuditEntry",
         "type": "object"
       },
+      "AuditIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Evidence",
+            "type": "array"
+          },
+          "impact": {
+            "minLength": 1,
+            "title": "Impact",
+            "type": "string"
+          },
+          "remediation": {
+            "minLength": 1,
+            "title": "Remediation",
+            "type": "string"
+          },
+          "severity": {
+            "minLength": 1,
+            "title": "Severity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "evidence",
+          "impact",
+          "severity",
+          "remediation"
+        ],
+        "title": "AuditIssue",
+        "type": "object"
+      },
       "AuditPosition": {
         "additionalProperties": false,
         "properties": {
@@ -851,6 +946,58 @@
           "sequence"
         ],
         "title": "AuditPosition",
+        "type": "object"
+      },
+      "AuditReport": {
+        "additionalProperties": false,
+        "properties": {
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/AuditIssue"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "outcome": {
+            "enum": [
+              "blocking_issue",
+              "needs_evidence",
+              "no_blocking_issue_found"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reviewed_refs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Reviewed Refs",
+            "type": "array"
+          },
+          "role": {
+            "const": "A7",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "outcome",
+          "issues",
+          "reviewed_refs"
+        ],
+        "title": "AuditReport",
         "type": "object"
       },
       "BaselineInputs": {
@@ -1404,6 +1551,180 @@
           "required_checks"
         ],
         "title": "ConfirmationProfile",
+        "type": "object"
+      },
+      "ContextInput": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "authority",
+              "evidence",
+              "history"
+            ],
+            "title": "Category",
+            "type": "string"
+          },
+          "included": {
+            "title": "Included",
+            "type": "boolean"
+          },
+          "ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              },
+              {
+                "$ref": "#/components/schemas/HistoricalRef"
+              }
+            ],
+            "title": "Ref"
+          },
+          "sources": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "truncation_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Truncation Reason"
+          }
+        },
+        "required": [
+          "ref",
+          "sources",
+          "category",
+          "included",
+          "truncation_reason"
+        ],
+        "title": "ContextInput",
+        "type": "object"
+      },
+      "ContextManifest": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization_view_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "build_policy_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "estimated_input_tokens": {
+            "minimum": 0,
+            "title": "Estimated Input Tokens",
+            "type": "integer"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/ContextInput"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "invalidation_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invalidation Reason"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "plan_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "prior_context_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "purpose": {
+            "enum": [
+              "initial",
+              "resume",
+              "new_audit"
+            ],
+            "title": "Purpose",
+            "type": "string"
+          },
+          "reserved_output_tokens": {
+            "exclusiveMinimum": 0,
+            "title": "Reserved Output Tokens",
+            "type": "integer"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "uncovered": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Uncovered",
+            "type": "array"
+          }
+        },
+        "required": [
+          "locator",
+          "task_ref",
+          "plan_ref",
+          "authorization_view_ref",
+          "build_policy_ref",
+          "tenant_id",
+          "project_id",
+          "purpose",
+          "prior_context_ref",
+          "inputs",
+          "estimated_input_tokens",
+          "reserved_output_tokens",
+          "uncovered",
+          "invalidation_reason"
+        ],
+        "title": "ContextManifest",
         "type": "object"
       },
       "CorrectionCheck": {
@@ -2127,6 +2448,67 @@
         "title": "ExplorationInputs",
         "type": "object"
       },
+      "ExplorationOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/CandidateDraft"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "exploration_run_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Exploration Run Refs",
+            "type": "array"
+          },
+          "limitations": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "no_candidate_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "No Candidate Reason"
+          },
+          "role": {
+            "const": "A2",
+            "title": "Role",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Source Refs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "role",
+          "candidates",
+          "source_refs",
+          "exploration_run_refs",
+          "limitations",
+          "no_candidate_reason"
+        ],
+        "title": "ExplorationOutput",
+        "type": "object"
+      },
       "ExternalOrigin": {
         "additionalProperties": false,
         "properties": {
@@ -2704,6 +3086,201 @@
         "title": "FixedUnitSpec",
         "type": "object"
       },
+      "Handoff": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "budget_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/HandoffDraft"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "original_task_count": {
+            "minimum": 0,
+            "title": "Original Task Count",
+            "type": "integer"
+          },
+          "pending_runs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Pending Runs",
+            "type": "array"
+          },
+          "pending_settlement_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Pending Settlement Refs",
+            "type": "array"
+          },
+          "plan_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "root_task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "source_node_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "source_principal_id": {
+            "minLength": 1,
+            "title": "Source Principal Id",
+            "type": "string"
+          },
+          "source_task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "target_lease_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "target_node_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "target_task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "draft",
+          "locator",
+          "tenant_id",
+          "project_id",
+          "root_task_ref",
+          "source_task_ref",
+          "target_task_ref",
+          "plan_ref",
+          "source_node_ref",
+          "target_node_ref",
+          "source_principal_id",
+          "target_lease_ref",
+          "budget_ref",
+          "authorization_ref",
+          "original_task_count",
+          "pending_runs",
+          "pending_settlement_refs",
+          "created_at"
+        ],
+        "title": "Handoff",
+        "type": "object"
+      },
+      "HandoffDraft": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_feedback_refs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Allowed Feedback Refs",
+            "type": "array"
+          },
+          "artifact_refs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Artifact Refs",
+            "type": "array"
+          },
+          "completed": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Completed",
+            "type": "array"
+          },
+          "output": {
+            "$ref": "#/components/schemas/RoleOutputEnvelope"
+          },
+          "receiver_contract_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "receiver_role": {
+            "enum": [
+              "A1",
+              "A2",
+              "A3",
+              "A4",
+              "A5",
+              "A7",
+              "A12"
+            ],
+            "title": "Receiver Role",
+            "type": "string"
+          },
+          "receiver_task_kind": {
+            "minLength": 1,
+            "title": "Receiver Task Kind",
+            "type": "string"
+          },
+          "stop_reason": {
+            "minLength": 1,
+            "title": "Stop Reason",
+            "type": "string"
+          },
+          "unresolved": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "output",
+          "receiver_role",
+          "receiver_task_kind",
+          "receiver_contract_ref",
+          "artifact_refs",
+          "allowed_feedback_refs",
+          "completed",
+          "unresolved",
+          "stop_reason"
+        ],
+        "title": "HandoffDraft",
+        "type": "object"
+      },
       "HistoricalCompletion": {
         "additionalProperties": false,
         "description": "Trusted collector evidence for work completed under the original authorization.",
@@ -2778,6 +3355,76 @@
           "manifest_sha256"
         ],
         "title": "ImageEvidence",
+        "type": "object"
+      },
+      "ImplementationOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "code_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Code Refs",
+            "type": "array"
+          },
+          "configuration_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "implementation_notes": {
+            "minLength": 1,
+            "title": "Implementation Notes",
+            "type": "string"
+          },
+          "role": {
+            "const": "A5",
+            "title": "Role",
+            "type": "string"
+          },
+          "run_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Run Refs",
+            "type": "array"
+          },
+          "run_request": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunRequestDraft"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "submission_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "code_refs",
+          "implementation_notes",
+          "configuration_ref",
+          "run_refs",
+          "run_request",
+          "submission_ref"
+        ],
+        "title": "ImplementationOutput",
         "type": "object"
       },
       "InternalOrigin": {
@@ -3337,6 +3984,137 @@
         "title": "ParameterValue",
         "type": "object"
       },
+      "PlanNode": {
+        "additionalProperties": false,
+        "properties": {
+          "budget_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "contract": {
+            "$ref": "#/components/schemas/TaskContract"
+          },
+          "contract_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "depends_on": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Depends On",
+            "type": "array"
+          },
+          "estimate_minor": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimate Minor"
+          },
+          "input_refs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Input Refs",
+            "type": "array"
+          },
+          "node_id": {
+            "minLength": 1,
+            "title": "Node Id",
+            "type": "string"
+          },
+          "resource_requirements": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Resource Requirements",
+            "type": "array"
+          },
+          "source_refs": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Source Refs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "node_id",
+          "contract_ref",
+          "contract",
+          "input_refs",
+          "depends_on",
+          "resource_requirements",
+          "estimate_minor",
+          "budget_ref",
+          "source_refs"
+        ],
+        "title": "PlanNode",
+        "type": "object"
+      },
+      "PlanRevision": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Authorization Refs",
+            "type": "array"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/TaskPlan"
+          },
+          "plan_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "plan_ref",
+          "tenant_id",
+          "project_id",
+          "plan",
+          "authorization_refs"
+        ],
+        "title": "PlanRevision",
+        "type": "object"
+      },
       "PreregDraft": {
         "additionalProperties": false,
         "properties": {
@@ -3746,6 +4524,59 @@
           "missing_policy_ref"
         ],
         "title": "ProtocolDraft",
+        "type": "object"
+      },
+      "ProtocolOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "calibration_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Calibration Refs",
+            "type": "array"
+          },
+          "protocol": {
+            "$ref": "#/components/schemas/ProtocolDraft"
+          },
+          "reference_calculation_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role": {
+            "const": "A3",
+            "title": "Role",
+            "type": "string"
+          },
+          "tolerance_basis": {
+            "minLength": 1,
+            "title": "Tolerance Basis",
+            "type": "string"
+          },
+          "version_diff": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Version Diff",
+            "type": "array"
+          }
+        },
+        "required": [
+          "role",
+          "protocol",
+          "calibration_refs",
+          "reference_calculation_ref",
+          "tolerance_basis",
+          "version_diff"
+        ],
+        "title": "ProtocolOutput",
         "type": "object"
       },
       "ProtocolRecord": {
@@ -4291,6 +5122,112 @@
         "title": "ReplicationInputs",
         "type": "object"
       },
+      "ResearchTask": {
+        "additionalProperties": false,
+        "properties": {
+          "active_snapshot": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "budget_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/ResearchTaskDraft"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ideating",
+                  "awaiting_selection",
+                  "designing",
+                  "executing",
+                  "reviewing"
+                ],
+                "type": "string"
+              },
+              {
+                "enum": [
+                  "draft",
+                  "paused",
+                  "blocked",
+                  "cancelled",
+                  "completed"
+                ],
+                "type": "string"
+              }
+            ],
+            "title": "Status"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "draft",
+          "task_ref",
+          "tenant_id",
+          "project_id",
+          "budget_ref",
+          "status",
+          "active_snapshot"
+        ],
+        "title": "ResearchTask",
+        "type": "object"
+      },
+      "ResearchTaskDraft": {
+        "additionalProperties": false,
+        "properties": {
+          "constraints": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Constraints",
+            "type": "array"
+          },
+          "mode": {
+            "minLength": 1,
+            "title": "Mode",
+            "type": "string"
+          },
+          "original_input": {
+            "minLength": 1,
+            "title": "Original Input",
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "title": "Question",
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "constraints",
+          "mode",
+          "original_input"
+        ],
+        "title": "ResearchTaskDraft",
+        "type": "object"
+      },
       "ResponseEnvelope": {
         "additionalProperties": false,
         "allOf": [
@@ -4573,6 +5510,58 @@
           "max_auto_retries"
         ],
         "title": "RetryPolicyView",
+        "type": "object"
+      },
+      "RoleOutputEnvelope": {
+        "additionalProperties": false,
+        "properties": {
+          "contract_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "output": {
+            "discriminator": {
+              "mapping": {
+                "A1": "#/components/schemas/StrategyOutput",
+                "A12": "#/components/schemas/WritingOutput",
+                "A2": "#/components/schemas/ExplorationOutput",
+                "A3": "#/components/schemas/ProtocolOutput",
+                "A4": "#/components/schemas/AnalysisOutput",
+                "A5": "#/components/schemas/ImplementationOutput",
+                "A7": "#/components/schemas/AuditReport"
+              },
+              "propertyName": "role"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StrategyOutput"
+              },
+              {
+                "$ref": "#/components/schemas/ExplorationOutput"
+              },
+              {
+                "$ref": "#/components/schemas/ProtocolOutput"
+              },
+              {
+                "$ref": "#/components/schemas/AnalysisOutput"
+              },
+              {
+                "$ref": "#/components/schemas/ImplementationOutput"
+              },
+              {
+                "$ref": "#/components/schemas/AuditReport"
+              },
+              {
+                "$ref": "#/components/schemas/WritingOutput"
+              }
+            ],
+            "title": "Output"
+          }
+        },
+        "required": [
+          "contract_ref",
+          "output"
+        ],
+        "title": "RoleOutputEnvelope",
         "type": "object"
       },
       "RunRequestDraft": {
@@ -5671,6 +6660,204 @@
         "title": "StopSpec",
         "type": "object"
       },
+      "StrategyOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "pcr_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pcr Reason"
+          },
+          "pending_approvals": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Pending Approvals",
+            "type": "array"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TaskPlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ranked_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Ranked Candidates",
+            "type": "array"
+          },
+          "rationale": {
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "role": {
+            "const": "A1",
+            "title": "Role",
+            "type": "string"
+          },
+          "unresolved": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          },
+          "unselected_candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Unselected Candidates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "role",
+          "ranked_candidates",
+          "unselected_candidates",
+          "rationale",
+          "plan",
+          "pending_approvals",
+          "unresolved",
+          "pcr_reason"
+        ],
+        "title": "StrategyOutput",
+        "type": "object"
+      },
+      "TaskContract": {
+        "additionalProperties": false,
+        "properties": {
+          "completion_conditions": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Completion Conditions",
+            "type": "array"
+          },
+          "output_contract_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "role": {
+            "enum": [
+              "A1",
+              "A2",
+              "A3",
+              "A4",
+              "A5",
+              "A7",
+              "A12"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "stop_conditions": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Stop Conditions",
+            "type": "array"
+          },
+          "task_kind": {
+            "minLength": 1,
+            "title": "Task Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "task_kind",
+          "output_contract_ref",
+          "completion_conditions",
+          "stop_conditions"
+        ],
+        "title": "TaskContract",
+        "type": "object"
+      },
+      "TaskPlan": {
+        "additionalProperties": false,
+        "properties": {
+          "change_impact": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Change Impact",
+            "type": "array"
+          },
+          "expected_active_revision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "input_snapshot": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "title": "Input Snapshot",
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/PlanNode"
+            },
+            "minItems": 1,
+            "title": "Nodes",
+            "type": "array"
+          },
+          "rationale": {
+            "minLength": 1,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "root_task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          }
+        },
+        "required": [
+          "root_task_ref",
+          "expected_active_revision",
+          "nodes",
+          "input_snapshot",
+          "rationale",
+          "change_impact"
+        ],
+        "title": "TaskPlan",
+        "type": "object"
+      },
       "TaskSnapshot": {
         "additionalProperties": false,
         "properties": {
@@ -6121,6 +7308,48 @@
         ],
         "title": "Unknown",
         "type": "object"
+      },
+      "WritingOutput": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "minItems": 1,
+            "title": "Claim Refs",
+            "type": "array"
+          },
+          "evidence_snapshot_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "manuscript": {
+            "minLength": 1,
+            "title": "Manuscript",
+            "type": "string"
+          },
+          "numerical_macro_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Numerical Macro Refs",
+            "type": "array"
+          },
+          "role": {
+            "const": "A12",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "manuscript",
+          "evidence_snapshot_ref",
+          "claim_refs",
+          "numerical_macro_refs"
+        ],
+        "title": "WritingOutput",
+        "type": "object"
       }
     }
   },
@@ -6185,6 +7414,7 @@
       "ClaimScience": "service_owned",
       "CodeEvidence": "service_owned",
       "ConfirmationProfile": "service_owned",
+      "ContextManifest": "service_owned",
       "CorrectionCheck": "service_owned",
       "Delegation": "service_owned",
       "DependencyEvidence": "service_owned",
@@ -6210,9 +7440,13 @@
       "FixedSelectionHistory": "service_owned",
       "FixedSplit": "service_owned",
       "FixedUnitSpec": "service_owned",
+      "Handoff": "service_owned",
+      "HandoffDraft": "caller_input",
       "ImageEvidence": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
+      "PlanNode": "caller_input",
+      "PlanRevision": "service_owned",
       "PreregDraft": "caller_input",
       "PreregRecord": "service_owned",
       "ProtocolDraft": "caller_input",
@@ -6220,8 +7454,11 @@
       "ReferenceRequest": "caller_input",
       "ReleaseManifestBody": "service_owned",
       "ReleaseReceipt": "service_owned",
+      "ResearchTask": "service_owned",
+      "ResearchTaskDraft": "caller_input",
       "ResponseEnvelope": "service_owned",
       "RetryCheck": "service_owned",
+      "RoleOutputEnvelope": "caller_input",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
       "SanitySnapshot": "service_owned",
@@ -6229,6 +7466,8 @@
       "SelectionRule": "service_owned",
       "SettlementCheck": "service_owned",
       "SignatureEnvelope": "service_owned",
+      "TaskContract": "service_owned",
+      "TaskPlan": "caller_input",
       "TaskSnapshot": "service_owned",
       "TaskTransitionCheck": "service_owned",
       "TerminalCorrection": "service_owned",
@@ -6240,12 +7479,35 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "plan graph and expected active revision; task qualification and root budget",
+      "context freshness, authorization, capacity and protected inputs",
+      "handoff recipient, exact contracts and feedback authorization",
       "strict JSON parsing (duplicate keys and non-finite numbers)",
       "interval endpoint ordering and domain-specific normalization",
       "trusted origin, exact target, active delegation and lease",
       "reference resolution and eligibility, scientific version and transition guards"
     ],
     "runtime_validation_required": true,
+    "task_and_handoff": {
+      "pure_guards": [
+        "validate_plan",
+        "validate_context",
+        "validate_role_output",
+        "accept_handoff"
+      ],
+      "requires_authoritative_read_ports": true,
+      "role_outputs": [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A7",
+        "A12"
+      ],
+      "scientific_id": "unsupported_for_batch7_contracts",
+      "side_effects": "none"
+    },
     "unlisted_objects_and_operations": "unsupported",
     "validate_transition": {
       "attempt": "AttemptTransitionCheck",
@@ -6301,6 +7563,9 @@
     },
     "ConfirmationProfile": {
       "$ref": "#/components/schemas/ConfirmationProfile"
+    },
+    "ContextManifest": {
+      "$ref": "#/components/schemas/ContextManifest"
     },
     "CorrectionCheck": {
       "$ref": "#/components/schemas/CorrectionCheck"
@@ -6377,6 +7642,12 @@
     "FixedUnitSpec": {
       "$ref": "#/components/schemas/FixedUnitSpec"
     },
+    "Handoff": {
+      "$ref": "#/components/schemas/Handoff"
+    },
+    "HandoffDraft": {
+      "$ref": "#/components/schemas/HandoffDraft"
+    },
     "ImageEvidence": {
       "$ref": "#/components/schemas/ImageEvidence"
     },
@@ -6385,6 +7656,12 @@
     },
     "MethodConfig": {
       "$ref": "#/components/schemas/MethodConfig"
+    },
+    "PlanNode": {
+      "$ref": "#/components/schemas/PlanNode"
+    },
+    "PlanRevision": {
+      "$ref": "#/components/schemas/PlanRevision"
     },
     "PreregDraft": {
       "$ref": "#/components/schemas/PreregDraft"
@@ -6407,11 +7684,20 @@
     "ReleaseReceipt": {
       "$ref": "#/components/schemas/ReleaseReceipt"
     },
+    "ResearchTask": {
+      "$ref": "#/components/schemas/ResearchTask"
+    },
+    "ResearchTaskDraft": {
+      "$ref": "#/components/schemas/ResearchTaskDraft"
+    },
     "ResponseEnvelope": {
       "$ref": "#/components/schemas/ResponseEnvelope"
     },
     "RetryCheck": {
       "$ref": "#/components/schemas/RetryCheck"
+    },
+    "RoleOutputEnvelope": {
+      "$ref": "#/components/schemas/RoleOutputEnvelope"
     },
     "RunRequestDraft": {
       "$ref": "#/components/schemas/RunRequestDraft"
@@ -6433,6 +7719,12 @@
     },
     "SignatureEnvelope": {
       "$ref": "#/components/schemas/SignatureEnvelope"
+    },
+    "TaskContract": {
+      "$ref": "#/components/schemas/TaskContract"
+    },
+    "TaskPlan": {
+      "$ref": "#/components/schemas/TaskPlan"
     },
     "TaskSnapshot": {
       "$ref": "#/components/schemas/TaskSnapshot"

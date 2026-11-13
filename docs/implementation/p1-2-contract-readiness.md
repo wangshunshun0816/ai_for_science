@@ -155,7 +155,7 @@ P1-2 完成要求：全对象覆盖、七入口/Schema 一致、适用待决项�
 | 项目 | 本批证据 | 后续 |
 | --- | --- | --- |
 | T02/T06 归属与 Scope | 项目级受信委派、统一消息、旧缺项只读、Scope 三值比较 | 完整账号与租户记录、真实身份及只读服务接入；跨范围科研映射需获批准 |
-| T03/T04 固定枚举目标 | UnitSpec、MissingPolicy、SelectionRule 子集及固定枚举 Protocol 独立预览向量 | 真实目标、精确授权及适用材料齐备前保持 Protocol 正式 ID 阻断；Prereg、RunRequest、ExecutionBinding 完整投影仍待 |
+| T03/T04 固定枚举目标 | UnitSpec、MissingPolicy、SelectionRule 子集及固定枚举 Protocol 独立预览向量 | 真实目标、精确授权及适用材料齐备前保持 Protocol 正式 ID 阻断；固定四题的 Prereg、RunRequest、ExecutionBinding 预映像及其限制见 §10 |
 | T10 七入口及导出 | 首批注册、生成 JSON Schema／OpenAPI、调用双方共用合同及漂移检查 | 扩展全对象覆盖及调用／提供方契约验证，继续补金样例和状态边 |
 | T03/T10 平台一致性 | Windows 3.12.14 与 Ubuntu 3.12.16 的 32 项规范字节／SHA-256 一致（含第五批整改新增 4 项），2 项非法输入均拒绝，两个 Schema SHA-256 一致 | 已完成本批向量对照。新增投影和端口继续扩大跨平台覆盖，Linux 正式运行仍单独验收 |
 
@@ -163,13 +163,17 @@ P1-2 完成要求：全对象覆盖、七入口/Schema 一致、适用待决项�
 
 ## 10. 第六批固定四题纯契约
 
-以 [第六批交付记录](p1-2-batch6-delivery.md) 跟踪。A0 人工验收待签收。
+A0 已验收第六批固定四题纯契约交付及整改。签收提交为 [`8e411604`](https://github.com/wangshunshun0816/ai_for_science/commit/8e4116041114c1954c2209cbf689f6eb6d66eb84)。见[第六批签收](decisions/A0-P1-2-batch6-acceptance.md)与[交付记录](p1-2-batch6-delivery.md)。
 
 | 项目 | 已交付 | 剩余与验收 |
 | --- | --- | --- |
 | T03/T04 固定枚举 Protocol | 只读目标解析、四题总体、适用性、基线及确定性预映像 | R04b 接入实际数据、切分、独立参考及协议批准。缺已审定 `protocol_use` 条款时阻断锁定 |
 | T04/T05 固定枚举 Prereg | 问题／族／选择历史、完整四题停止规则、阈值和 Scope、Arm 与基线、批准科学条款投影 | R05/R06 提供完整历史及族检查，R06 核验真实有效签名后锁定。`family_confirmation` 条款仍缺；历史标记清除权限待 A0 |
 | T04/T07 独立 ExecutionBinding 与确认 RunRequest | 代码／镜像／依赖／数据／方法及 sanity 的精确绑定、确定性确认预映像、对错批准的拒绝 | R08/R09/R10a 接入真实只读材料与 sanity、租约及启动授权；R07/R08c 接入实际预算及数据许可。相应用途条款缺失时阻断 |
-| T03/T10 导出与平台证据 | 目标视图 Schema、能力表，四个新预映像和七项拒绝向量跨平台复算 | 后续补齐全对象、所有模式、I-SCHEMA 调用两侧及其余金样例覆盖。Windows 纯契约通过后仍需 Linux 正式运行验收 |
+| T03/T10 导出与平台证据 | 目标视图 Schema、能力表；整改后 Ubuntu 229 项、Windows 21 项，7 个一致预映像、7 项原拒绝、9 组整改检查和 2 份 Schema 摘要一致 | 后续补齐全对象、所有模式、I-SCHEMA 调用两侧及其余金样例覆盖。Windows 纯契约通过后仍需 Linux 正式运行验收 |
 
 固定枚举首包采用精确 Scope，跨 Scope 的科研映射仍待审定。采样／描述型需独立方法参考及适用材料，其他未审定批准用途继续阻断。
+
+## 11. 第七批任务与交接纯契约
+
+见[第七批交付记录](p1-2-batch7-delivery.md)。人工验收待 A0。当前支持 ResearchTask、TaskPlan／PlanRevision、PlanNode／TaskContract、ContextManifest、七类最小输出及授权交接。已验证的 task_kind 仅为合成夹具；生产启用须取得对应资格、批准和配置。完整计划派生政策、真实原子替换、任务调度、上下文策略及脱敏视图装配留待 R16/R08b/R14/R09。完整 SanityRequest／SanityReport、ProtocolBundle、RoleQualification、账户／租户／项目及未具备的角色工件目标继续按 P1-2 或其提供方节点跟踪。

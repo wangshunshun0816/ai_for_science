@@ -2,7 +2,7 @@
 
 ## 依据与范围
 
-开工时本地 HEAD、origin/main 与 GitHub main 均为第四批签收提交 `14162515f2a4ac5c55cd122e06e18a843291dff1`，工作区干净。依据 AGENTS.md、开发指南 §3.4／§5.3、大方案 §5.1／§5.5／§6.4 和附录 A.1，以及 [首组批准](decisions/A0-R02-first-contracts-checklist.md)、[Q-04～Q-07 批准](decisions/A0-P1-2-Q04-Q07-checklist.md)及本批授权。第四批为限定范围通过，第五批人工验收待 A0。
+开工时本地 HEAD、origin/main 与 GitHub main 均为第四批签收提交 `14162515f2a4ac5c55cd122e06e18a843291dff1`，工作区干净。依据 AGENTS.md、开发指南 §3.4／§5.3、大方案 §5.1／§5.5／§6.4 和附录 A.1，以及 [首组批准](decisions/A0-R02-first-contracts-checklist.md)、[Q-04～Q-07 批准](decisions/A0-P1-2-Q04-Q07-checklist.md)及本批授权。第四批为限定范围通过，第五批为限定范围通过。A0 已验收本批限定交付及整改。见[人工签收](decisions/A0-P1-2-batch5-acceptance.md)及[签收提交 `c378993`](https://github.com/wangshunshun0816/ai_for_science/commit/c378993cbbf19ff54452dc9165ed2cdfc59104d6)。
 
 | 项目 | 已实现与验证 | 仍受阻 |
 | --- | --- | --- |

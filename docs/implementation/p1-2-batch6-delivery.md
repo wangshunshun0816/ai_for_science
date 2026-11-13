@@ -25,7 +25,7 @@
 
 ## 4. 待办与 CI
 
-历史标记清除权限、跨 Scope 科研映射、其他用途条款、采样及描述型分支仍按原决定处理。真实服务接入、完整 I-SCHEMA、其余金样例及 Linux 正式运行仍待对应阶段。第六批人工验收待 A0。
+历史标记清除权限、跨 Scope 科研映射、其他用途条款、采样及描述型分支仍按原决定处理。真实服务接入、完整 I-SCHEMA、其余金样例及 Linux 正式运行仍待对应阶段。A0 已验收本批限定交付及整改。见[人工签收](decisions/A0-P1-2-batch6-acceptance.md)及[签收提交 `8e41160`](https://github.com/wangshunshun0816/ai_for_science/commit/8e4116041114c1954c2209cbf689f6eb6d66eb84)。
 
 GitHub Actions [运行 43318093230](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230) 已完成，结果为 **Success**，运行记录从开始到完成更新用时 23 秒。该运行在 `main` 手动触发，实际 SHA 为 `df85e6c00928ffdfdfc5463eb322c564c281009e`，与第六批交付提交一致。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43318093230/job/131531276420) 的锁定工具安装、Python 安装、`Locked local checks and build` 均成功。Checkout 步骤成功，运行注解记录了 `actions/checkout` 的 Node.js 20 弃用警告，runner 使用 Node.js 24 执行。
 
@@ -46,4 +46,4 @@ GitHub Actions [运行 43318093230](https://github.com/wangshunshun0816/ai_for_s
 
 完整族选择和数据暴露事实、分析独立校准与实际工件核验仍由对应权威来源提供。本批只支持固定四题已明确的尝试选择和反馈规则；其他预注册策略缺规范时阻断。未注册目标域、未审定批准用途、跨 Scope 映射、历史标记清除、采样／描述型启用继续按既有边界处理。生产服务装配和实际运行另验收。
 
-GitHub Actions [运行 43323478957](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957) 在 `main` 手动触发，结果为 **Success**。实际运行 SHA 为 `b2e2fb93eb9a5823d9ba313ff64c163071133daf`，与第六批整改提交一致。从运行开始到完成更新为 26 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957/job/131549915158)的锁定检查与构建通过。Checkout 成功，唯一警告为固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。 A0 签收待填写。
+GitHub Actions [运行 43323478957](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957) 在 `main` 手动触发，结果为 **Success**。实际运行 SHA 为 `b2e2fb93eb9a5823d9ba313ff64c163071133daf`，与第六批整改提交一致。从运行开始到完成更新为 26 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43323478957/job/131549915158)的锁定检查与构建通过。Checkout 成功，唯一警告为固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。

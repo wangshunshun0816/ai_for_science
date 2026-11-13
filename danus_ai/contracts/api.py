@@ -12,6 +12,7 @@ from .claims import (
     EvidenceEvent,
     claim_content_version,
 )
+from .context import ContextManifest
 from .first_objects import (
     CandidateDraft,
     CandidateRecord,
@@ -50,9 +51,18 @@ from .messages import (
     TrustedRequestContext,
 )
 from .observations import EvaluationView, FixedFourPolicy, TrustedObservation
+from .planning import (
+    PlanNode,
+    PlanRevision,
+    ResearchTask,
+    ResearchTaskDraft,
+    TaskContract,
+    TaskPlan,
+)
 from .projections import content_version, validate_candidate_version
 from .protocol_targets import FixedMissingPolicy, FixedProtocolTargets, FixedUnitSpec, SelectionRule
 from .references import MethodConfig
+from .role_outputs import Handoff, HandoffDraft, RoleOutputEnvelope
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
 from .scope import Scope
 from .signing import ApprovalSubject, ReleaseManifestBody, ReleaseReceipt, SignatureEnvelope
@@ -123,10 +133,20 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     ProtocolDraft,
     PreregDraft,
     RunRequestDraft,
+    ResearchTaskDraft,
+    PlanNode,
+    TaskPlan,
+    RoleOutputEnvelope,
+    HandoffDraft,
     ReferenceRequest,
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    ResearchTask,
+    PlanRevision,
+    TaskContract,
+    ContextManifest,
+    Handoff,
     CandidateRecord,
     ProtocolRecord,
     PreregRecord,
@@ -298,7 +318,22 @@ def schema_capabilities() -> dict[str, object]:
         },
         "unlisted_objects_and_operations": "unsupported",
         "runtime_validation_required": True,
+        "task_and_handoff": {
+            "pure_guards": [
+                "validate_plan",
+                "validate_context",
+                "validate_role_output",
+                "accept_handoff",
+            ],
+            "requires_authoritative_read_ports": True,
+            "role_outputs": ["A1", "A2", "A3", "A4", "A5", "A7", "A12"],
+            "scientific_id": "unsupported_for_batch7_contracts",
+            "side_effects": "none",
+        },
         "runtime_only_checks": [
+            "plan graph and expected active revision; task qualification and root budget",
+            "context freshness, authorization, capacity and protected inputs",
+            "handoff recipient, exact contracts and feedback authorization",
             "strict JSON parsing (duplicate keys and non-finite numbers)",
             "interval endpoint ordering and domain-specific normalization",
             "trusted origin, exact target, active delegation and lease",
