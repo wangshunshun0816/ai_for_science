@@ -769,12 +769,21 @@ class FixedFour:
             self._check_record(value, result)
         return result
 
+    def resolve_sanity_binding(
+        self, ref: ScientificRef, *, protocol_basis: ScientificRef | None = None
+    ) -> ExecutionBinding:
+        binding = self._typed(ref, ExecutionBinding)
+        if self.binding(binding, protocol_basis=protocol_basis).version != ref.content_version:
+            raise ContractBlocked("TARGET_VERSION_MISMATCH: ExecutionBinding")
+        return binding
+
     def check_sanity(
         self,
         value: RunRequestRecord,
         binding: ExecutionBinding,
         *,
         protocol_basis: ScientificRef | None = None,
+        expected_report: SanitySnapshot | None = None,
     ) -> None:
         value = RunRequestRecord.model_validate(value)
         resolved = self._typed(value.execution_binding_ref, ExecutionBinding)
@@ -799,7 +808,8 @@ class FixedFour:
         report = SanitySnapshot.model_validate(report)
         profile = self.target(binding.validation_profile_ref, ConfirmationProfile)
         if (
-            report.locator != value.sanity_ref
+            (expected_report is not None and report != expected_report)
+            or report.locator != value.sanity_ref
             or (report.tenant_id, report.project_id)
             != (self.context.tenant_id, self.context.project_id)
             or report.binding_ref != value.execution_binding_ref

@@ -310,7 +310,7 @@ def test_shared_request_contract_and_readonly_guards() -> None:
 
 def test_registry_export_and_transition_fail_closed() -> None:
     with pytest.raises(ContractBlocked, match="OBJECT_UNSUPPORTED"):
-        validate_object("SanityReport", {})
+        validate_object("UnregisteredObject", {})
     with pytest.raises(ContractBlocked, match="TRANSITION_UNSUPPORTED"):
         validate_transition("publish", {}, trusted=True)
     with pytest.raises(ContractBlocked, match="SERVICE_OWNED"):

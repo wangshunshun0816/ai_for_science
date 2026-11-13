@@ -66,6 +66,14 @@ from .role_outputs import Handoff, HandoffDraft, RoleOutputEnvelope
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
 from .scope import Scope
 from .signing import ApprovalSubject, ReleaseManifestBody, ReleaseReceipt, SignatureEnvelope
+from .submission import (
+    ClaimSubmission,
+    ClaimSubmissionDraft,
+    EvidenceReport,
+    GateExecution,
+    SanityReport,
+    SanityRequest,
+)
 from .transitions import (
     AttemptFacts,
     AttemptSnapshot,
@@ -129,6 +137,8 @@ class EngineeringCheck(StrictContract):
 
 
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    ClaimSubmissionDraft,
+    SanityRequest,
     CandidateDraft,
     ProtocolDraft,
     PreregDraft,
@@ -142,6 +152,9 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    ClaimSubmission,
+    GateExecution,
+    SanityReport,
     ResearchTask,
     PlanRevision,
     TaskContract,
@@ -206,7 +219,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     CorrectionCheck,
     EngineeringCheck,
 )
-_OUTPUT_MODELS: tuple[type[StrictContract], ...] = (EvaluationView,)
+_OUTPUT_MODELS: tuple[type[StrictContract], ...] = (EvaluationView, EvidenceReport)
 
 
 def schema_registry() -> dict[
@@ -333,7 +346,20 @@ def schema_capabilities() -> dict[str, object]:
             "scientific_id": "unsupported_for_batch7_contracts",
             "side_effects": "none",
         },
+        "fixed_four_submission": {
+            "guards": [
+                "check_submission_draft",
+                "check_submission_transition",
+                "check_submission_report",
+                "check_sanity_request",
+                "check_sanity_report",
+            ],
+            "authority": "service_assembled_read_ports",
+            "side_effects": "none",
+        },
         "runtime_only_checks": [
+            "submission decision and report binding, gate evidence and R07 usage provenance",
+            "sanity binding, authoritative suite/profile coverage and current approvals",
             "plan graph and expected active revision; task qualification and root budget",
             "context freshness, authorization, capacity and protected inputs",
             "handoff recipient, exact contracts and feedback authorization",

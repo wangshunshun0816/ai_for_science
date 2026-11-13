@@ -1466,6 +1466,114 @@
       "title": "ClaimScience",
       "type": "object"
     },
+    "ClaimSubmission": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "draft": {
+          "$ref": "#/$defs/ClaimSubmissionDraft"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "report_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "received",
+            "checking",
+            "accepted",
+            "rejected",
+            "needs_evidence",
+            "error"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "draft",
+        "status",
+        "report_ref",
+        "claim_ref"
+      ],
+      "title": "ClaimSubmission",
+      "type": "object"
+    },
+    "ClaimSubmissionDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "premise_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Premise Refs",
+          "type": "array"
+        },
+        "prereg_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "run_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Run Refs",
+          "type": "array"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "statement": {
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "statement",
+        "scope_ref",
+        "run_refs",
+        "protocol_ref",
+        "prereg_ref",
+        "premise_refs"
+      ],
+      "title": "ClaimSubmissionDraft",
+      "type": "object"
+    },
     "ClosedInterval": {
       "additionalProperties": false,
       "properties": {
@@ -2370,6 +2478,91 @@
       "title": "EvidenceEvent",
       "type": "object"
     },
+    "EvidenceReport": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Audit Refs",
+          "type": "array"
+        },
+        "basis_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Basis Refs",
+          "type": "array"
+        },
+        "decision": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "needs_evidence",
+            "error"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "gate_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Gate Refs",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "observation_bindings": {
+          "items": {
+            "$ref": "#/$defs/ObservationBinding"
+          },
+          "title": "Observation Bindings",
+          "type": "array"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "repair_scope": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Repair Scope"
+        },
+        "submission_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "submission_ref",
+        "decision",
+        "gate_refs",
+        "basis_refs",
+        "observation_bindings",
+        "audit_refs",
+        "repair_scope"
+      ],
+      "title": "EvidenceReport",
+      "type": "object"
+    },
     "ExecutionBinding": {
       "additionalProperties": false,
       "description": "No RunRequest/report/back-reference fields can be supplied.",
@@ -3086,6 +3279,120 @@
         "independence_basis_ref"
       ],
       "title": "FixedUnitSpec",
+      "type": "object"
+    },
+    "GateExecution": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "ended_at": {
+          "title": "Ended At",
+          "type": "string"
+        },
+        "gate": {
+          "enum": [
+            "G0",
+            "G1",
+            "G2"
+          ],
+          "title": "Gate",
+          "type": "string"
+        },
+        "invocation_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Invocation Refs",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "policy_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "pass",
+            "fail",
+            "needs_evidence",
+            "error"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "rework_parent_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "title": "Started At",
+          "type": "string"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "trace_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "usage_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Usage Refs",
+          "type": "array"
+        },
+        "wait_reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Wait Reason"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "subject_ref",
+        "gate",
+        "attempt",
+        "policy_ref",
+        "trace_ref",
+        "invocation_refs",
+        "usage_refs",
+        "started_at",
+        "ended_at",
+        "wait_reason",
+        "rework_parent_ref",
+        "result"
+      ],
+      "title": "GateExecution",
       "type": "object"
     },
     "Handoff": {
@@ -6017,6 +6324,46 @@
       "title": "SafetyLimits",
       "type": "object"
     },
+    "SanityCheckEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "basis_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Basis Refs",
+          "type": "array"
+        },
+        "coverage": {
+          "minLength": 1,
+          "title": "Coverage",
+          "type": "string"
+        },
+        "output_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Output Refs",
+          "type": "array"
+        },
+        "residual_limits": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Residual Limits",
+          "type": "array"
+        }
+      },
+      "required": [
+        "basis_refs",
+        "output_refs",
+        "coverage",
+        "residual_limits"
+      ],
+      "title": "SanityCheckEvidence",
+      "type": "object"
+    },
     "SanityInputs": {
       "additionalProperties": false,
       "properties": {
@@ -6028,6 +6375,109 @@
         "sanity_request_ref"
       ],
       "title": "SanityInputs",
+      "type": "object"
+    },
+    "SanityReport": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_bindings": {
+          "items": {
+            "$ref": "#/$defs/ApprovalLocator"
+          },
+          "title": "Approval Bindings",
+          "type": "array"
+        },
+        "binding_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "checks": {
+          "additionalProperties": {
+            "enum": [
+              "pass",
+              "defect",
+              "error",
+              "not_covered",
+              "not_applicable"
+            ],
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Checks",
+          "type": "object"
+        },
+        "evidence": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SanityCheckEvidence"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Evidence",
+          "type": "object"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "not_applicable_bases": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Not Applicable Bases",
+          "type": "object"
+        },
+        "profile_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "stale": {
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "suite_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "binding_ref",
+        "suite_ref",
+        "profile_ref",
+        "checks",
+        "stale",
+        "approval_bindings",
+        "not_applicable_bases",
+        "evidence"
+      ],
+      "title": "SanityReport",
+      "type": "object"
+    },
+    "SanityRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "binding_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "binding_ref"
+      ],
+      "title": "SanityRequest",
       "type": "object"
     },
     "SanitySnapshot": {
@@ -7434,6 +7884,17 @@
       ],
       "service_api": "FixedFour"
     },
+    "fixed_four_submission": {
+      "authority": "service_assembled_read_ports",
+      "guards": [
+        "check_submission_draft",
+        "check_submission_transition",
+        "check_submission_report",
+        "check_sanity_request",
+        "check_sanity_report"
+      ],
+      "side_effects": "none"
+    },
     "objects": {
       "ApplicabilityBasis": "service_owned",
       "ApprovalDisposition": "service_owned",
@@ -7448,6 +7909,8 @@
       "CandidateRecord": "service_owned",
       "ClaimRecord": "service_owned",
       "ClaimScience": "service_owned",
+      "ClaimSubmission": "service_owned",
+      "ClaimSubmissionDraft": "caller_input",
       "CodeEvidence": "service_owned",
       "ConfirmationProfile": "service_owned",
       "ContextManifest": "service_owned",
@@ -7459,6 +7922,7 @@
       "ErrorDetail": "service_owned",
       "EvaluationView": "output_only",
       "EvidenceEvent": "service_owned",
+      "EvidenceReport": "output_only",
       "ExecutionBinding": "service_owned",
       "FixedBaseline": "service_owned",
       "FixedDataset": "service_owned",
@@ -7476,6 +7940,7 @@
       "FixedSelectionHistory": "service_owned",
       "FixedSplit": "service_owned",
       "FixedUnitSpec": "service_owned",
+      "GateExecution": "service_owned",
       "Handoff": "service_owned",
       "HandoffDraft": "caller_input",
       "ImageEvidence": "service_owned",
@@ -7497,6 +7962,8 @@
       "RoleOutputEnvelope": "caller_input",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
+      "SanityReport": "service_owned",
+      "SanityRequest": "caller_input",
       "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
       "SelectionRule": "service_owned",
@@ -7515,6 +7982,8 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "submission decision and report binding, gate evidence and R07 usage provenance",
+      "sanity binding, authoritative suite/profile coverage and current approvals",
       "plan graph and expected active revision; task qualification and root budget",
       "context freshness, authorization, capacity and protected inputs",
       "handoff recipient, exact contracts and feedback authorization",
@@ -7600,6 +8069,12 @@
     "ClaimScience": {
       "$ref": "#/$defs/ClaimScience"
     },
+    "ClaimSubmission": {
+      "$ref": "#/$defs/ClaimSubmission"
+    },
+    "ClaimSubmissionDraft": {
+      "$ref": "#/$defs/ClaimSubmissionDraft"
+    },
     "CodeEvidence": {
       "$ref": "#/$defs/CodeEvidence"
     },
@@ -7632,6 +8107,9 @@
     },
     "EvidenceEvent": {
       "$ref": "#/$defs/EvidenceEvent"
+    },
+    "EvidenceReport": {
+      "$ref": "#/$defs/EvidenceReport"
     },
     "ExecutionBinding": {
       "$ref": "#/$defs/ExecutionBinding"
@@ -7683,6 +8161,9 @@
     },
     "FixedUnitSpec": {
       "$ref": "#/$defs/FixedUnitSpec"
+    },
+    "GateExecution": {
+      "$ref": "#/$defs/GateExecution"
     },
     "Handoff": {
       "$ref": "#/$defs/Handoff"
@@ -7746,6 +8227,12 @@
     },
     "RunRequestRecord": {
       "$ref": "#/$defs/RunRequestRecord"
+    },
+    "SanityReport": {
+      "$ref": "#/$defs/SanityReport"
+    },
+    "SanityRequest": {
+      "$ref": "#/$defs/SanityRequest"
     },
     "SanitySnapshot": {
       "$ref": "#/$defs/SanitySnapshot"

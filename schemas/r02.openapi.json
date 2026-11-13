@@ -1467,6 +1467,114 @@
         "title": "ClaimScience",
         "type": "object"
       },
+      "ClaimSubmission": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "draft": {
+            "$ref": "#/components/schemas/ClaimSubmissionDraft"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "report_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "received",
+              "checking",
+              "accepted",
+              "rejected",
+              "needs_evidence",
+              "error"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "draft",
+          "status",
+          "report_ref",
+          "claim_ref"
+        ],
+        "title": "ClaimSubmission",
+        "type": "object"
+      },
+      "ClaimSubmissionDraft": {
+        "additionalProperties": false,
+        "properties": {
+          "premise_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Premise Refs",
+            "type": "array"
+          },
+          "prereg_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "protocol_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "run_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "minItems": 1,
+            "title": "Run Refs",
+            "type": "array"
+          },
+          "scope_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "statement": {
+            "minLength": 1,
+            "title": "Statement",
+            "type": "string"
+          }
+        },
+        "required": [
+          "statement",
+          "scope_ref",
+          "run_refs",
+          "protocol_ref",
+          "prereg_ref",
+          "premise_refs"
+        ],
+        "title": "ClaimSubmissionDraft",
+        "type": "object"
+      },
       "ClosedInterval": {
         "additionalProperties": false,
         "properties": {
@@ -2371,6 +2479,91 @@
         "title": "EvidenceEvent",
         "type": "object"
       },
+      "EvidenceReport": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Audit Refs",
+            "type": "array"
+          },
+          "basis_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Basis Refs",
+            "type": "array"
+          },
+          "decision": {
+            "enum": [
+              "accepted",
+              "rejected",
+              "needs_evidence",
+              "error"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "gate_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Gate Refs",
+            "type": "array"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "observation_bindings": {
+            "items": {
+              "$ref": "#/components/schemas/ObservationBinding"
+            },
+            "title": "Observation Bindings",
+            "type": "array"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "repair_scope": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repair Scope"
+          },
+          "submission_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "submission_ref",
+          "decision",
+          "gate_refs",
+          "basis_refs",
+          "observation_bindings",
+          "audit_refs",
+          "repair_scope"
+        ],
+        "title": "EvidenceReport",
+        "type": "object"
+      },
       "ExecutionBinding": {
         "additionalProperties": false,
         "description": "No RunRequest/report/back-reference fields can be supplied.",
@@ -3087,6 +3280,120 @@
           "independence_basis_ref"
         ],
         "title": "FixedUnitSpec",
+        "type": "object"
+      },
+      "GateExecution": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "minimum": 1,
+            "title": "Attempt",
+            "type": "integer"
+          },
+          "ended_at": {
+            "title": "Ended At",
+            "type": "string"
+          },
+          "gate": {
+            "enum": [
+              "G0",
+              "G1",
+              "G2"
+            ],
+            "title": "Gate",
+            "type": "string"
+          },
+          "invocation_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Invocation Refs",
+            "type": "array"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "policy_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "needs_evidence",
+              "error"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "rework_parent_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "started_at": {
+            "title": "Started At",
+            "type": "string"
+          },
+          "subject_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "trace_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "usage_refs": {
+            "items": {
+              "$ref": "#/components/schemas/RecordLocator"
+            },
+            "title": "Usage Refs",
+            "type": "array"
+          },
+          "wait_reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wait Reason"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "subject_ref",
+          "gate",
+          "attempt",
+          "policy_ref",
+          "trace_ref",
+          "invocation_refs",
+          "usage_refs",
+          "started_at",
+          "ended_at",
+          "wait_reason",
+          "rework_parent_ref",
+          "result"
+        ],
+        "title": "GateExecution",
         "type": "object"
       },
       "Handoff": {
@@ -6018,6 +6325,46 @@
         "title": "SafetyLimits",
         "type": "object"
       },
+      "SanityCheckEvidence": {
+        "additionalProperties": false,
+        "properties": {
+          "basis_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Basis Refs",
+            "type": "array"
+          },
+          "coverage": {
+            "minLength": 1,
+            "title": "Coverage",
+            "type": "string"
+          },
+          "output_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "title": "Output Refs",
+            "type": "array"
+          },
+          "residual_limits": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Residual Limits",
+            "type": "array"
+          }
+        },
+        "required": [
+          "basis_refs",
+          "output_refs",
+          "coverage",
+          "residual_limits"
+        ],
+        "title": "SanityCheckEvidence",
+        "type": "object"
+      },
       "SanityInputs": {
         "additionalProperties": false,
         "properties": {
@@ -6029,6 +6376,109 @@
           "sanity_request_ref"
         ],
         "title": "SanityInputs",
+        "type": "object"
+      },
+      "SanityReport": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_bindings": {
+            "items": {
+              "$ref": "#/components/schemas/ApprovalLocator"
+            },
+            "title": "Approval Bindings",
+            "type": "array"
+          },
+          "binding_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "checks": {
+            "additionalProperties": {
+              "enum": [
+                "pass",
+                "defect",
+                "error",
+                "not_covered",
+                "not_applicable"
+              ],
+              "type": "string"
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SanityCheckEvidence"
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "title": "Evidence",
+            "type": "object"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "not_applicable_bases": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ScientificRef"
+            },
+            "propertyNames": {
+              "minLength": 1
+            },
+            "title": "Not Applicable Bases",
+            "type": "object"
+          },
+          "profile_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "suite_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "binding_ref",
+          "suite_ref",
+          "profile_ref",
+          "checks",
+          "stale",
+          "approval_bindings",
+          "not_applicable_bases",
+          "evidence"
+        ],
+        "title": "SanityReport",
+        "type": "object"
+      },
+      "SanityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "binding_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          }
+        },
+        "required": [
+          "binding_ref"
+        ],
+        "title": "SanityRequest",
         "type": "object"
       },
       "SanitySnapshot": {
@@ -7441,6 +7891,17 @@
       ],
       "service_api": "FixedFour"
     },
+    "fixed_four_submission": {
+      "authority": "service_assembled_read_ports",
+      "guards": [
+        "check_submission_draft",
+        "check_submission_transition",
+        "check_submission_report",
+        "check_sanity_request",
+        "check_sanity_report"
+      ],
+      "side_effects": "none"
+    },
     "objects": {
       "ApplicabilityBasis": "service_owned",
       "ApprovalDisposition": "service_owned",
@@ -7455,6 +7916,8 @@
       "CandidateRecord": "service_owned",
       "ClaimRecord": "service_owned",
       "ClaimScience": "service_owned",
+      "ClaimSubmission": "service_owned",
+      "ClaimSubmissionDraft": "caller_input",
       "CodeEvidence": "service_owned",
       "ConfirmationProfile": "service_owned",
       "ContextManifest": "service_owned",
@@ -7466,6 +7929,7 @@
       "ErrorDetail": "service_owned",
       "EvaluationView": "output_only",
       "EvidenceEvent": "service_owned",
+      "EvidenceReport": "output_only",
       "ExecutionBinding": "service_owned",
       "FixedBaseline": "service_owned",
       "FixedDataset": "service_owned",
@@ -7483,6 +7947,7 @@
       "FixedSelectionHistory": "service_owned",
       "FixedSplit": "service_owned",
       "FixedUnitSpec": "service_owned",
+      "GateExecution": "service_owned",
       "Handoff": "service_owned",
       "HandoffDraft": "caller_input",
       "ImageEvidence": "service_owned",
@@ -7504,6 +7969,8 @@
       "RoleOutputEnvelope": "caller_input",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
+      "SanityReport": "service_owned",
+      "SanityRequest": "caller_input",
       "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
       "SelectionRule": "service_owned",
@@ -7522,6 +7989,8 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "submission decision and report binding, gate evidence and R07 usage provenance",
+      "sanity binding, authoritative suite/profile coverage and current approvals",
       "plan graph and expected active revision; task qualification and root budget",
       "context freshness, authorization, capacity and protected inputs",
       "handoff recipient, exact contracts and feedback authorization",
@@ -7607,6 +8076,12 @@
     "ClaimScience": {
       "$ref": "#/components/schemas/ClaimScience"
     },
+    "ClaimSubmission": {
+      "$ref": "#/components/schemas/ClaimSubmission"
+    },
+    "ClaimSubmissionDraft": {
+      "$ref": "#/components/schemas/ClaimSubmissionDraft"
+    },
     "CodeEvidence": {
       "$ref": "#/components/schemas/CodeEvidence"
     },
@@ -7639,6 +8114,9 @@
     },
     "EvidenceEvent": {
       "$ref": "#/components/schemas/EvidenceEvent"
+    },
+    "EvidenceReport": {
+      "$ref": "#/components/schemas/EvidenceReport"
     },
     "ExecutionBinding": {
       "$ref": "#/components/schemas/ExecutionBinding"
@@ -7690,6 +8168,9 @@
     },
     "FixedUnitSpec": {
       "$ref": "#/components/schemas/FixedUnitSpec"
+    },
+    "GateExecution": {
+      "$ref": "#/components/schemas/GateExecution"
     },
     "Handoff": {
       "$ref": "#/components/schemas/Handoff"
@@ -7753,6 +8234,12 @@
     },
     "RunRequestRecord": {
       "$ref": "#/components/schemas/RunRequestRecord"
+    },
+    "SanityReport": {
+      "$ref": "#/components/schemas/SanityReport"
+    },
+    "SanityRequest": {
+      "$ref": "#/components/schemas/SanityRequest"
     },
     "SanitySnapshot": {
       "$ref": "#/components/schemas/SanitySnapshot"

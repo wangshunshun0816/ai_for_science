@@ -17,7 +17,7 @@ Ubuntu CPython 3.12.16 运行 `bash scripts/verify.sh`，253 项通过，锁定�
 
 两侧用 `python -B tests/contracts/test_batch7.py` 生成向量。3 份规范字节及完整 SHA-256、15 个计划及上下文拒绝场景、两份 Schema 摘要相同，并执行交接、七角色形状和权限检查。计划及探索输出的期望字段独立手列，NFC／换行以显式字面量定义，再使用 Python 标准库按受限向量编码。原九个金样例及手算相对 `412e67e` 无字节差异。[Ubuntu 输出](evidence/p1-2-batch7-ubuntu.json) · [Windows 输出](evidence/p1-2-batch7-windows.json)
 
-GitHub Actions [运行 43351115237](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237) 在 `main` 手动触发，已完成，结果为 **Success**。实际运行 SHA 为 `e5188d22d0c47e5845d1b5ea853dba98535134ba`，与第七批交付提交一致。从运行开始到完成更新用时 28 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237/job/131642134859)的锁定工具和 Python 安装、完整工程检查及构建均成功。Checkout 成功，唯一警告是固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。A0 人工验收待签收。
+GitHub Actions [运行 43351115237](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237) 在 `main` 手动触发，已完成，结果为 **Success**。实际运行 SHA 为 `e5188d22d0c47e5845d1b5ea853dba98535134ba`，与第七批交付提交一致。从运行开始到完成更新用时 28 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237/job/131642134859)的锁定工具和 Python 安装、完整工程检查及构建均成功。Checkout 成功，唯一警告是固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。见文末后续签收状态。
 
 
 ## 验收整改
@@ -32,8 +32,12 @@ GitHub Actions [运行 43351115237](https://github.com/wangshunshun0816/ai_for_s
 | 角色输出，角色规格 §4.6／§5.1 | 未审阅自由文本替换、嵌套的同族确认反馈和矛盾审计结论均拒绝。自由文本与已审核接收视图逐字段匹配，结构化来源检查可见性和反馈族。严重度的最小判别是阻断／非阻断，具体细分量表随审计规范决定。 |
 | Schema 和向量，开发指南 §3.4／§5.3 | 两份生成物声明激活预检无写操作及接收视图要求。ContextManifest 与 Handoff 新增手列字段预期，标准库独立编码，接收正反例和既有向量在两侧执行。 |
 
-生产审阅／过滤服务的权威来源、敏感文本和语义注入识别、工件完整谱系及预算／权限来源仍由对应服务验收。授权定位类型细分、审计严重度细分以及合法恢复的业务同一性粒度如需扩展，按后续具体合同定稿。仓储、调度和原子 CAS 属后续工作。A0 待签收。
+生产审阅／过滤服务的权威来源、敏感文本和语义注入识别、工件完整谱系及预算／权限来源仍由对应服务验收。授权定位类型细分、审计严重度细分以及合法恢复的业务同一性粒度如需扩展，按后续具体合同定稿。仓储、调度和原子 CAS 属后续工作。见文末后续签收状态。
 
 Ubuntu 3.12.16 执行 `bash scripts/verify.sh`，267 项测试通过，锁定安装、静态检查、导入边界、Schema 检查和构建成功。Windows 3.12.14 使用 `%TEMP%/danus-r02-batch7-remediation` 原锁隔离环境，第七批 38 项通过。两侧执行 `python -B tests/contracts/test_batch7.py`，5 份规范 UTF-8 字节和完整 SHA-256、15 个原计划／上下文拒绝及两份 Schema 摘要相同，新增路径在两侧复验。原九个金样例和手算记录相对 `412e67e` 无字节差异。[Ubuntu 检查](evidence/p1-2-batch7-remediation-verify.log) · [Ubuntu 向量](evidence/p1-2-batch7-remediation-ubuntu.json) · [Windows 向量](evidence/p1-2-batch7-remediation-windows.json)
 
 GitHub Actions [整改运行 43354232528](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43354232528) 在 `main` 手动触发，结果为 **Success**。实际运行 SHA 为 `89c25da8cd9efe50e0509912ce3b06efd6ac26bf`，与第七批整改提交一致。从运行开始到完成更新用时 24 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43354232528/job/131652295785)的锁定检查和构建通过。Checkout 成功，唯一警告是固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。
+
+## 后续签收状态
+
+Jack_Wang 于 2026-11-13 签收通过，范围仅限第七批已交付及整改内容。签收提交 `e3b899b27842e1af7662252c2d0ed71781bbd6b8`，见[人工验收记录](decisions/A0-P1-2-batch7-acceptance.md)。
