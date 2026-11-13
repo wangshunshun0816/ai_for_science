@@ -51,6 +51,7 @@ from .messages import (
     TrustedRequestContext,
 )
 from .observations import EvaluationView, FixedFourPolicy, TrustedObservation
+from .ownership import OwnershipUnclaimed, PersonalAccount, PersonalTenant, Project
 from .planning import (
     PlanNode,
     PlanRevision,
@@ -188,6 +189,10 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     TrustedRequestContext,
     Delegation,
     LegacyIncomplete,
+    OwnershipUnclaimed,
+    PersonalAccount,
+    PersonalTenant,
+    Project,
     ResponseEnvelope,
     ErrorDetail,
     FixedUnitSpec,
@@ -357,7 +362,13 @@ def schema_capabilities() -> dict[str, object]:
             "authority": "service_assembled_read_ports",
             "side_effects": "none",
         },
+        "ownership": {
+            "records": ["PersonalAccount", "PersonalTenant", "Project", "OwnershipUnclaimed"],
+            "runtime_guard": "require_ownership",
+            "checked_at": ["delegation_authorization", "delegated_reference_read"],
+        },
         "runtime_only_checks": [
+            "current exact account, tenant and project ownership relations and revisions",
             "submission decision and report binding, gate evidence and R07 usage provenance",
             "sanity binding, authoritative suite/profile coverage and current approvals",
             "plan graph and expected active revision; task qualification and root budget",

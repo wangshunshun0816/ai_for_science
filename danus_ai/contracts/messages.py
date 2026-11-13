@@ -8,6 +8,7 @@ from pydantic import ConfigDict, Field, model_validator
 
 from .base import AuthoritativeRecord, DraftContract, StrictContract
 from .guards import ContractBlocked, ReadOnlyPort, Ref, RequestContext, require_reference
+from .ownership import OwnershipReader, OwnershipUnclaimed, OwnershipVersions, require_ownership
 from .references import HistoricalRef, RecordLocator, ScientificRef, Text, UTCTime
 
 Payload = TypeVar("Payload", bound=StrictContract)
@@ -107,6 +108,7 @@ class AuthorizedDelegation:
     """Verified grant snapshot. Use requires re-reading current authority."""
 
     grant: Delegation
+    ownership: OwnershipVersions
 
     @property
     def request_context(self) -> RequestContext:
@@ -126,7 +128,7 @@ class DelegationState:
     current_lease: RecordLocator | None
 
 
-class ReferenceQueryPort(ReadOnlyPort, Protocol):
+class ReferenceQueryPort(ReadOnlyPort, OwnershipReader, Protocol):
     def delegation_state(
         self, ctx: RequestContext, locator: RecordLocator, /
     ) -> DelegationState | None:
@@ -140,6 +142,9 @@ def authorize_delegated_request(
     current_lease: RecordLocator,
     expected_purpose: str,
     now: datetime,
+    port: OwnershipReader,
+    *,
+    expected_ownership: OwnershipVersions | None = None,
 ) -> AuthorizedDelegation:
     """Use only authenticated context and currently resolved delegation/lease facts."""
     context = TrustedRequestContext.model_validate(context)
@@ -154,7 +159,13 @@ def authorize_delegated_request(
         or now >= datetime.fromisoformat(context.expires_at)
     ):
         raise ContractBlocked("DELEGATION_INVALID")
-    return AuthorizedDelegation(delegation.model_copy(deep=True))
+    scope = RequestContext(
+        context.tenant_id, context.project_id, context.principal_id, context.role, context.task_kind
+    )
+    versions = require_ownership(
+        scope, context.on_behalf_of_account, port, expected=expected_ownership
+    )
+    return AuthorizedDelegation(delegation.model_copy(deep=True), versions)
 
 
 def resolve_reference_query(
@@ -184,6 +195,8 @@ def resolve_reference_query(
         current.current_lease,
         expected_purpose,
         now,
+        port,
+        expected_ownership=authorization.ownership,
     )
     if verified.grant.operation != request.operation or ref not in verified.grant.target_refs:
         raise ContractBlocked("DELEGATION_SCOPE_MISMATCH")
@@ -200,7 +213,9 @@ class LegacyIncomplete(AuthoritativeRecord):
 
 
 class LegacyReadPort(Protocol):
-    def legacy(self, ctx: RequestContext, locator: RecordLocator, /) -> LegacyIncomplete | None: ...
+    def legacy(
+        self, ctx: RequestContext, locator: RecordLocator, /
+    ) -> LegacyIncomplete | OwnershipUnclaimed | None: ...
 
 
 def read_legacy(
@@ -209,6 +224,7 @@ def read_legacy(
     view = port.legacy(context, locator)
     if (
         view is None
+        or isinstance(view, OwnershipUnclaimed)
         or view.locator != locator
         or view.tenant_id != context.tenant_id
         or view.project_id != context.project_id

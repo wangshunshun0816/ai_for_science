@@ -47,6 +47,7 @@ from danus_ai.contracts.messages import (
     read_legacy,
     resolve_reference_query,
 )
+from danus_ai.contracts.ownership import OwnershipVersions, PersonalAccount, PersonalTenant, Project
 from danus_ai.contracts.parsing import ContractJSONError
 from danus_ai.contracts.projections import candidate_projection
 from danus_ai.contracts.protocol_targets import FixedProtocolTargets, protocol_science_preview
@@ -152,6 +153,33 @@ class Port:
         self.lease = grant.context.lease_ref if grant is not None else None
         self.resolve_calls = 0
 
+    def _fixture_versions(self, ctx: RequestContext, account_id: str, /) -> OwnershipVersions:
+        return OwnershipVersions(
+            RecordLocator(record_type="PersonalAccount", record_id=account_id, revision=1),
+            RecordLocator(record_type="PersonalTenant", record_id=ctx.tenant_id, revision=1),
+            RecordLocator(record_type="Project", record_id=ctx.project_id, revision=1),
+        )
+
+    def ownership_versions(
+        self, ctx: RequestContext, account_id: str, /
+    ) -> OwnershipVersions | None:
+        return self._fixture_versions(ctx, account_id)
+
+    def personal_account(self, ref: RecordLocator, /) -> PersonalAccount:
+        return PersonalAccount(
+            locator=ref,
+            login_subject="synthetic",
+            personal_tenant_ref=self._fixture_versions(CTX, ref.record_id).tenant,
+        )
+
+    def personal_tenant(self, ref: RecordLocator, /) -> PersonalTenant:
+        return PersonalTenant(
+            locator=ref, owner_account_ref=self._fixture_versions(CTX, "owner").account
+        )
+
+    def project(self, ref: RecordLocator, /) -> Project:
+        return Project(locator=ref, tenant_ref=self._fixture_versions(CTX, "owner").tenant)
+
     def delegation_state(
         self, ctx: RequestContext, locator: RecordLocator, /
     ) -> DelegationState | None:
@@ -222,7 +250,9 @@ def make_grant(operation: str = "references.resolve") -> Delegation:
 
 def authorize(grant: Delegation) -> AuthorizedDelegation:
     ctx = grant.context
-    return authorize_delegated_request(ctx, grant, grant.locator, ctx.lease_ref, "read", NOW)
+    return authorize_delegated_request(
+        ctx, grant, grant.locator, ctx.lease_ref, "read", NOW, Port(grant)
+    )
 
 
 def test_delegation_pins_identity_task_lease_and_purpose() -> None:
@@ -238,7 +268,7 @@ def test_delegation_pins_identity_task_lease_and_purpose() -> None:
         (grant, grant.locator, ctx.lease_ref, "read", now.replace(hour=3)),
     ]:
         with pytest.raises(ContractBlocked, match="DELEGATION_INVALID"):
-            authorize_delegated_request(ctx, wrong, expected, lease, purpose, time)
+            authorize_delegated_request(ctx, wrong, expected, lease, purpose, time, Port(grant))
     with pytest.raises(ContractBlocked, match="DELEGATION_INVALID"):
         authorize_delegated_request(
             ctx.model_copy(update={"task_id": "other"}),
@@ -247,6 +277,7 @@ def test_delegation_pins_identity_task_lease_and_purpose() -> None:
             ctx.lease_ref,
             "read",
             now,
+            Port(grant),
         )
 
 

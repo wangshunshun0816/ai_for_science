@@ -39,3 +39,7 @@ GitHub Actions [运行 43373228351](https://github.com/wangshunshun0816/ai_for_s
 - 两侧行为复验覆盖运行字段与旧样例适配、伪造权威字段、错版／归属及未授权引用、Sanity 自依赖与 profile 跳过、提交状态与报告不匹配、错误来源用量和缺题不能接受。字节对照覆盖指定六种合同各一个输入。原九个金样例、手算记录及设计基线无字节差异。
 
 [整改 CI 运行 43375110700](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43375110700) 由 `workflow_dispatch` 在 `main` 手动触发。GitHub API 核实实际 SHA 为 `16df8ec216ceae4e8ccc7edf7e1ab425284183b2`，最终状态为 `completed / success`。运行自 2026-11-13 05:54:54 UTC 开始，05:55:12 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43375110700/job/131719664882)的 Checkout、固定工具和 Python 安装、锁定检查及构建均通过。
+
+## 后续签收
+
+Jack_Wang 于 2026-11-13 签收通过，限第八批固定四题纯契约的已交付及整改内容。提交 `126095ae4e8fc806559cbfc209e66aa8ef9b8501`，见[验收记录](decisions/A0-P1-2-batch8-acceptance.md)。

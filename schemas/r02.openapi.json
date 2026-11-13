@@ -4163,6 +4163,25 @@
         "title": "ObservationRow",
         "type": "object"
       },
+      "OwnershipUnclaimed": {
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "status": {
+            "const": "ownership_unclaimed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "locator"
+        ],
+        "title": "OwnershipUnclaimed",
+        "type": "object"
+      },
       "ParameterRange": {
         "additionalProperties": false,
         "properties": {
@@ -4292,6 +4311,46 @@
           "value"
         ],
         "title": "ParameterValue",
+        "type": "object"
+      },
+      "PersonalAccount": {
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "login_subject": {
+            "minLength": 1,
+            "title": "Login Subject",
+            "type": "string"
+          },
+          "personal_tenant_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          }
+        },
+        "required": [
+          "locator",
+          "login_subject",
+          "personal_tenant_ref"
+        ],
+        "title": "PersonalAccount",
+        "type": "object"
+      },
+      "PersonalTenant": {
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "owner_account_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          }
+        },
+        "required": [
+          "locator",
+          "owner_account_ref"
+        ],
+        "title": "PersonalTenant",
         "type": "object"
       },
       "PlanNode": {
@@ -4737,6 +4796,23 @@
           "threshold_terms"
         ],
         "title": "PreregRecord",
+        "type": "object"
+      },
+      "Project": {
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_ref"
+        ],
+        "title": "Project",
         "type": "object"
       },
       "ProtocolDraft": {
@@ -7953,10 +8029,14 @@
       "ImageEvidence": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
+      "OwnershipUnclaimed": "service_owned",
+      "PersonalAccount": "service_owned",
+      "PersonalTenant": "service_owned",
       "PlanNode": "caller_input",
       "PlanRevision": "service_owned",
       "PreregDraft": "caller_input",
       "PreregRecord": "service_owned",
+      "Project": "service_owned",
       "ProtocolDraft": "caller_input",
       "ProtocolRecord": "service_owned",
       "ReferenceRequest": "caller_input",
@@ -7985,10 +8065,24 @@
       "TrustedObservation": "service_owned",
       "TrustedRequestContext": "service_owned"
     },
+    "ownership": {
+      "checked_at": [
+        "delegation_authorization",
+        "delegated_reference_read"
+      ],
+      "records": [
+        "PersonalAccount",
+        "PersonalTenant",
+        "Project",
+        "OwnershipUnclaimed"
+      ],
+      "runtime_guard": "require_ownership"
+    },
     "reference_operations": [
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "current exact account, tenant and project ownership relations and revisions",
       "submission decision and report binding, gate evidence and R07 usage provenance",
       "sanity binding, authoritative suite/profile coverage and current approvals",
       "plan graph and expected active revision; task qualification and root budget",
@@ -8187,6 +8281,15 @@
     "MethodConfig": {
       "$ref": "#/components/schemas/MethodConfig"
     },
+    "OwnershipUnclaimed": {
+      "$ref": "#/components/schemas/OwnershipUnclaimed"
+    },
+    "PersonalAccount": {
+      "$ref": "#/components/schemas/PersonalAccount"
+    },
+    "PersonalTenant": {
+      "$ref": "#/components/schemas/PersonalTenant"
+    },
     "PlanNode": {
       "$ref": "#/components/schemas/PlanNode"
     },
@@ -8198,6 +8301,9 @@
     },
     "PreregRecord": {
       "$ref": "#/components/schemas/PreregRecord"
+    },
+    "Project": {
+      "$ref": "#/components/schemas/Project"
     },
     "ProtocolDraft": {
       "$ref": "#/components/schemas/ProtocolDraft"
