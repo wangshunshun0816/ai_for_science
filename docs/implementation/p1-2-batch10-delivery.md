@@ -30,4 +30,6 @@ Windows CPython 3.12.14 使用临时隔离环境，通过现有依赖锁同步�
 - 用独立投影得到正确摘要的替代 profile 和套件，覆盖探索类型拒绝、确认 profile 缺必需项、套件偏离协议。作业附加通过字段、作业冒充报告和视图自报均拒绝。
 - 遍历包组件、独立参考与详细检查材料的显式依赖边，每条先核授权和内容再按精确定位复用遍历结果。回归覆盖合法 DAG、直接环、多节点环、缺依赖事实和同摘要未授权材料。普通引用不自动视为依赖；通用材料类型的依赖语义仍待对应目标规范，缺权威边事实阻断。
 - Ubuntu 3.12.16 完整检查及构建通过，300 项测试通过。Windows 3.12.14 同锁专项 12 项及生成物检查通过。四组手列向量和两份 Schema 跨平台一致，与整改前相同；公开合同、设计基线、原九个金样例、手算和锁文件无字节差异。[完整日志](evidence/p1-2-batch10-remediation-verify.log) · [Ubuntu](evidence/p1-2-batch10-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch10-remediation-windows.json)
-- 整改提交的远端 CI 待核验。原 CI 保留为整改前证据。
+- [整改 CI 43405543618](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43405543618) 在 main 运行。GitHub API 核实实际 SHA 为 `7159521436e8bd29daf12ea6aa39d03fc417977f`，最终结果为 completed / success。2026-11-13 09:58:48 UTC 开始，09:59:13 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43405543618/job/131818891358)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。 原 CI 保留为整改前证据。
+
+**仍待明确。** 当前绑定的选择规则，以及通用材料中哪些引用构成依赖边，均未定稿。合成端口验证通过仅证明守卫能够核验给定权威事实，不能关闭这两项。缺权威事实时继续阻断。
