@@ -17,4 +17,4 @@ Ubuntu CPython 3.12.16 运行 `bash scripts/verify.sh`，253 项通过，锁定�
 
 两侧用 `python -B tests/contracts/test_batch7.py` 生成向量。3 份规范字节及完整 SHA-256、15 个计划及上下文拒绝场景、两份 Schema 摘要相同，并执行交接、七角色形状和权限检查。计划及探索输出的期望字段独立手列，NFC／换行以显式字面量定义，再使用 Python 标准库按受限向量编码。原九个金样例及手算相对 `412e67e` 无字节差异。[Ubuntu 输出](evidence/p1-2-batch7-ubuntu.json) · [Windows 输出](evidence/p1-2-batch7-windows.json)
 
-对应提交的免费手动 CI 待核实。A0 人工验收待签收。
+GitHub Actions [运行 43351115237](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237) 在 `main` 手动触发，已完成，结果为 **Success**。实际运行 SHA 为 `e5188d22d0c47e5845d1b5ea853dba98535134ba`，与第七批交付提交一致。从运行开始到完成更新用时 28 秒。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43351115237/job/131642134859)的锁定工具和 Python 安装、完整工程检查及构建均成功。Checkout 成功，唯一警告是固定的 `actions/checkout` 使用已弃用的 Node.js 20，runner 改用 Node.js 24 执行。A0 人工验收待签收。
