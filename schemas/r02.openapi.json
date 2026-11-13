@@ -912,7 +912,10 @@
             "type": "string"
           },
           "severity": {
-            "minLength": 1,
+            "enum": [
+              "blocking",
+              "non_blocking"
+            ],
             "title": "Severity",
             "type": "string"
           }
@@ -4085,6 +4088,7 @@
             "items": {
               "$ref": "#/components/schemas/RecordLocator"
             },
+            "minItems": 1,
             "title": "Authorization Refs",
             "type": "array"
           },
@@ -5124,6 +5128,45 @@
       },
       "ResearchTask": {
         "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "draft"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "active_snapshot": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "not": {
+                    "enum": [
+                      "draft",
+                      "cancelled"
+                    ]
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "active_snapshot": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
         "properties": {
           "active_snapshot": {
             "anyOf": [
@@ -7489,6 +7532,12 @@
     ],
     "runtime_validation_required": true,
     "task_and_handoff": {
+      "activation_performs_write": false,
+      "handoff_requires_exact_receiver_review": true,
+      "plan_service_operations": [
+        "validate_plan",
+        "activate_plan"
+      ],
       "pure_guards": [
         "validate_plan",
         "validate_context",

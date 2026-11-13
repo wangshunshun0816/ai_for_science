@@ -1,0 +1,211 @@
+Resolved 19 packages in 6ms
+Resolved 19 packages in 1ms
+Uninstalled 1 package in 9ms
+ - danus-ai==0.1.0 (from file:///home/wangshunshun/danus-ai)
+Resolved 19 packages in 1ms
+   Building danus-ai @ file:///home/wangshunshun/danus-ai
+      Built danus-ai @ file:///home/wangshunshun/danus-ai
+Prepared 1 package in 651ms
+Installed 1 package in 3ms
+ + danus-ai==0.1.0 (from file:///home/wangshunshun/danus-ai)
+Python 3.12.16
+All checks passed!
+36 files already formatted
+Success: no issues found in 34 source files
+Import boundaries: PASS
+R02 schema bundles: verified
+........................................................................ [ 26%]
+........................................................................ [ 53%]
+........................................................................ [ 80%]
+...................................................                      [100%]
+267 passed in 11.80s
+Building source distribution...
+running sdist
+running egg_info
+writing danus_ai.egg-info/PKG-INFO
+writing dependency_links to danus_ai.egg-info/dependency_links.txt
+writing requirements to danus_ai.egg-info/requires.txt
+writing top-level names to danus_ai.egg-info/top_level.txt
+reading manifest file 'danus_ai.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+writing manifest file 'danus_ai.egg-info/SOURCES.txt'
+running check
+creating danus_ai-0.1.0
+creating danus_ai-0.1.0/danus_ai
+creating danus_ai-0.1.0/danus_ai.egg-info
+creating danus_ai-0.1.0/danus_ai/contracts
+creating danus_ai-0.1.0/fixtures/import_boundaries/illegal/orchestration
+creating danus_ai-0.1.0/fixtures/import_boundaries/legal
+creating danus_ai-0.1.0/fixtures/import_boundaries/legal/contracts
+creating danus_ai-0.1.0/fixtures/import_boundaries/legal/orchestration
+creating danus_ai-0.1.0/schemas
+creating danus_ai-0.1.0/scripts
+creating danus_ai-0.1.0/tests
+creating danus_ai-0.1.0/tests/contracts
+creating danus_ai-0.1.0/tests/fixtures/canonicalization
+copying files to danus_ai-0.1.0...
+copying .python-version -> danus_ai-0.1.0
+copying MANIFEST.in -> danus_ai-0.1.0
+copying README.md -> danus_ai-0.1.0
+copying pyproject.toml -> danus_ai-0.1.0
+copying uv.lock -> danus_ai-0.1.0
+copying danus_ai/__init__.py -> danus_ai-0.1.0/danus_ai
+copying danus_ai.egg-info/PKG-INFO -> danus_ai-0.1.0/danus_ai.egg-info
+copying danus_ai.egg-info/SOURCES.txt -> danus_ai-0.1.0/danus_ai.egg-info
+copying danus_ai.egg-info/dependency_links.txt -> danus_ai-0.1.0/danus_ai.egg-info
+copying danus_ai.egg-info/requires.txt -> danus_ai-0.1.0/danus_ai.egg-info
+copying danus_ai.egg-info/top_level.txt -> danus_ai-0.1.0/danus_ai.egg-info
+copying danus_ai/contracts/__init__.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/api.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/approval_conflicts.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/base.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/canonicalization.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/claims.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/context.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/export_schema.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/first_objects.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/fixed_four.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/guards.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/messages.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/observations.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/parsing.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/planning.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/projections.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/protocol_targets.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/references.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/role_outputs.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/runs.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/scope.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/signing.py -> danus_ai-0.1.0/danus_ai/contracts
+copying danus_ai/contracts/transitions.py -> danus_ai-0.1.0/danus_ai/contracts
+copying fixtures/import_boundaries/illegal/orchestration/service.py -> danus_ai-0.1.0/fixtures/import_boundaries/illegal/orchestration
+copying fixtures/import_boundaries/legal/bootstrap.py -> danus_ai-0.1.0/fixtures/import_boundaries/legal
+copying fixtures/import_boundaries/legal/contracts/ports.py -> danus_ai-0.1.0/fixtures/import_boundaries/legal/contracts
+copying fixtures/import_boundaries/legal/orchestration/service.py -> danus_ai-0.1.0/fixtures/import_boundaries/legal/orchestration
+copying schemas/r02.openapi.json -> danus_ai-0.1.0/schemas
+copying schemas/r02.schema.json -> danus_ai-0.1.0/schemas
+copying scripts/check_import_boundaries.py -> danus_ai-0.1.0/scripts
+copying scripts/export_r02_schema.py -> danus_ai-0.1.0/scripts
+copying scripts/p0_audit_upstream.py -> danus_ai-0.1.0/scripts
+copying scripts/verify.sh -> danus_ai-0.1.0/scripts
+copying tests/test_foundation.py -> danus_ai-0.1.0/tests
+copying tests/contracts/test_batch5.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_batch6.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_batch7.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_canonicalization.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_first_batch.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_foundations.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_q04_q05.py -> danus_ai-0.1.0/tests/contracts
+copying tests/contracts/test_q06_q07.py -> danus_ai-0.1.0/tests/contracts
+copying tests/fixtures/canonicalization/README.md -> danus_ai-0.1.0/tests/fixtures/canonicalization
+copying tests/fixtures/canonicalization/r02-batch5-remediation.json -> danus_ai-0.1.0/tests/fixtures/canonicalization
+copying tests/fixtures/canonicalization/r02-batch5.json -> danus_ai-0.1.0/tests/fixtures/canonicalization
+copying tests/fixtures/canonicalization/rfc8785-appendix-b.json -> danus_ai-0.1.0/tests/fixtures/canonicalization
+copying danus_ai.egg-info/SOURCES.txt -> danus_ai-0.1.0/danus_ai.egg-info
+Writing danus_ai-0.1.0/setup.cfg
+Creating tar archive
+removing 'danus_ai-0.1.0' (and everything under it)
+Building wheel from source distribution...
+running bdist_wheel
+running build
+running build_py
+creating build/lib/danus_ai
+copying danus_ai/__init__.py -> build/lib/danus_ai
+creating build/lib/danus_ai/contracts
+copying danus_ai/contracts/transitions.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/guards.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/parsing.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/planning.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/approval_conflicts.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/signing.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/runs.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/base.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/__init__.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/observations.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/first_objects.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/references.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/export_schema.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/messages.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/projections.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/protocol_targets.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/canonicalization.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/scope.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/fixed_four.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/claims.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/role_outputs.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/api.py -> build/lib/danus_ai/contracts
+copying danus_ai/contracts/context.py -> build/lib/danus_ai/contracts
+running egg_info
+writing danus_ai.egg-info/PKG-INFO
+writing dependency_links to danus_ai.egg-info/dependency_links.txt
+writing requirements to danus_ai.egg-info/requires.txt
+writing top-level names to danus_ai.egg-info/top_level.txt
+reading manifest file 'danus_ai.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+writing manifest file 'danus_ai.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/danus_ai
+copying build/lib/danus_ai/__init__.py -> build/bdist.linux-x86_64/wheel/./danus_ai
+creating build/bdist.linux-x86_64/wheel/danus_ai/contracts
+copying build/lib/danus_ai/contracts/transitions.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/guards.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/parsing.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/planning.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/approval_conflicts.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/signing.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/runs.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/base.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/__init__.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/observations.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/first_objects.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/references.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/export_schema.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/messages.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/projections.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/protocol_targets.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/canonicalization.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/scope.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/fixed_four.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/claims.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/role_outputs.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/api.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+copying build/lib/danus_ai/contracts/context.py -> build/bdist.linux-x86_64/wheel/./danus_ai/contracts
+running install_egg_info
+Copying danus_ai.egg-info to build/bdist.linux-x86_64/wheel/./danus_ai-0.1.0-py3.12.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/danus_ai-0.1.0.dist-info/WHEEL
+creating '/home/wangshunshun/danus-ai/dist/.tmp-gb7ga9rc/danus_ai-0.1.0-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'danus_ai/__init__.py'
+adding 'danus_ai/contracts/__init__.py'
+adding 'danus_ai/contracts/api.py'
+adding 'danus_ai/contracts/approval_conflicts.py'
+adding 'danus_ai/contracts/base.py'
+adding 'danus_ai/contracts/canonicalization.py'
+adding 'danus_ai/contracts/claims.py'
+adding 'danus_ai/contracts/context.py'
+adding 'danus_ai/contracts/export_schema.py'
+adding 'danus_ai/contracts/first_objects.py'
+adding 'danus_ai/contracts/fixed_four.py'
+adding 'danus_ai/contracts/guards.py'
+adding 'danus_ai/contracts/messages.py'
+adding 'danus_ai/contracts/observations.py'
+adding 'danus_ai/contracts/parsing.py'
+adding 'danus_ai/contracts/planning.py'
+adding 'danus_ai/contracts/projections.py'
+adding 'danus_ai/contracts/protocol_targets.py'
+adding 'danus_ai/contracts/references.py'
+adding 'danus_ai/contracts/role_outputs.py'
+adding 'danus_ai/contracts/runs.py'
+adding 'danus_ai/contracts/scope.py'
+adding 'danus_ai/contracts/signing.py'
+adding 'danus_ai/contracts/transitions.py'
+adding 'danus_ai-0.1.0.dist-info/METADATA'
+adding 'danus_ai-0.1.0.dist-info/WHEEL'
+adding 'danus_ai-0.1.0.dist-info/top_level.txt'
+adding 'danus_ai-0.1.0.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+Successfully built dist/danus_ai-0.1.0.tar.gz
+Successfully built dist/danus_ai-0.1.0-py3-none-any.whl

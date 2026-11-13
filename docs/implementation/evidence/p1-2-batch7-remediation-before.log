@@ -1,0 +1,162 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+_______________________ test_remediation_handoff[budget] _______________________
+
+case = 'budget'
+
+    @pytest.mark.parametrize("case", ["budget", "route", "delegation", "text"])
+    def test_remediation_handoff(case: str) -> None:
+        c = Chain()
+        r = c.reader
+        v = c.handoff
+        assert r.current_handoff is not None
+        if case == "budget":
+            r.current_budget = None
+        if case == "route":
+            v = v.model_copy(update={"root_task_ref": c.sender, "target_node_ref": v.source_node_ref})
+        if case == "text":
+            v = v.model_copy(update={"draft": v.draft.model_copy(
+                update={"completed": ["same-family confirmation labels: q1=1"]}
+            )})
+        r.current_handoff = r.current_handoff.model_copy(update={"current": v})
+        if case == "delegation":
+            r.delegation = loc("Delegation", "different")
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:707: Failed
+_______________________ test_remediation_handoff[route] ________________________
+
+case = 'route'
+
+    @pytest.mark.parametrize("case", ["budget", "route", "delegation", "text"])
+    def test_remediation_handoff(case: str) -> None:
+        c = Chain()
+        r = c.reader
+        v = c.handoff
+        assert r.current_handoff is not None
+        if case == "budget":
+            r.current_budget = None
+        if case == "route":
+            v = v.model_copy(update={"root_task_ref": c.sender, "target_node_ref": v.source_node_ref})
+        if case == "text":
+            v = v.model_copy(update={"draft": v.draft.model_copy(
+                update={"completed": ["same-family confirmation labels: q1=1"]}
+            )})
+        r.current_handoff = r.current_handoff.model_copy(update={"current": v})
+        if case == "delegation":
+            r.delegation = loc("Delegation", "different")
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:707: Failed
+_____________________ test_remediation_handoff[delegation] _____________________
+
+case = 'delegation'
+
+    @pytest.mark.parametrize("case", ["budget", "route", "delegation", "text"])
+    def test_remediation_handoff(case: str) -> None:
+        c = Chain()
+        r = c.reader
+        v = c.handoff
+        assert r.current_handoff is not None
+        if case == "budget":
+            r.current_budget = None
+        if case == "route":
+            v = v.model_copy(update={"root_task_ref": c.sender, "target_node_ref": v.source_node_ref})
+        if case == "text":
+            v = v.model_copy(update={"draft": v.draft.model_copy(
+                update={"completed": ["same-family confirmation labels: q1=1"]}
+            )})
+        r.current_handoff = r.current_handoff.model_copy(update={"current": v})
+        if case == "delegation":
+            r.delegation = loc("Delegation", "different")
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:707: Failed
+________________________ test_remediation_handoff[text] ________________________
+
+case = 'text'
+
+    @pytest.mark.parametrize("case", ["budget", "route", "delegation", "text"])
+    def test_remediation_handoff(case: str) -> None:
+        c = Chain()
+        r = c.reader
+        v = c.handoff
+        assert r.current_handoff is not None
+        if case == "budget":
+            r.current_budget = None
+        if case == "route":
+            v = v.model_copy(update={"root_task_ref": c.sender, "target_node_ref": v.source_node_ref})
+        if case == "text":
+            v = v.model_copy(update={"draft": v.draft.model_copy(
+                update={"completed": ["same-family confirmation labels: q1=1"]}
+            )})
+        r.current_handoff = r.current_handoff.model_copy(update={"current": v})
+        if case == "delegation":
+            r.delegation = loc("Delegation", "different")
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:707: Failed
+__________________ test_remediation_role_cannot_validate_plan __________________
+
+    def test_remediation_role_cannot_validate_plan() -> None:
+        c = Chain()
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:713: Failed
+___________ test_remediation_cold_audit_rejects_prior_context_source ___________
+
+    def test_remediation_cold_audit_rejects_prior_context_source() -> None:
+        c = Chain()
+        r = c.reader
+        assert r.current_context is not None
+        old = loc("ContextManifest", "old")
+        r.targets.append(old)
+        inputs = c.context.inputs.copy()
+        inputs[0] = inputs[0].model_copy(update={"sources": [old]})
+        v = c.context.model_copy(update={"purpose": "new_audit", "inputs": inputs})
+        r.current_context = r.current_context.model_copy(update={
+            "purpose": "new_audit", "verified_inputs": inputs,
+        })
+>       with pytest.raises(ContractBlocked):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ContractBlocked
+
+tests/contracts/test_batch7.py:729: Failed
+_____________________ test_remediation_audit_contradiction _____________________
+
+    def test_remediation_audit_contradiction() -> None:
+        c = Chain()
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/contracts/test_batch7.py:735: Failed
+_________________ test_remediation_plan_requires_authorization _________________
+
+    def test_remediation_plan_requires_authorization() -> None:
+        c = Chain()
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/contracts/test_batch7.py:748: Failed
+=========================== short test summary info ============================
+FAILED tests/contracts/test_batch7.py::test_remediation_handoff[budget] - Fai...
+FAILED tests/contracts/test_batch7.py::test_remediation_handoff[route] - Fail...
+FAILED tests/contracts/test_batch7.py::test_remediation_handoff[delegation]
+FAILED tests/contracts/test_batch7.py::test_remediation_handoff[text] - Faile...
+FAILED tests/contracts/test_batch7.py::test_remediation_role_cannot_validate_plan
+FAILED tests/contracts/test_batch7.py::test_remediation_cold_audit_rejects_prior_context_source
+FAILED tests/contracts/test_batch7.py::test_remediation_audit_contradiction
+FAILED tests/contracts/test_batch7.py::test_remediation_plan_requires_authorization
+8 failed, 24 deselected in 0.95s

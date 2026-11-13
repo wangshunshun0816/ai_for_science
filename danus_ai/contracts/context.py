@@ -77,9 +77,19 @@ class ContextFacts(ProjectFact):
     estimated_input_tokens: Revision
     purpose: ContextPurpose
     prior_context_ref: RecordLocator | None
+    prior_context_task_ref: RecordLocator | None = None
+
+
+class SourceProvenance(ProjectFact):
+    ref: Ref
+    parents: list[Ref]
+    origin: Literal["original_evidence", "derived_evidence", "session_context"]
 
 
 class ContextReader(PlanningReader, Protocol):
+    def source_provenance(
+        self, context: TrustedRequestContext, ref: Ref
+    ) -> SourceProvenance | None: ...
     def context_facts(self, context: TrustedRequestContext) -> ContextFacts | None: ...
 
 
@@ -124,8 +134,16 @@ def validate_context(
         or facts.prior_context_ref != manifest.prior_context_ref
         or (manifest.purpose == "new_audit" and context.role != "A7")
         or (context.role == "A7" and manifest.purpose == "initial")
+        or (manifest.purpose == "resume" and facts.prior_context_task_ref != manifest.task_ref)
     ):
         raise ContractBlocked("CONTEXT_RECOVERY_MISMATCH")
+    if manifest.purpose == "new_audit":
+        _require_cold_sources(
+            context,
+            [ref for entry in manifest.inputs for ref in (entry.ref, *entry.sources)],
+            reader,
+            now=now,
+        )
     if manifest.prior_context_ref is not None:
         require_access(context, "validate_context", [manifest.prior_context_ref], reader, now=now)
     if (
@@ -144,3 +162,37 @@ def validate_context(
     ]
     if not facts.required_refs or any(ref not in included for ref in facts.required_refs):
         raise ContractBlocked("KEY_CONTEXT_MISSING")
+
+
+def _require_cold_sources(
+    context: TrustedRequestContext, refs: list[Ref], reader: ContextReader, *, now: datetime
+) -> None:
+    # Reject cyclic and incomplete lineage. Shared parents may be visited once.
+    checked: set[tuple[object, ...]] = set()
+    active: set[tuple[object, ...]] = set()
+    stack = [(ref, False) for ref in refs]
+    while stack:
+        ref, leaving = stack.pop()
+        key = (type(ref), *ref.model_dump().values())
+        if leaving:
+            active.remove(key)
+            checked.add(key)
+            continue
+        if key in checked:
+            continue
+        kind = ref.record_type if isinstance(ref, RecordLocator) else ref.object_type
+        if key in active or kind == "ContextManifest":
+            raise ContractBlocked("AUDIT_PRIOR_CONTEXT_FORBIDDEN")
+        require_access(context, "validate_context", [ref], reader, now=now)
+        origin = reader.source_provenance(context, ref)
+        if origin is not None:
+            origin = SourceProvenance.model_validate(origin)
+        if origin is None or origin.ref != ref or not same_project(context, origin):
+            raise ContractBlocked("AUDIT_SOURCE_PROVENANCE_UNAVAILABLE")
+        if origin.origin == "session_context":
+            raise ContractBlocked("AUDIT_PRIOR_CONTEXT_FORBIDDEN")
+        if origin.origin == "derived_evidence" and not origin.parents:
+            raise ContractBlocked("AUDIT_SOURCE_PROVENANCE_UNAVAILABLE")
+        active.add(key)
+        stack.append((ref, True))
+        stack.extend((parent, False) for parent in origin.parents)

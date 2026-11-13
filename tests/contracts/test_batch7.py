@@ -8,7 +8,12 @@ from hashlib import sha256
 import pytest
 
 from danus_ai.contracts import canonicalize, content_id, validate_object
-from danus_ai.contracts.context import ContextFacts, ContextManifest, validate_context
+from danus_ai.contracts.context import (
+    ContextFacts,
+    ContextManifest,
+    SourceProvenance,
+    validate_context,
+)
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked
 from danus_ai.contracts.messages import TrustedRequestContext
@@ -18,6 +23,7 @@ from danus_ai.contracts.planning import (
     PlanFacts,
     PlanNode,
     PlanRevision,
+    PlanServiceAuthority,
     Ref,
     ReferenceFact,
     ResearchTask,
@@ -31,7 +37,9 @@ from danus_ai.contracts.references import RecordLocator, ScientificRef
 from danus_ai.contracts.role_outputs import (
     Handoff,
     HandoffDraft,
+    HandoffEndpoint,
     HandoffFacts,
+    HandoffMaterial,
     RoleOutputEnvelope,
     accept_handoff,
     validate_role_output,
@@ -63,13 +71,33 @@ class SyntheticReader:
         self.current_context: ContextFacts | None = None
         self.current_handoff: HandoffFacts | None = None
         self.revoked = False
+        self.delegation = loc("Delegation", "grant")
         self.lease_current = True
+
+    def plan_service(
+        self, context: TrustedRequestContext, root: RecordLocator, operation: str
+    ) -> PlanServiceAuthority:
+        return PlanServiceAuthority.model_validate(
+            PROJECT
+            | {
+                "principal_id": context.principal_id,
+                "root_task_ref": root,
+                "delegation_ref": self.delegation,
+                "operation": operation,
+                "activation_authorization_refs": [self.delegation]
+                if operation == "activate_plan"
+                else [],
+            }
+        )
+
+    def source_provenance(self, context: TrustedRequestContext, ref: Ref) -> SourceProvenance:
+        return SourceProvenance(**PROJECT, ref=ref, parents=[], origin="original_evidence")
 
     def access(self, context: TrustedRequestContext, operation: str) -> AccessFact:
         return AccessFact(
             **PROJECT,
             context=context,
-            delegation_ref=loc("Delegation", "grant"),
+            delegation_ref=self.delegation,
             operation=operation,
             target_refs=self.targets,
             revoked=self.revoked,
@@ -131,7 +159,7 @@ class Chain:
         self.source = sci("SourceSnapshot", "source")
         self.policy = sci("ContextBuildPolicy", "policy")
         self.view = loc("AuthorizationView", "view")
-        self.a1 = identity("A1", "root", "strategy")
+        self.a1 = identity("R16", "root", "strategy")
         self.a2 = identity("A2", "sender", "explore")
         self.a4 = identity("A4", "target", "design")
         self.explore_output = loc("RoleOutputContract", "explore", 1)
@@ -210,11 +238,34 @@ class Chain:
             **PROJECT,
             current=self.handoff,
             approved_feedback_refs=[],
-            sender_contract_ref=self.explore_output,
-            receiver_contract_ref=self.design_output,
+            sender=HandoffEndpoint(
+                task_ref=self.sender,
+                node_ref=self.handoff.source_node_ref,
+                role="A2",
+                task_kind="explore",
+                output_contract_ref=self.explore_output,
+            ),
+            receiver=HandoffEndpoint(
+                task_ref=self.target,
+                node_ref=self.handoff.target_node_ref,
+                role="A4",
+                task_kind="design",
+                output_contract_ref=self.design_output,
+            ),
             active_plan_ref=self.active,
-            approved_artifact_refs=[self.source],
-            route_and_approvals_current=True,
+            root_task_ref=self.root,
+            receiver_purpose="research",
+            approvals_current=True,
+            reviewed_receiver_view=self.handoff.draft,
+            materials=[
+                HandoffMaterial(
+                    ref=self.source,
+                    source_refs=[],
+                    visibility="receiver_visible",
+                    kind="ordinary",
+                    family_id=None,
+                )
+            ],
         )
         self.context = ContextManifest.model_validate(
             {
@@ -259,6 +310,7 @@ class Chain:
             required_refs=[self.source],
             purpose="initial",
             prior_context_ref=None,
+            prior_context_task_ref=None,
             verified_inputs=self.context.inputs,
             estimated_input_tokens=10,
         )
@@ -444,9 +496,11 @@ def test_context_resume_and_audit() -> None:
     r = c.reader
     assert r.current_context is not None
     prior = loc("ContextManifest", "old-context")
-    r.targets.append(prior)
+    r.targets.extend([prior, c.context.inputs[1].ref])
     facts = r.current_context
-    r.current_context = facts.model_copy(update={"purpose": "resume", "prior_context_ref": prior})
+    r.current_context = facts.model_copy(
+        update={"purpose": "resume", "prior_context_ref": prior, "prior_context_task_ref": c.target}
+    )
     resume = c.context.model_copy(update={"purpose": "resume", "prior_context_ref": prior})
     validate_context(resume, c.a4, r, now=NOW)
     r.current_context = facts.model_copy(update={"purpose": "new_audit"})
@@ -645,6 +699,77 @@ def independent_vectors() -> dict[str, dict[str, str]]:
             },
         ),
     ]
+    source_task = r | {"record_id": "sender"}
+    target_task = r | {"record_id": "target"}
+    expected_context = {
+        **PROJECT,
+        "locator": {"record_type": "ContextManifest", "record_id": "ctx", "revision": 0},
+        "task_ref": target_task,
+        "plan_ref": v,
+        "authorization_view_ref": {
+            "record_type": "AuthorizationView",
+            "record_id": "view",
+            "revision": 0,
+        },
+        "build_policy_ref": s | {"object_type": "ContextBuildPolicy", "object_id": "policy"},
+        "purpose": "initial",
+        "prior_context_ref": None,
+        "estimated_input_tokens": 10,
+        "reserved_output_tokens": 5,
+        "uncovered": [],
+        "invalidation_reason": None,
+        "inputs": [
+            {
+                "ref": s,
+                "sources": [],
+                "category": "authority",
+                "included": True,
+                "truncation_reason": None,
+            },
+            {
+                "ref": s | {"object_id": "old"},
+                "sources": [],
+                "category": "history",
+                "included": False,
+                "truncation_reason": "budget",
+            },
+        ],
+    }
+    expected_handoff = {
+        **PROJECT,
+        "locator": {"record_type": "Handoff", "record_id": "handoff", "revision": 0},
+        "draft": {
+            "output": values[1][2],
+            "receiver_role": "A4",
+            "receiver_task_kind": "design",
+            "receiver_contract_ref": o | {"record_id": "design"},
+            "artifact_refs": [s],
+            "allowed_feedback_refs": [],
+            "completed": ["source search"],
+            "unresolved": [],
+            "stop_reason": "handoff",
+        },
+        "root_task_ref": r,
+        "source_task_ref": source_task,
+        "target_task_ref": target_task,
+        "plan_ref": v,
+        "source_node_ref": {"record_type": "PlanNode", "record_id": "left", "revision": 0},
+        "target_node_ref": {"record_type": "PlanNode", "record_id": "join", "revision": 0},
+        "source_principal_id": "A2",
+        "target_lease_ref": {"record_type": "Lease", "record_id": "target", "revision": 0},
+        "budget_ref": b,
+        "authorization_ref": {"record_type": "Delegation", "record_id": "grant", "revision": 0},
+        "original_task_count": 3,
+        "pending_runs": [],
+        "pending_settlement_refs": [],
+        "created_at": "2026-11-13T00:00:00Z",
+    }
+    values.extend(
+        [
+            ("context_manifest", c.context.model_dump(), expected_context),
+            ("handoff", c.handoff.model_dump(), expected_handoff),
+        ]
+    )
     report = {}
     for name, actual, expected in values:
         utf8 = json.dumps(
@@ -656,7 +781,253 @@ def independent_vectors() -> dict[str, dict[str, str]]:
 
 
 def test_independent_vectors() -> None:
-    assert len(independent_vectors()) == 3
+    assert len(independent_vectors()) == 5
+
+
+@pytest.mark.parametrize("case", ["budget", "route", "delegation", "text"])
+def test_remediation_handoff(case: str) -> None:
+    c = Chain()
+    r = c.reader
+    v = c.handoff
+    assert r.current_handoff is not None
+    if case == "budget":
+        r.current_budget = None
+    if case == "route":
+        v = v.model_copy(update={"root_task_ref": c.sender, "target_node_ref": v.source_node_ref})
+    if case == "text":
+        v = v.model_copy(
+            update={
+                "draft": v.draft.model_copy(
+                    update={"completed": ["same-family confirmation labels: q1=1"]}
+                )
+            }
+        )
+    r.current_handoff = r.current_handoff.model_copy(update={"current": v})
+    if case == "delegation":
+        r.delegation = loc("Delegation", "different")
+    with pytest.raises(ContractBlocked):
+        accept_handoff(v, c.a4, r, now=NOW)
+
+
+def test_remediation_role_cannot_validate_plan() -> None:
+    c = Chain()
+    with pytest.raises(ContractBlocked):
+        validate_plan(c.plan, c.a2, c.reader, now=NOW)
+
+
+def test_remediation_cold_audit_rejects_prior_context_source() -> None:
+    c = Chain()
+    r = c.reader
+    assert r.current_context is not None
+    old = loc("ContextManifest", "old")
+    r.targets.append(old)
+    inputs = c.context.inputs.copy()
+    inputs[0] = inputs[0].model_copy(update={"sources": [old]})
+    v = c.context.model_copy(update={"purpose": "new_audit", "inputs": inputs})
+    r.current_context = r.current_context.model_copy(
+        update={
+            "purpose": "new_audit",
+            "verified_inputs": inputs,
+        }
+    )
+    with pytest.raises(ContractBlocked):
+        validate_context(v, identity("A7", "target", "audit"), r, now=NOW)
+
+
+def test_remediation_audit_contradiction() -> None:
+    c = Chain()
+    with pytest.raises(ValueError):
+        RoleOutputEnvelope.model_validate(
+            {
+                "contract_ref": c.explore_output,
+                "output": {
+                    "role": "A7",
+                    "outcome": "no_blocking_issue_found",
+                    "reviewed_refs": [c.source],
+                    "issues": [
+                        {
+                            "code": "G0",
+                            "evidence": [c.source],
+                            "impact": "blocks",
+                            "severity": "blocking",
+                            "remediation": "fix",
+                        }
+                    ],
+                },
+            }
+        )
+
+
+def test_remediation_plan_requires_authorization() -> None:
+    c = Chain()
+    with pytest.raises(ValueError):
+        PlanRevision(
+            **PROJECT, plan_ref=loc("PlanRevision", "plan", 2), plan=c.plan, authorization_refs=[]
+        )
+
+
+@pytest.mark.parametrize(("sender", "receiver"), [("A4", "A5"), ("A7", "A4"), ("A7", "A5")])
+def test_remediation_routes(sender: str, receiver: str) -> None:
+    import runpy
+    from pathlib import Path
+
+    c = Chain()
+    r = c.reader
+    assert r.current_handoff is not None
+    sender_contract = loc("RoleOutputContract", sender, 1)
+    receiver_contract = loc("RoleOutputContract", receiver, 1)
+    ctx = identity(receiver, "target", "design")
+    r.kind["design"] = TaskKindFact.model_validate(
+        r.kind["design"].model_dump()
+        | {
+            "contract": r.kind["design"].contract.model_dump()
+            | {
+                "role": receiver,
+                "output_contract_ref": receiver_contract.model_dump(),
+            },
+        }
+    )
+    r.targets.extend([sender_contract, receiver_contract])
+    if sender == "A4":
+        fixed = runpy.run_path(str(Path(__file__).with_name("test_batch6.py")))["Chain"]()
+        body = {
+            "role": "A4",
+            "design": fixed.prereg.model_dump(),
+            "prediction": "effect",
+            "failure_criterion": "missing",
+            "data_need": "four",
+            "estimate_basis": "fixture",
+        }
+    else:
+        body = {
+            "role": "A7",
+            "outcome": "needs_evidence",
+            "reviewed_refs": [c.source],
+            "issues": [
+                {
+                    "code": "missing",
+                    "evidence": [c.source],
+                    "impact": "limited",
+                    "severity": "non_blocking",
+                    "remediation": "supply evidence",
+                }
+            ],
+        }
+    output = RoleOutputEnvelope.model_validate({"contract_ref": sender_contract, "output": body})
+    draft = HandoffDraft.model_validate(
+        c.handoff.draft.model_dump()
+        | {
+            "output": output.model_dump(),
+            "receiver_role": receiver,
+            "receiver_contract_ref": receiver_contract.model_dump(),
+        }
+    )
+    v = Handoff.model_validate(c.handoff.model_dump() | {"draft": draft.model_dump()})
+    from danus_ai.contracts.role_outputs import _output_refs
+
+    transferred = [c.source, *_output_refs(output.output)]
+    r.targets.extend(transferred)
+    facts = r.current_handoff
+    r.current_handoff = facts.model_copy(
+        update={
+            "current": v,
+            "reviewed_receiver_view": draft,
+            "sender": facts.sender.model_copy(
+                update={"role": sender, "output_contract_ref": sender_contract}
+            ),
+            "receiver": facts.receiver.model_copy(
+                update={"role": receiver, "output_contract_ref": receiver_contract}
+            ),
+            "materials": [
+                HandoffMaterial(
+                    ref=ref,
+                    source_refs=[],
+                    visibility="receiver_visible",
+                    kind="ordinary",
+                    family_id=None,
+                )
+                for ref in {
+                    json.dumps(x.model_dump(), sort_keys=True): x for x in transferred
+                }.values()
+            ],
+        }
+    )
+    accept_handoff(v, ctx, r, now=NOW)
+    stale = r.current_handoff
+    r.current_handoff = stale.model_copy(
+        update={
+            "receiver": stale.receiver.model_copy(
+                update={"output_contract_ref": loc("RoleOutputContract", receiver, 2)}
+            )
+        }
+    )
+    with pytest.raises(ContractBlocked, match="HANDOFF_VERSION_STALE"):
+        accept_handoff(v, ctx, r, now=NOW)
+
+
+def test_remediation_feedback_lineage() -> None:
+    c = Chain()
+    r = c.reader
+    assert r.current_handoff is not None
+    feedback = loc("RunRecord", "feedback")
+    r.targets.append(feedback)
+    facts = r.current_handoff
+    source = facts.materials[0].model_copy(update={"source_refs": [feedback]})
+    hidden = HandoffMaterial(
+        ref=feedback,
+        source_refs=[],
+        visibility="receiver_visible",
+        kind="confirmation_feedback",
+        family_id=c.a4.family_id,
+    )
+    r.current_handoff = facts.model_copy(update={"materials": [source, hidden]})
+    with pytest.raises(ContractBlocked, match="HANDOFF_FEEDBACK_FORBIDDEN"):
+        accept_handoff(c.handoff, c.a4, r, now=NOW)
+
+
+def test_remediation_activation_preconditions() -> None:
+    c = Chain()
+    with pytest.raises(ContractBlocked, match="PLAN_AUTHORIZATION_REQUIRED"):
+        validate_plan(c.plan, c.a1, c.reader, now=NOW, operation="activate_plan")
+    validate_plan(
+        c.plan,
+        c.a1,
+        c.reader,
+        now=NOW,
+        operation="activate_plan",
+        authorization_refs=(c.handoff.authorization_ref,),
+    )
+
+
+def test_remediation_task_schema() -> None:
+    from danus_ai.contracts.transitions import TaskSnapshot
+
+    c = Chain()
+    snapshot = TaskSnapshot(
+        task_ref=c.root,
+        status="draft",
+        prior_phase=None,
+        reason_ref=None,
+        active_plan_revision=c.active,
+        task_contract_ref=c.plan.nodes[0].contract_ref,
+        pending_reconciliation_refs=[],
+    )
+    with pytest.raises(ValueError, match="TASK_SNAPSHOT_MISMATCH"):
+        ResearchTask(
+            **PROJECT,
+            draft=ResearchTaskDraft(
+                question="q", constraints=[], mode="design", original_input="q"
+            ),
+            task_ref=c.root,
+            budget_ref=c.budget,
+            status="draft",
+            active_snapshot=snapshot,
+        )
+    schema = json.loads(schema_bytes("json-schema"))["$defs"]["ResearchTask"]
+    assert [rule["then"]["properties"]["active_snapshot"]["type"] for rule in schema["allOf"]] == [
+        "null",
+        "object",
+    ]
 
 
 if __name__ == "__main__":
@@ -665,6 +1036,17 @@ if __name__ == "__main__":
     test_context_resume_and_audit()
     test_role_authority()
     test_seven_role_shapes()
+    test_remediation_role_cannot_validate_plan()
+    test_remediation_cold_audit_rejects_prior_context_source()
+    test_remediation_audit_contradiction()
+    test_remediation_plan_requires_authorization()
+    test_remediation_feedback_lineage()
+    test_remediation_activation_preconditions()
+    test_remediation_task_schema()
+    for case in ("budget", "route", "delegation", "text"):
+        test_remediation_handoff(case)
+    for sender, receiver in (("A4", "A5"), ("A7", "A4"), ("A7", "A5")):
+        test_remediation_routes(sender, receiver)
     for case, code in PLAN_CASES:
         test_plan_guard(case, code)
     for case, code in CONTEXT_CASES:

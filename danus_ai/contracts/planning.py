@@ -4,7 +4,7 @@ from collections import deque
 from datetime import datetime
 from typing import Annotated, Literal, Protocol, Self
 
-from pydantic import Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 
 from .base import AuthoritativeRecord, DraftContract, StrictContract
 from .canonicalization import normalize
@@ -31,6 +31,21 @@ class ResearchTaskDraft(DraftContract):
 
 
 class ResearchTask(AuthoritativeRecord):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "allOf": [
+                {
+                    "if": {"properties": {"status": {"const": "draft"}}},
+                    "then": {"properties": {"active_snapshot": {"type": "null"}}},
+                },
+                {
+                    "if": {"properties": {"status": {"not": {"enum": ["draft", "cancelled"]}}}},
+                    "then": {"properties": {"active_snapshot": {"type": "object"}}},
+                },
+            ],
+        }
+    )
+
     draft: ResearchTaskDraft
     task_ref: RecordLocator
     tenant_id: Text
@@ -47,7 +62,11 @@ class ResearchTask(AuthoritativeRecord):
         if snapshot is None:
             if self.status not in {"draft", "cancelled"}:
                 raise ValueError("TASK_SNAPSHOT_REQUIRED")
-        elif snapshot.task_ref != self.task_ref or snapshot.status != self.status:
+        elif (
+            self.status == "draft"
+            or snapshot.task_ref != self.task_ref
+            or snapshot.status != self.status
+        ):
             raise ValueError("TASK_SNAPSHOT_MISMATCH")
         return self
 
@@ -129,11 +148,18 @@ class PlanRevision(AuthoritativeRecord):
     tenant_id: Text
     project_id: Text
     plan: TaskPlan
-    authorization_refs: list[RecordLocator]
+    authorization_refs: Annotated[list[RecordLocator], Field(min_length=1)]
 
     @model_validator(mode="after")
     def revision_matches_parent(self) -> Self:
         require_type(self.plan_ref, "PlanRevision")
+        for ref in self.authorization_refs:
+            if ref.record_type not in {"Delegation", "Approval"}:
+                raise ValueError("PLAN_AUTHORIZATION_TYPE_MISMATCH")
+        if len(
+            set((ref.record_id, ref.record_type, ref.revision) for ref in self.authorization_refs)
+        ) != len(self.authorization_refs):
+            raise ValueError("PLAN_DUPLICATE_AUTHORIZATION")
         parent = self.plan.expected_active_revision
         if parent is not None:
             if (
@@ -189,9 +215,20 @@ class PlanFacts(ProjectFact):
     eligible_node_ids: list[Text]
 
 
+class PlanServiceAuthority(ProjectFact):
+    principal_id: Text
+    root_task_ref: RecordLocator
+    delegation_ref: RecordLocator
+    operation: Literal["validate_plan", "activate_plan"]
+    activation_authorization_refs: list[RecordLocator]
+
+
 class PlanningReader(Protocol):
     """Trusted service-supplied reads. Synthetic adapters are test fixtures."""
 
+    def plan_service(
+        self, context: TrustedRequestContext, root: RecordLocator, operation: str
+    ) -> PlanServiceAuthority | None: ...
     def access(self, context: TrustedRequestContext, operation: str) -> AccessFact | None: ...
     def reference(self, context: TrustedRequestContext, ref: Ref) -> ReferenceFact | None: ...
     def plan(self, context: TrustedRequestContext, root: RecordLocator) -> PlanFacts | None: ...
@@ -210,7 +247,9 @@ def require_access(
     reader: PlanningReader,
     *,
     now: datetime,
-) -> None:
+    expected_delegation: RecordLocator | None = None,
+    expected_purpose: str | None = None,
+) -> AccessFact:
     context = TrustedRequestContext.model_validate(context)
     fact = reader.access(context, operation)
     if fact is not None:
@@ -221,6 +260,8 @@ def require_access(
         or fact.context != context
         or fact.delegation_ref.record_type != "Delegation"
         or fact.operation != operation
+        or (expected_delegation is not None and fact.delegation_ref != expected_delegation)
+        or (expected_purpose is not None and fact.context.purpose != expected_purpose)
         or fact.revoked
         or not fact.lease_current
         or now.tzinfo is None
@@ -238,6 +279,7 @@ def require_access(
             raise ContractBlocked("REFERENCE_VERSION_STALE")
         if not target.contract_ready:
             raise ContractBlocked("TARGET_CONTRACT_UNAVAILABLE")
+    return fact
 
 
 def require_task_kind(
@@ -269,9 +311,30 @@ def validate_plan(
     reader: PlanningReader,
     *,
     now: datetime,
+    operation: Literal["validate_plan", "activate_plan"] = "validate_plan",
+    authorization_refs: tuple[RecordLocator, ...] = (),
 ) -> None:
     plan = TaskPlan.model_validate(plan)
-    refs: list[Ref] = [plan.root_task_ref, *plan.input_snapshot]
+    authority = reader.plan_service(context, plan.root_task_ref, operation)
+    if authority is not None:
+        authority = PlanServiceAuthority.model_validate(authority)
+    if (
+        context.role != "R16"
+        or authority is None
+        or not same_project(context, authority)
+        or authority.principal_id != context.principal_id
+        or authority.root_task_ref != plan.root_task_ref
+        or authority.operation != operation
+    ):
+        raise ContractBlocked("PLAN_SERVICE_REQUIRED")
+    if operation == "activate_plan" and (
+        not authorization_refs
+        or tuple(authority.activation_authorization_refs) != authorization_refs
+    ):
+        raise ContractBlocked("PLAN_AUTHORIZATION_REQUIRED")
+    if any(ref.record_type not in {"Delegation", "Approval"} for ref in authorization_refs):
+        raise ContractBlocked("PLAN_AUTHORIZATION_TYPE_MISMATCH")
+    refs: list[Ref] = [plan.root_task_ref, *plan.input_snapshot, *authorization_refs]
     if plan.expected_active_revision is not None:
         refs.append(plan.expected_active_revision)
     for node in plan.nodes:
@@ -284,7 +347,9 @@ def validate_plan(
                 *node.source_refs,
             ]
         )
-    require_access(context, "validate_plan", refs, reader, now=now)
+    require_access(
+        context, operation, refs, reader, now=now, expected_delegation=authority.delegation_ref
+    )
     facts = reader.plan(context, plan.root_task_ref)
     if facts is not None:
         facts = PlanFacts.model_validate(facts)
@@ -302,7 +367,7 @@ def validate_plan(
         raise ContractBlocked("PLAN_NODE_LIMIT_UNAVAILABLE_OR_EXCEEDED")
     total = 0
     for node in plan.nodes:
-        kind = require_task_kind(context, node.contract.task_kind, "validate_plan", reader, now=now)
+        kind = require_task_kind(context, node.contract.task_kind, operation, reader, now=now)
         if kind.contract_ref != node.contract_ref or kind.contract != node.contract:
             raise ContractBlocked("TASK_CONTRACT_MISMATCH")
         if normalize(node.node_id) not in {normalize(key) for key in facts.eligible_node_ids}:

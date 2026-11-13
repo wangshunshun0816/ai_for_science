@@ -10,6 +10,7 @@ from .first_objects import CandidateDraft, PreregDraft, ProtocolDraft
 from .guards import ContractBlocked
 from .messages import TrustedRequestContext
 from .planning import (
+    BudgetFact,
     PlanningReader,
     ProjectFact,
     Ref,
@@ -102,7 +103,7 @@ class AuditIssue(DraftContract):
     code: Text
     evidence: Annotated[list[Ref], Field(min_length=1)]
     impact: Text
-    severity: Text
+    severity: Literal["blocking", "non_blocking"]
     remediation: Text
 
 
@@ -116,6 +117,11 @@ class AuditReport(DraftContract):
     def issue_required(self) -> Self:
         if self.outcome in {"blocking_issue", "needs_evidence"} and not self.issues:
             raise ValueError("AUDIT_BLOCKER_EVIDENCE_REQUIRED")
+        has_blocker = any(issue.severity == "blocking" for issue in self.issues)
+        if self.outcome == "no_blocking_issue_found" and has_blocker:
+            raise ValueError("AUDIT_OUTCOME_CONFLICT")
+        if self.outcome == "blocking_issue" and not has_blocker:
+            raise ValueError("AUDIT_OUTCOME_CONFLICT")
         return self
 
 
@@ -213,14 +219,33 @@ class Handoff(AuthoritativeRecord):
         return self
 
 
+class HandoffEndpoint(AuthoritativeRecord):
+    task_ref: RecordLocator
+    node_ref: RecordLocator
+    role: Role
+    task_kind: Text
+    output_contract_ref: RecordLocator
+
+
+class HandoffMaterial(AuthoritativeRecord):
+    ref: Ref
+    source_refs: list[Ref]
+    visibility: Literal["receiver_visible", "restricted"]
+    kind: Literal["ordinary", "confirmation_feedback"]
+    family_id: Text | None
+
+
 class HandoffFacts(ProjectFact):
     current: Handoff
-    approved_feedback_refs: list[Ref]
-    sender_contract_ref: RecordLocator
-    receiver_contract_ref: RecordLocator
     active_plan_ref: RecordLocator
-    approved_artifact_refs: list[Ref]
-    route_and_approvals_current: bool
+    root_task_ref: RecordLocator
+    sender: HandoffEndpoint
+    receiver: HandoffEndpoint
+    receiver_purpose: Text
+    approvals_current: bool
+    approved_feedback_refs: list[Ref]
+    reviewed_receiver_view: HandoffDraft | None
+    materials: list[HandoffMaterial]
 
 
 class HandoffReader(PlanningReader, Protocol):
@@ -294,7 +319,14 @@ def accept_handoff(
         *draft.allowed_feedback_refs,
         *_output_refs(draft.output),
     ]
-    require_access(context, "accept_handoff", refs, reader, now=now)
+    require_access(
+        context,
+        "accept_handoff",
+        refs,
+        reader,
+        now=now,
+        expected_delegation=value.authorization_ref,
+    )
     facts = reader.handoff(context, value.locator)
     if facts is not None:
         facts = HandoffFacts.model_validate(facts.model_dump())
@@ -302,22 +334,76 @@ def accept_handoff(
         facts is None
         or not same_project(context, facts)
         or facts.current != value
-        or facts.sender_contract_ref != draft.output.contract_ref
-        or facts.receiver_contract_ref != draft.receiver_contract_ref
+        or facts.sender.output_contract_ref != draft.output.contract_ref
+        or facts.receiver.output_contract_ref != draft.receiver_contract_ref
         or facts.active_plan_ref != value.plan_ref
-        or not facts.route_and_approvals_current
+        or not facts.approvals_current
     ):
         raise ContractBlocked("HANDOFF_VERSION_STALE")
+    if (
+        facts.root_task_ref != value.root_task_ref
+        or facts.sender.task_ref != value.source_task_ref
+        or facts.sender.node_ref != value.source_node_ref
+        or facts.sender.role != draft.output.output.role
+        or facts.receiver.task_ref != value.target_task_ref
+        or facts.receiver.node_ref != value.target_node_ref
+        or facts.receiver.role != draft.receiver_role
+        or facts.receiver.task_kind != draft.receiver_task_kind
+        or facts.receiver_purpose != context.purpose
+    ):
+        raise ContractBlocked("HANDOFF_ROUTE_MISMATCH")
+    budget = reader.budget(context, value.budget_ref)
+    if budget is not None:
+        budget = BudgetFact.model_validate(budget)
+    if (
+        budget is None
+        or not same_project(context, budget)
+        or not budget.active
+        or budget.ref != value.budget_ref
+        or budget.root_task_ref != value.root_task_ref
+    ):
+        raise ContractBlocked("HANDOFF_BUDGET_UNAVAILABLE")
     kind = require_task_kind(context, context.task_kind, "accept_handoff", reader, now=now)
     if (
         kind.contract.role != context.role
         or kind.contract.output_contract_ref != draft.receiver_contract_ref
     ):
         raise ContractBlocked("ROLE_OUTPUT_CONTRACT_MISMATCH")
-    # The accepted payload includes nested output references as well as the
-    # explicit attachment list; the receiver's filtered view covers both.
-    transferred = [*draft.artifact_refs, *_output_refs(draft.output.output)]
-    if any(ref not in facts.approved_artifact_refs for ref in transferred):
-        raise ContractBlocked("HANDOFF_ARTIFACT_FORBIDDEN")
     if any(ref not in facts.approved_feedback_refs for ref in draft.allowed_feedback_refs):
         raise ContractBlocked("HANDOFF_FEEDBACK_FORBIDDEN")
+    # Exact receiver review binds free text and nested output; content analysis is upstream.
+    if facts.reviewed_receiver_view != draft:
+        raise ContractBlocked("HANDOFF_REVIEWED_VIEW_REQUIRED")
+    transferred = [
+        *draft.artifact_refs,
+        *draft.allowed_feedback_refs,
+        *_output_refs(draft.output.output),
+        *value.pending_runs,
+        *value.pending_settlement_refs,
+    ]
+    checked: list[Ref] = []
+    while transferred:
+        ref = transferred.pop()
+        if ref in checked:
+            continue
+        checked.append(ref)
+        matches = [material for material in facts.materials if material.ref == ref]
+        if len(matches) != 1 or matches[0].visibility != "receiver_visible":
+            raise ContractBlocked("HANDOFF_ARTIFACT_FORBIDDEN")
+        material = matches[0]
+        if material.kind == "confirmation_feedback" and (
+            material.family_id is None
+            or context.family_id is None
+            or material.family_id == context.family_id
+        ):
+            raise ContractBlocked("HANDOFF_FEEDBACK_FORBIDDEN")
+        require_access(
+            context,
+            "accept_handoff",
+            material.source_refs,
+            reader,
+            now=now,
+            expected_delegation=value.authorization_ref,
+            expected_purpose=facts.receiver_purpose,
+        )
+        transferred.extend(material.source_refs)
