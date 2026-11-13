@@ -91,11 +91,24 @@ class SanityReportView(AuthoritativeRecord):
     stale: Literal[False]
 
 
-class ProtocolArtifactReader(SanityReportReader, Protocol):
+class CurrentSanityReader(SanityReportReader, Protocol):
+    def current_binding(
+        self, ctx: RequestContext, subject: RecordLocator, /
+    ) -> ScientificRef | None:
+        """Resolve the current binding for this exact authorized subject."""
+        ...
+
+
+class ProtocolArtifactReader(Protocol):
     def protocol_bundle(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> ProtocolBundle | None: ...
     def check_suite(self, ctx: RequestContext, ref: RecordLocator, /) -> CheckSuite | None: ...
+    def material_dependencies(
+        self, ctx: RequestContext, ref: ScientificRef, /
+    ) -> tuple[ScientificRef, ...] | None:
+        """Return complete, authoritative dependency edges for this exact material."""
+        ...
 
 
 def _scoped(record: ProjectRecord, expected: RecordLocator, context: RequestContext) -> None:
@@ -134,33 +147,73 @@ def check_protocol_bundle(
     required = fixed.target(suite.suite_version_ref, FixedSanitySuite)
     if suite.checks.keys() != set(required.checks):
         raise ContractBlocked("SANITY_ARTIFACT_CHECKS_MISMATCH")
-    for ref in [*bundle.component_refs, *bundle.independent_reference_refs]:
-        fixed.material(ref)
+    materials = [*bundle.component_refs, *bundle.independent_reference_refs]
     for check in suite.checks.values():
-        for check_ref in (
-            check.applicability_ref,
-            check.expectation_ref,
-            check.tolerance_basis_ref,
-            check.uncovered_scope_ref,
-        ):
-            if check_ref is not None:
-                fixed.material(check_ref)
+        materials.extend(
+            ref
+            for ref in (
+                check.applicability_ref,
+                check.expectation_ref,
+                check.tolerance_basis_ref,
+                check.uncovered_scope_ref,
+            )
+            if ref is not None
+        )
+    _check_material_dependencies(materials, fixed, reader)
     if require_approved:
         raise ContractBlocked("SPEC_UNRESOLVED: protocol_use approval terms")
     return bundle
+
+
+def _check_material_dependencies(
+    roots: list[ScientificRef], fixed: FixedFour, reader: ProtocolArtifactReader
+) -> None:
+    # Explicit dependency edges only. Authorization precedes memoization on every edge.
+    active: set[tuple[str, str, str]] = set()
+    complete: set[tuple[str, str, str]] = set()
+    stack = [(ref, False) for ref in reversed(roots)]
+    while stack:
+        ref, exiting = stack.pop()
+        key = (ref.object_type, ref.object_id, ref.content_version)
+        if exiting:
+            active.remove(key)
+            complete.add(key)
+            continue
+        _reject_cycles([ref])
+        if ref.object_type in {"Protocol", "CheckSuite", "ValidationProfile"}:
+            raise ContractBlocked("SANITY_ARTIFACT_CYCLE")
+        fixed.material(ref)
+        if key in active:
+            raise ContractBlocked("SANITY_ARTIFACT_CYCLE")
+        if key in complete:
+            continue
+        edges = reader.material_dependencies(fixed.context, ref)
+        if edges is None:
+            raise ContractBlocked("SPEC_UNRESOLVED: material dependency edges")
+        active.add(key)
+        stack.append((ref, True))
+        stack.extend((edge, False) for edge in reversed(edges))
 
 
 def resolve_sanity_report_view(
     report_ref: RecordLocator,
     expected_binding_ref: ScientificRef,
     fixed: FixedFour,
-    reader: SanityReportReader,
+    reader: CurrentSanityReader,
     *,
+    subject: RecordLocator,
     protocol_basis: ScientificRef | None = None,
 ) -> SanityReportView:
     if report_ref.record_type != "SanityReport":
         raise ContractBlocked("REFERENCE_TYPE_MISMATCH")
-    binding = fixed.resolve_sanity_binding(expected_binding_ref, protocol_basis=protocol_basis)
+    if subject.record_type not in {"ResearchTask", "PlanRevision", "RunRequest"}:
+        raise ContractBlocked("SANITY_SUBJECT_UNSUPPORTED")
+    current = reader.current_binding(fixed.context, subject)
+    if current is None:
+        raise ContractBlocked("SANITY_CURRENT_BINDING_REQUIRED")
+    if current != expected_binding_ref:
+        raise ContractBlocked("SANITY_CURRENT_BINDING_MISMATCH")
+    binding = fixed.resolve_sanity_binding(current, protocol_basis=protocol_basis)
     resolved = reader.sanity_report(fixed.context, report_ref)
     if resolved is None:
         raise ContractBlocked("SANITY_NOT_READY")

@@ -11,7 +11,7 @@ from danus_ai.contracts.canonicalization import canonicalize
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.first_objects import ProtocolRecord
 from danus_ai.contracts.guards import ContractBlocked, RequestContext
-from danus_ai.contracts.references import RecordLocator
+from danus_ai.contracts.references import RecordLocator, ScientificRef, scientific_projection
 from danus_ai.contracts.sanity_artifacts import (
     CheckSuite,
     ProtocolBundle,
@@ -21,7 +21,7 @@ from danus_ai.contracts.sanity_artifacts import (
     resolve_sanity_report_view,
 )
 from danus_ai.contracts.submission import SanityReport
-from tests.contracts.test_batch6 import CTX, Chain
+from tests.contracts.test_batch6 import CTX, Chain, version
 
 
 def locator(kind: str) -> dict[str, object]:
@@ -69,8 +69,13 @@ def payloads() -> dict[str, dict[str, Any]]:
     }
 
 
+SUBJECT = RecordLocator.model_validate(locator("ResearchTask"))
+
+
 class Artifacts:
     def __init__(self, c: Chain) -> None:
+        self.current: ScientificRef | None = c.binding_ref
+        self.edges: dict[str, tuple[ScientificRef, ...] | None] = {}
         data = payloads()
         material = c.reader.add(
             "Material", "artifact", {"text": "independent fixture"}
@@ -110,6 +115,16 @@ class Artifacts:
                 }
             }
         )
+
+    def current_binding(
+        self, ctx: RequestContext, subject: RecordLocator, /
+    ) -> ScientificRef | None:
+        return self.current if ctx == CTX and subject == SUBJECT else None
+
+    def material_dependencies(
+        self, ctx: RequestContext, ref: ScientificRef, /
+    ) -> tuple[ScientificRef, ...] | None:
+        return self.edges.get(ref.object_id, ())
 
     def protocol_bundle(self, ctx: RequestContext, ref: RecordLocator, /) -> ProtocolBundle:
         return self.bundle
@@ -155,11 +170,14 @@ def test_bundle_and_project_authority() -> None:
 def test_report_cannot_claim_eligibility(status: str) -> None:
     c = Chain()
     a = Artifacts(c)
-    assert resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a).stale is False
+    assert (
+        resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a, subject=SUBJECT).stale
+        is False
+    )
     a.report = a.report.model_copy(update={"checks": {"no-leak": status}})
     c.reader.report = c.report.model_copy(update={"checks": {"no-leak": status}})
     with pytest.raises((ContractBlocked, ValueError), match="SANITY"):
-        resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a)
+        resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a, subject=SUBJECT)
 
 
 def test_reference_and_cycle_rejections() -> None:
@@ -171,7 +189,11 @@ def test_reference_and_cycle_rejections() -> None:
         )
     with pytest.raises(ContractBlocked, match="SANITY"):
         resolve_sanity_report_view(
-            c.report.locator.model_copy(update={"revision": 2}), c.binding_ref, c.api, a
+            c.report.locator.model_copy(update={"revision": 2}),
+            c.binding_ref,
+            c.api,
+            a,
+            subject=SUBJECT,
         )
     with pytest.raises(ValueError, match="CYCLE"):
         ProtocolBundle.model_validate(a.bundle.model_dump() | {"component_refs": [c.binding_ref]})
@@ -192,12 +214,23 @@ def test_profile_binding_and_staleness() -> None:
         )
         body = c.binding.model_dump() | {"validation_profile_ref": profile_ref.model_dump()}
         binding = c.reader.add(
-            "ExecutionBinding", "replacement-binding", body, digest=c.binding_ref.content_version
+            "ExecutionBinding",
+            "replacement-binding",
+            body,
+            digest=version(
+                "execution_binding",
+                c.binding_expected | {"validation_profile_ref": scientific_projection(profile_ref)},
+            ),
         )
+        a.current = binding
         with pytest.raises(
-            ContractBlocked, match="TARGET_CONTENT_MISMATCH|SANITY_PROFILE_MISMATCH"
+            ContractBlocked,
+            match="TARGET_CONTENT_MISMATCH"
+            if profile == "exploration_lite"
+            else "SANITY_PROFILE_MISMATCH",
         ):
-            resolve_sanity_report_view(c.report.locator, binding, c.api, a)
+            resolve_sanity_report_view(c.report.locator, binding, c.api, a, subject=SUBJECT)
+    a.current = c.binding_ref
     original = a.report.model_dump()
     cases: tuple[dict[str, object], ...] = (
         {"stale": True},
@@ -210,7 +243,123 @@ def test_profile_binding_and_staleness() -> None:
         a.report = SanityReport.model_validate(original | changes)
         c.reader.report = type(c.report).model_validate(a.report.model_dump(exclude={"evidence"}))
         with pytest.raises(ContractBlocked, match="SANITY_BINDING_OR_RESULT_MISMATCH"):
-            resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a)
+            resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a, subject=SUBJECT)
+
+
+def test_current_binding_and_historical_report() -> None:
+    c = Chain()
+    a = Artifacts(c)
+    profile_ref = c.reader.add(
+        "ValidationProfile",
+        "new-profile",
+        {
+            "name": "confirmation_full",
+            "suite_ref": c.suite.model_dump(),
+            "required_checks": ["no-leak", "another"],
+        },
+    )
+    new = c.reader.add(
+        "ExecutionBinding",
+        "new-binding",
+        c.binding.model_dump() | {"validation_profile_ref": profile_ref.model_dump()},
+        digest=version(
+            "execution_binding",
+            c.binding_expected | {"validation_profile_ref": scientific_projection(profile_ref)},
+        ),
+    )
+    assert c.api.resolve_sanity_binding(new).validation_profile_ref == profile_ref
+    assert (
+        resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a, subject=SUBJECT).stale
+        is False
+    )
+    a.current = new
+    with pytest.raises(ContractBlocked, match="SANITY_CURRENT_BINDING_MISMATCH"):
+        resolve_sanity_report_view(c.report.locator, c.binding_ref, c.api, a, subject=SUBJECT)
+    with pytest.raises(ContractBlocked, match="SANITY_BINDING_OR_RESULT_MISMATCH"):
+        resolve_sanity_report_view(c.report.locator, new, c.api, a, subject=SUBJECT)
+    a.current = None
+    with pytest.raises(ContractBlocked, match="SANITY_CURRENT_BINDING_REQUIRED"):
+        resolve_sanity_report_view(c.report.locator, new, c.api, a, subject=SUBJECT)
+
+
+def test_replacement_suite_with_correct_digest_is_rejected() -> None:
+    c = Chain()
+    a = Artifacts(c)
+    suite = c.reader.add("CheckSuite", "smaller-suite", {"checks": ["other"]})
+    profile = c.reader.add(
+        "ValidationProfile",
+        "smaller-profile",
+        {
+            "name": "confirmation_full",
+            "suite_ref": suite.model_dump(),
+            "required_checks": ["other"],
+        },
+    )
+    candidate = c.reader.add(
+        "ExecutionBinding",
+        "smaller-binding",
+        c.binding.model_dump()
+        | {"suite_ref": suite.model_dump(), "validation_profile_ref": profile.model_dump()},
+        digest=version(
+            "execution_binding",
+            c.binding_expected
+            | {
+                "suite_ref": scientific_projection(suite),
+                "validation_profile_ref": scientific_projection(profile),
+            },
+        ),
+    )
+    a.current = candidate
+    with pytest.raises(ContractBlocked, match="^EXECUTION_BINDING_MISMATCH$"):
+        resolve_sanity_report_view(c.report.locator, candidate, c.api, a, subject=SUBJECT)
+
+
+def test_dependency_dag_and_material_authorization() -> None:
+    c = Chain()
+    a = Artifacts(c)
+    root = a.bundle.component_refs[0]
+    leaf = c.reader.add("Material", "leaf", {"text": "leaf"})
+
+    def check() -> ProtocolBundle:
+        return check_protocol_bundle(a.bundle.locator, a.suite.locator, c.api, a)
+
+    a.edges[root.object_id] = (leaf,)
+    assert check() == a.bundle
+    for edges in ((root,), None):
+        a.edges[root.object_id] = edges
+        with pytest.raises(ContractBlocked, match="CYCLE|SPEC_UNRESOLVED"):
+            check()
+    a.edges[root.object_id] = (leaf,)
+    a.edges[leaf.object_id] = (root,)
+    with pytest.raises(ContractBlocked, match="SANITY_ARTIFACT_CYCLE"):
+        check()
+    a.edges.clear()
+    duplicate = c.reader.add("Material", "ungranted", {"text": "independent fixture"})
+    assert duplicate.content_version == root.content_version
+    c.reader.states[duplicate.object_id] = replace(
+        c.reader.states[duplicate.object_id], project_id=None
+    )
+    a.bundle = a.bundle.model_copy(update={"component_refs": [root, duplicate]})
+    with pytest.raises(ContractBlocked, match="OWNERSHIP"):
+        check()
+
+
+def test_job_is_not_report_or_qualification() -> None:
+    c = Chain()
+    a = Artifacts(c)
+    with pytest.raises(ValueError):
+        SanityJobRef.model_validate({"job_id": "one", "passed": True})
+    for name in ("SanityJobRef", "SanityReportView"):
+        with pytest.raises(ContractBlocked, match="OUTPUT_ONLY"):
+            validate_object(name, payloads()[name])
+    with pytest.raises(ContractBlocked, match="REFERENCE_TYPE_MISMATCH"):
+        resolve_sanity_report_view(
+            RecordLocator.model_validate(locator("SanityJob")),
+            c.binding_ref,
+            c.api,
+            a,
+            subject=SUBJECT,
+        )
 
 
 def vectors() -> dict[str, dict[str, str]]:
