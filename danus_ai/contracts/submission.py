@@ -22,7 +22,7 @@ from .runs import ConfirmationInputs, ExecutionBinding, RunRequestRecord
 class ClaimSubmissionDraft(DraftContract):
     statement: Text
     scope_ref: ScientificRef
-    run_refs: Annotated[list[ScientificRef], Field(min_length=1)]
+    run_ids: Annotated[list[ScientificRef], Field(min_length=1)]
     protocol_ref: ScientificRef
     prereg_ref: ScientificRef
     premise_refs: list[ScientificRef]
@@ -33,7 +33,7 @@ class ClaimSubmissionDraft(DraftContract):
             (self.scope_ref, "Scope"),
             (self.protocol_ref, "Protocol"),
             (self.prereg_ref, "Prereg"),
-            *((ref, "RunRequest") for ref in self.run_refs),
+            *((ref, "RunRequest") for ref in self.run_ids),
             *((ref, "ClaimNode") for ref in self.premise_refs),
         ]:
             if ref.object_type != kind:
@@ -239,7 +239,7 @@ def _check_draft_references(
     for ref in [draft.scope_ref, draft.protocol_ref, draft.prereg_ref, *draft.premise_refs]:
         require_reference(ctx, ref, port)
     runs = {}
-    for ref in draft.run_refs:
+    for ref in draft.run_ids:
         require_reference(ctx, ref, port)
         fact = port.run(ctx, ref)
         if fact is None or fact.ref != ref:

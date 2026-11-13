@@ -1546,12 +1546,12 @@
         "protocol_ref": {
           "$ref": "#/$defs/ScientificRef"
         },
-        "run_refs": {
+        "run_ids": {
           "items": {
             "$ref": "#/$defs/ScientificRef"
           },
           "minItems": 1,
-          "title": "Run Refs",
+          "title": "Run Ids",
           "type": "array"
         },
         "scope_ref": {
@@ -1566,7 +1566,7 @@
       "required": [
         "statement",
         "scope_ref",
-        "run_refs",
+        "run_ids",
         "protocol_ref",
         "prereg_ref",
         "premise_refs"

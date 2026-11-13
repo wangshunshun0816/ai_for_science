@@ -1,12 +1,15 @@
 import json
 from dataclasses import replace
 from hashlib import sha256
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
 
 from danus_ai.contracts.api import validate_object
+from danus_ai.contracts.base import StrictContract
 from danus_ai.contracts.canonicalization import canonicalize
+from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked, RequestContext
 from danus_ai.contracts.observations import FixedFourPolicy, ObservationBinding, TrustedObservation
 from danus_ai.contracts.references import RecordLocator, ScientificRef
@@ -25,6 +28,7 @@ from danus_ai.contracts.submission import (
     check_submission_report,
     check_submission_transition,
 )
+from tests.contracts.legacy_submission import adapt_golden_run_refs
 from tests.contracts.test_batch6 import CTX, Chain, SyntheticReader
 
 
@@ -127,7 +131,7 @@ def test_submission_boundary() -> None:
         scope_ref=add("Scope"),
         protocol_ref=add("Protocol"),
         prereg_ref=add("Prereg"),
-        run_refs=[add("RunRequest")],
+        run_ids=[add("RunRequest")],
         premise_refs=[],
     )
     ctx = replace(CTX, role="A5")
@@ -200,7 +204,7 @@ def test_report_outcomes_and_usage() -> None:
         scope_ref=scope,
         protocol_ref=c.protocol_ref,
         prereg_ref=c.prereg_ref,
-        run_refs=[run],
+        run_ids=[run],
         premise_refs=[],
     )
     assert list(check_submission_draft(draft, ctx, reader).values()) == [c.run_record]
@@ -294,23 +298,160 @@ def test_report_outcomes_and_usage() -> None:
         reader.gates["G0"] = reader.gates["G0"].model_copy(update={"result": "pass"})
 
 
-def vectors() -> dict[str, dict[str, str]]:
-    digest = "a" * 64
-    request = SanityRequest(
-        binding_ref=ScientificRef(
-            object_type="ExecutionBinding",
-            object_id="bind",
-            content_version=f"execution_binding:v1:{digest}",
-        )
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def ref_body(kind: str, identifier: str) -> dict[str, str]:
+    return {
+        "object_type": kind,
+        "object_id": identifier,
+        "content_version": "sample:v1:" + "a" * 64,
+    }
+
+
+def draft_body() -> dict[str, object]:
+    return {
+        "statement": "固定四题",
+        "scope_ref": ref_body("Scope", "scope"),
+        "protocol_ref": ref_body("Protocol", "protocol"),
+        "prereg_ref": ref_body("Prereg", "prereg"),
+        "run_ids": [ref_body("RunRequest", "baseline"), ref_body("RunRequest", "method")],
+        "premise_refs": [],
+    }
+
+
+def test_formal_run_ids_and_explicit_golden_adapter() -> None:
+    formal = draft_body()
+    parsed = validate_object("ClaimSubmissionDraft", formal)
+    assert isinstance(parsed, ClaimSubmissionDraft)
+    assert parsed.model_dump() == formal
+    old = dict(formal)
+    old["run_refs"] = old.pop("run_ids")
+    for payload in (old, formal | old):
+        with pytest.raises(ValidationError):
+            validate_object("ClaimSubmissionDraft", payload)
+    golden = ROOT / "docs/implementation/p0-2/golden/positive.json"
+    fixture = json.loads(golden.read_bytes())
+    legacy = next(
+        value["submission"]
+        for value in fixture.values()
+        if isinstance(value, dict) and "submission" in value
     )
-    expected = (
-        '{"binding_ref":{"content_version":"execution_binding:v1:'
-        + digest
-        + '","object_id":"bind","object_type":"ExecutionBinding"}}'
-    ).encode()
-    actual = canonicalize(request.model_dump())
-    assert actual == expected
-    return {"sanity_request": {"utf8_hex": actual.hex(), "sha256": sha256(actual).hexdigest()}}
+    catalog = dict(zip(("fixture:run-baseline", "fixture:run-method"), parsed.run_ids, strict=True))
+    adapted = adapt_golden_run_refs(legacy, catalog)
+    assert [ref.object_id for ref in adapted] == ["baseline", "method"]
+    assert adapted == parsed.run_ids
+    with pytest.raises(ValueError, match="run definition"):
+        adapt_golden_run_refs(
+            legacy,
+            catalog
+            | {
+                "fixture:run-baseline": parsed.run_ids[0].model_copy(
+                    update={"object_type": "Attempt"}
+                )
+            },
+        )
+    with pytest.raises(ValidationError):
+        validate_object("ClaimSubmissionDraft", formal | {"run_ids": [ref_body("Attempt", "a")]})
+
+
+def vectors() -> dict[str, dict[str, str]]:
+    # Hand-written wire payloads also serve as independent expected projections.
+    # For these string, integer, boolean and null values sorted stdlib JSON gives JCS bytes.
+    def record(kind: str) -> dict[str, object]:
+        return {"record_type": kind, "record_id": kind.lower(), "revision": 1}
+
+    owner = {"tenant_id": "tenant", "project_id": "project"}
+    binding = ref_body("ExecutionBinding", "bind")
+    submission = record("ClaimSubmission")
+    instant = "2026-11-13T00:00:00Z"
+    payloads: list[tuple[type[StrictContract], dict[str, object]]] = [
+        (ClaimSubmissionDraft, draft_body()),
+        (
+            ClaimSubmission,
+            {
+                **owner,
+                "locator": submission,
+                "draft": draft_body(),
+                "status": "received",
+                "report_ref": None,
+                "claim_ref": None,
+            },
+        ),
+        (SanityRequest, {"binding_ref": binding}),
+        (
+            SanityReport,
+            {
+                **owner,
+                "locator": record("SanityReport"),
+                "binding_ref": binding,
+                "suite_ref": ref_body("CheckSuite", "suite"),
+                "profile_ref": ref_body("ValidationProfile", "profile"),
+                "checks": {"check": "pass"},
+                "stale": False,
+                "approval_bindings": [],
+                "not_applicable_bases": {},
+                "evidence": {
+                    "check": {
+                        "basis_refs": [],
+                        "output_refs": [],
+                        "coverage": "四题",
+                        "residual_limits": [],
+                    }
+                },
+            },
+        ),
+        (
+            EvidenceReport,
+            {
+                **owner,
+                "locator": record("EvidenceReport"),
+                "submission_ref": submission,
+                "decision": "error",
+                "gate_refs": [record("GateExecution")],
+                "basis_refs": [],
+                "observation_bindings": [],
+                "audit_refs": [],
+                "repair_scope": None,
+            },
+        ),
+        (
+            GateExecution,
+            {
+                **owner,
+                "locator": record("GateExecution"),
+                "subject_ref": submission,
+                "gate": "G0",
+                "attempt": 1,
+                "policy_ref": ref_body("Policy", "policy"),
+                "trace_ref": ref_body("Trace", "trace"),
+                "invocation_refs": [],
+                "usage_refs": [record("Usage")],
+                "started_at": instant,
+                "ended_at": instant,
+                "wait_reason": None,
+                "rework_parent_ref": None,
+                "result": "error",
+            },
+        ),
+    ]
+    result = {}
+    for model, expected_body in payloads:
+        expected = json.dumps(
+            expected_body, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        ).encode("utf-8")
+        expected_sha256 = sha256(expected).hexdigest()
+        actual = canonicalize(model.model_validate(expected_body).model_dump())
+        assert actual == expected
+        assert sha256(actual).hexdigest() == expected_sha256
+        result[model.__name__] = {"utf8_hex": actual.hex(), "sha256": expected_sha256}
+    for filename, generated in (
+        ("r02.schema.json", schema_bytes("json-schema")),
+        ("r02.openapi.json", schema_bytes("openapi")),
+    ):
+        assert generated == (ROOT / "schemas" / filename).read_bytes()
+        result[filename] = {"sha256": sha256(generated).hexdigest()}
+    return result
 
 
 def test_vectors() -> None:

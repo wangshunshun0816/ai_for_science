@@ -29,3 +29,13 @@ Ubuntu CPython 3.12.16 完整检查通过，271 项测试通过。执行 `bash s
 GitHub Actions [运行 43373228351](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43373228351) 在 `main` 手动触发。GitHub API 确认 `completed / success`，实际运行 SHA 为 `6f0f92575b3a374e2ddcf348081c6938952ed6c6`。UTC 05:37:23 开始，05:37:46 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43373228351/job/131713642231) 的 Checkout、固定工具与 Python 安装、锁定检查及构建均成功。
 
 验收复核发现两项缺口。当前调用模型和生成物使用 `run_refs`，与大方案 §5.1 的正式字段 `run_ids` 及 E-02 的旧样例显式适配约定不一致。跨平台逐字节证据仅覆盖 SanityRequest，未覆盖 ClaimSubmissionDraft、ClaimSubmission、SanityReport、EvidenceReport、GateExecution 或生成的两份 Schema。Windows 4 项行为测试另计。
+
+
+## 验收整改与复验
+
+- 正式 ClaimSubmissionDraft、权威记录的嵌套草稿及生成物统一使用 `run_ids`。每项保留现行 ScientificRef 的运行定义类型、对象 ID 及精确内容版本；原有逐条权限、归属和版本守卫继续生效。旧 `run_refs` 只由测试适配器经显式目录映射。复验正式字段通过，正式入口拒绝旧字段、双字段及 Attempt 引用；旧正例的两个别名保持原顺序并映射到对应运行定义。
+- [Ubuntu 完整日志](evidence/p1-2-batch8-remediation-verify.log)记录 CPython 3.12.16、272 项测试及构建通过。Windows CPython 3.12.14 在既有原锁隔离环境运行第八批 5 项测试及生成物检查，全部通过。两侧 pydantic 2.14.3、pydantic-core 2.50.4、rfc8785 0.1.4、pytest 9.2.0，项目锁无变化。
+- 六种合同各有一组手列投影，用独立标准库 JSON 编码得出预期 UTF-8 及完整 SHA-256，两侧逐项一致。两侧各自生成的 JSON Schema 和 OpenAPI 均逐字节等于仓库对应生成物，两侧摘要一致。[Ubuntu 输出](evidence/p1-2-batch8-remediation-ubuntu.json) · [Windows 输出](evidence/p1-2-batch8-remediation-windows.json)
+- 两侧行为复验覆盖运行字段与旧样例适配、伪造权威字段、错版／归属及未授权引用、Sanity 自依赖与 profile 跳过、提交状态与报告不匹配、错误来源用量和缺题不能接受。字节对照覆盖指定六种合同各一个输入。原九个金样例、手算记录及设计基线无字节差异。
+
+整改提交的远端 CI 待运行核验。§验证记录的成功运行对应整改前提交。
