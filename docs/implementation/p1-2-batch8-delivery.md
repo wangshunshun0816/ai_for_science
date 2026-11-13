@@ -38,4 +38,4 @@ GitHub Actions [运行 43373228351](https://github.com/wangshunshun0816/ai_for_s
 - 六种合同各有一组手列投影，用独立标准库 JSON 编码得出预期 UTF-8 及完整 SHA-256，两侧逐项一致。两侧各自生成的 JSON Schema 和 OpenAPI 均逐字节等于仓库对应生成物，两侧摘要一致。[Ubuntu 输出](evidence/p1-2-batch8-remediation-ubuntu.json) · [Windows 输出](evidence/p1-2-batch8-remediation-windows.json)
 - 两侧行为复验覆盖运行字段与旧样例适配、伪造权威字段、错版／归属及未授权引用、Sanity 自依赖与 profile 跳过、提交状态与报告不匹配、错误来源用量和缺题不能接受。字节对照覆盖指定六种合同各一个输入。原九个金样例、手算记录及设计基线无字节差异。
 
-整改提交的远端 CI 待运行核验。§验证记录的成功运行对应整改前提交。
+[整改 CI 运行 43375110700](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43375110700) 由 `workflow_dispatch` 在 `main` 手动触发。GitHub API 核实实际 SHA 为 `16df8ec216ceae4e8ccc7edf7e1ab425284183b2`，最终状态为 `completed / success`。运行自 2026-11-13 05:54:54 UTC 开始，05:55:12 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43375110700/job/131719664882)的 Checkout、固定工具和 Python 安装、锁定检查及构建均通过。
