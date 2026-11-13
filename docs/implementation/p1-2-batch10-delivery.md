@@ -18,7 +18,7 @@
 
 ## 证据
 
-Ubuntu CPython 3.12.16 完整工程检查及构建通过，296 项测试通过。[日志](evidence/p1-2-batch10-verify.log) 原九个金样例、手算、设计基线和依赖锁无字节差异。远端 CI 待核验本批交付 SHA。
+Ubuntu CPython 3.12.16 完整工程检查及构建通过，296 项测试通过。[日志](evidence/p1-2-batch10-verify.log) 原九个金样例、手算、设计基线和依赖锁无字节差异。[远端 CI 43404421838](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43404421838) 在 main 手动触发，实际 SHA 为 `c0492356b505e543dd123c552ed5601dba136d0e`，最终为 completed / success。2026-11-13 09:49:06 UTC 开始，09:49:33 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43404421838/job/131815130231)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。
 
 Windows CPython 3.12.14 使用临时隔离环境，通过现有依赖锁同步项目所需依赖。8 项专项测试及 Schema 检查通过。四种新增合同各有一组手列预期，由独立标准库 JSON 编码并计算 SHA-256。两侧规范 UTF-8 和完整摘要逐项一致；两份生成物在两侧分别与仓库文件逐字节一致。[Ubuntu 向量](evidence/p1-2-batch10-ubuntu.json) · [Windows 向量](evidence/p1-2-batch10-windows.json)
 
