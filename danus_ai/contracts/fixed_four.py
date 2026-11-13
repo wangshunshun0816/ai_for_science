@@ -162,6 +162,9 @@ class ConfirmationProfile(StrictContract):
     required_checks: list[Text]
 
 
+SanityCheckStatus = Literal["pass", "defect", "error", "not_covered", "not_applicable"]
+
+
 class SanitySnapshot(StrictContract):
     locator: RecordLocator
     tenant_id: Text
@@ -169,7 +172,7 @@ class SanitySnapshot(StrictContract):
     binding_ref: ScientificRef
     suite_ref: ScientificRef
     profile_ref: ScientificRef
-    checks: dict[Text, Literal["pass", "defect", "error", "not_covered", "not_applicable"]]
+    checks: dict[Text, SanityCheckStatus]
     stale: bool
     approval_bindings: list[ApprovalLocator]
     not_applicable_bases: dict[Text, ScientificRef]
@@ -802,17 +805,29 @@ class FixedFour:
             raise ContractBlocked("TARGET_VERSION_MISMATCH: ExecutionBinding")
         if value.sanity_ref is None:
             raise ContractBlocked("SANITY_NOT_READY")
-        report = self.port.sanity(self.context, value.sanity_ref)
+        self._check_sanity_snapshot(
+            value.sanity_ref, value.execution_binding_ref, binding, expected_report=expected_report
+        )
+
+    def _check_sanity_snapshot(
+        self,
+        report_ref: RecordLocator,
+        binding_ref: ScientificRef,
+        binding: ExecutionBinding,
+        *,
+        expected_report: SanitySnapshot | None = None,
+    ) -> None:
+        report = self.port.sanity(self.context, report_ref)
         if report is None:
             raise ContractBlocked("SANITY_NOT_READY")
         report = SanitySnapshot.model_validate(report)
         profile = self.target(binding.validation_profile_ref, ConfirmationProfile)
         if (
             (expected_report is not None and report != expected_report)
-            or report.locator != value.sanity_ref
+            or report.locator != report_ref
             or (report.tenant_id, report.project_id)
             != (self.context.tenant_id, self.context.project_id)
-            or report.binding_ref != value.execution_binding_ref
+            or report.binding_ref != binding_ref
             or report.suite_ref != binding.suite_ref
             or report.profile_ref != binding.validation_profile_ref
             or not profile.required_checks

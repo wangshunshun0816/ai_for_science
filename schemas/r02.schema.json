@@ -1306,6 +1306,79 @@
       "title": "CandidateRecord",
       "type": "object"
     },
+    "CheckDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "expectation_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tolerance_basis_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "uncovered_scope_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "applicability_ref",
+        "expectation_ref",
+        "tolerance_basis_ref",
+        "uncovered_scope_ref"
+      ],
+      "title": "CheckDefinition",
+      "type": "object"
+    },
+    "CheckSuite": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "additionalProperties": {
+            "$ref": "#/$defs/CheckDefinition"
+          },
+          "minProperties": 1,
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Checks",
+          "type": "object"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "suite_version_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "suite_version_ref",
+        "checks"
+      ],
+      "title": "CheckSuite",
+      "type": "object"
+    },
     "CheckpointScope": {
       "additionalProperties": false,
       "properties": {
@@ -4814,6 +4887,72 @@
       "title": "Project",
       "type": "object"
     },
+    "ProtocolBundle": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "binding_snapshot_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "component_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Component Refs",
+          "type": "array"
+        },
+        "independent_reference_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Independent Reference Refs",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "protocol_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "suite_version_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "protocol_ref",
+        "component_refs",
+        "independent_reference_refs",
+        "suite_version_ref",
+        "binding_snapshot_ref",
+        "approval_ref"
+      ],
+      "title": "ProtocolBundle",
+      "type": "object"
+    },
     "ProtocolDraft": {
       "additionalProperties": false,
       "properties": {
@@ -6453,6 +6592,21 @@
       "title": "SanityInputs",
       "type": "object"
     },
+    "SanityJobRef": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "minLength": 1,
+          "title": "Job Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "title": "SanityJobRef",
+      "type": "object"
+    },
     "SanityReport": {
       "additionalProperties": false,
       "properties": {
@@ -6541,6 +6695,53 @@
         "evidence"
       ],
       "title": "SanityReport",
+      "type": "object"
+    },
+    "SanityReportView": {
+      "additionalProperties": false,
+      "properties": {
+        "check_results": {
+          "additionalProperties": {
+            "enum": [
+              "pass",
+              "defect",
+              "error",
+              "not_covered",
+              "not_applicable"
+            ],
+            "type": "string"
+          },
+          "propertyNames": {
+            "minLength": 1
+          },
+          "title": "Check Results",
+          "type": "object"
+        },
+        "eligibility": {
+          "const": "confirmation_eligible",
+          "title": "Eligibility",
+          "type": "string"
+        },
+        "expected_binding_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "report_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "stale": {
+          "const": false,
+          "title": "Stale",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "report_ref",
+        "expected_binding_ref",
+        "check_results",
+        "eligibility",
+        "stale"
+      ],
+      "title": "SanityReportView",
       "type": "object"
     },
     "SanityRequest": {
@@ -7983,6 +8184,7 @@
       "AuditEntry": "service_owned",
       "CandidateDraft": "caller_input",
       "CandidateRecord": "service_owned",
+      "CheckSuite": "service_owned",
       "ClaimRecord": "service_owned",
       "ClaimScience": "service_owned",
       "ClaimSubmission": "service_owned",
@@ -8030,6 +8232,7 @@
       "PreregDraft": "caller_input",
       "PreregRecord": "service_owned",
       "Project": "service_owned",
+      "ProtocolBundle": "service_owned",
       "ProtocolDraft": "caller_input",
       "ProtocolRecord": "service_owned",
       "ReferenceRequest": "caller_input",
@@ -8042,7 +8245,9 @@
       "RoleOutputEnvelope": "caller_input",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
+      "SanityJobRef": "output_only",
       "SanityReport": "service_owned",
+      "SanityReportView": "output_only",
       "SanityRequest": "caller_input",
       "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
@@ -8075,6 +8280,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "exact protocol artifacts, current binding and report qualification",
       "current exact account, tenant and project ownership relations and revisions",
       "submission decision and report binding, gate evidence and R07 usage provenance",
       "sanity binding, authoritative suite/profile coverage and current approvals",
@@ -8087,6 +8293,15 @@
       "reference resolution and eligibility, scientific version and transition guards"
     ],
     "runtime_validation_required": true,
+    "sanity_artifacts": {
+      "guards": [
+        "check_protocol_bundle",
+        "resolve_sanity_report_view"
+      ],
+      "job_ref_confers_eligibility": false,
+      "runtime_authority": "service_assembled_read_ports",
+      "scope": "fixed_four_confirmation"
+    },
     "task_and_handoff": {
       "activation_performs_write": false,
       "handoff_requires_exact_receiver_review": true,
@@ -8156,6 +8371,9 @@
     },
     "CandidateRecord": {
       "$ref": "#/$defs/CandidateRecord"
+    },
+    "CheckSuite": {
+      "$ref": "#/$defs/CheckSuite"
     },
     "ClaimRecord": {
       "$ref": "#/$defs/ClaimRecord"
@@ -8298,6 +8516,9 @@
     "Project": {
       "$ref": "#/$defs/Project"
     },
+    "ProtocolBundle": {
+      "$ref": "#/$defs/ProtocolBundle"
+    },
     "ProtocolDraft": {
       "$ref": "#/$defs/ProtocolDraft"
     },
@@ -8334,8 +8555,14 @@
     "RunRequestRecord": {
       "$ref": "#/$defs/RunRequestRecord"
     },
+    "SanityJobRef": {
+      "$ref": "#/$defs/SanityJobRef"
+    },
     "SanityReport": {
       "$ref": "#/$defs/SanityReport"
+    },
+    "SanityReportView": {
+      "$ref": "#/$defs/SanityReportView"
     },
     "SanityRequest": {
       "$ref": "#/$defs/SanityRequest"

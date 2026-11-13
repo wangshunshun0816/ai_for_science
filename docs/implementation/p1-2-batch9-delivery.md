@@ -28,3 +28,7 @@
 - LegacyIncomplete 仍兼容空归属结构，空归属与待认领状态均不能通过业务读取，且不会按当前上下文补齐。普通入口拒绝载荷内 trusted 字段，真实适配器负责认证和受信调用边界。
 - Ubuntu 3.12.16 完整检查与构建通过，288 项测试通过。Windows 3.12.14 同锁专项 16 项和生成物检查通过。三组独立向量及两份 Schema 两侧一致，且与整改前输出相同。原九个金样例、手算、设计基线与锁文件保持原字节。[Ubuntu 日志](evidence/p1-2-batch9-remediation-verify.log) · [Ubuntu 向量](evidence/p1-2-batch9-remediation-ubuntu.json) · [Windows 向量](evidence/p1-2-batch9-remediation-windows.json)
 - [整改 CI 43381229894](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43381229894) 在 main 手动触发。GitHub API 核实实际 SHA 为 `c1b20305eeb8d48fda60cea88a9c6dfbff0ed9c9`，最终为 completed / success。2026-11-13 06:48:11 UTC 开始，06:48:38 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43381229894/job/131739210479)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。
+
+## 后续签收
+
+Jack_Wang 于 2026-11-13 限定签收通过，提交 `beb7742a0df19dfb6ced62a8c6423be1977ecf31`。见[验收记录](decisions/A0-P1-2-batch9-acceptance.md)。

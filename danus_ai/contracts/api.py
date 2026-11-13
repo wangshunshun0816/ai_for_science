@@ -65,6 +65,7 @@ from .protocol_targets import FixedMissingPolicy, FixedProtocolTargets, FixedUni
 from .references import MethodConfig
 from .role_outputs import Handoff, HandoffDraft, RoleOutputEnvelope
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
+from .sanity_artifacts import CheckSuite, ProtocolBundle, SanityJobRef, SanityReportView
 from .scope import Scope
 from .signing import ApprovalSubject, ReleaseManifestBody, ReleaseReceipt, SignatureEnvelope
 from .submission import (
@@ -156,6 +157,8 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     ClaimSubmission,
     GateExecution,
     SanityReport,
+    CheckSuite,
+    ProtocolBundle,
     ResearchTask,
     PlanRevision,
     TaskContract,
@@ -224,7 +227,12 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     CorrectionCheck,
     EngineeringCheck,
 )
-_OUTPUT_MODELS: tuple[type[StrictContract], ...] = (EvaluationView, EvidenceReport)
+_OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
+    EvaluationView,
+    EvidenceReport,
+    SanityJobRef,
+    SanityReportView,
+)
 
 
 def schema_registry() -> dict[
@@ -367,7 +375,14 @@ def schema_capabilities() -> dict[str, object]:
             "runtime_guard": "require_ownership",
             "checked_at": ["delegation_authorization", "delegated_reference_read"],
         },
+        "sanity_artifacts": {
+            "guards": ["check_protocol_bundle", "resolve_sanity_report_view"],
+            "job_ref_confers_eligibility": False,
+            "runtime_authority": "service_assembled_read_ports",
+            "scope": "fixed_four_confirmation",
+        },
         "runtime_only_checks": [
+            "exact protocol artifacts, current binding and report qualification",
             "current exact account, tenant and project ownership relations and revisions",
             "submission decision and report binding, gate evidence and R07 usage provenance",
             "sanity binding, authoritative suite/profile coverage and current approvals",
