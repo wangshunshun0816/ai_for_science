@@ -152,6 +152,11 @@ class Port:
         self.grant = grant
         self.lease = grant.context.lease_ref if grant is not None else None
         self.resolve_calls = 0
+        self.issued_ownership = (
+            self._fixture_versions(CTX, grant.context.on_behalf_of_account)
+            if grant is not None
+            else None
+        )
 
     def _fixture_versions(self, ctx: RequestContext, account_id: str, /) -> OwnershipVersions:
         return OwnershipVersions(
@@ -185,7 +190,7 @@ class Port:
     ) -> DelegationState | None:
         if self.grant is None or self.grant.locator != locator:
             return None
-        return DelegationState(self.grant, self.lease)
+        return DelegationState(self.grant, self.lease, self.issued_ownership)
 
     def resolve(self, ctx: RequestContext, ref: Ref) -> ReferenceState:
         self.resolve_calls += 1

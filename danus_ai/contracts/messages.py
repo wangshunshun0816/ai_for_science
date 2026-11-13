@@ -126,6 +126,7 @@ class AuthorizedDelegation:
 class DelegationState:
     grant: Delegation
     current_lease: RecordLocator | None
+    issued_ownership: OwnershipVersions | None
 
 
 class ReferenceQueryPort(ReadOnlyPort, OwnershipReader, Protocol):
@@ -142,7 +143,7 @@ def authorize_delegated_request(
     current_lease: RecordLocator,
     expected_purpose: str,
     now: datetime,
-    port: OwnershipReader,
+    port: ReferenceQueryPort,
     *,
     expected_ownership: OwnershipVersions | None = None,
 ) -> AuthorizedDelegation:
@@ -162,9 +163,15 @@ def authorize_delegated_request(
     scope = RequestContext(
         context.tenant_id, context.project_id, context.principal_id, context.role, context.task_kind
     )
-    versions = require_ownership(
-        scope, context.on_behalf_of_account, port, expected=expected_ownership
-    )
+    state = port.delegation_state(scope, expected_delegation)
+    if state is None or state.grant != delegation or state.current_lease != current_lease:
+        raise ContractBlocked("DELEGATION_INVALID")
+    issued = state.issued_ownership
+    if issued is None:
+        raise ContractBlocked("DELEGATION_ISSUANCE_FACTS_REQUIRED")
+    if expected_ownership is not None and issued != expected_ownership:
+        raise ContractBlocked("OWNERSHIP_VERSION_MISMATCH")
+    versions = require_ownership(scope, context.on_behalf_of_account, port, expected=issued)
     return AuthorizedDelegation(delegation.model_copy(deep=True), versions)
 
 

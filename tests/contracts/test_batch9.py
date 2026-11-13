@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from hashlib import sha256
 from pathlib import Path
 
@@ -8,7 +9,7 @@ from pydantic import ValidationError
 from danus_ai.contracts.api import validate_object
 from danus_ai.contracts.canonicalization import canonicalize
 from danus_ai.contracts.export_schema import schema_bytes
-from danus_ai.contracts.guards import ContractBlocked, Ref, RequestContext
+from danus_ai.contracts.guards import ContractBlocked, Ref, ReferenceState, RequestContext
 from danus_ai.contracts.messages import (
     LegacyIncomplete,
     authorize_delegated_request,
@@ -37,6 +38,7 @@ class Catalog(Port):
         self.tenants = {}
         self.projects = {}
         self.missing = False
+        self.target_project = "project"
         for a, t, projects in (("owner", "tenant", ("project", "side")), ("b", "other", ("b1",))):
             account, tenant = loc("PersonalAccount", a), loc("PersonalTenant", t)
             self.accounts[a] = PersonalAccount(
@@ -73,6 +75,14 @@ class Catalog(Port):
         )
         self.grant = original.model_copy(update={"context": context})
         self.lease = context.lease_ref
+        self.issued_ownership = self.ownership_versions(
+            RequestContext(tenant, project, context.principal_id, context.role, context.task_kind),
+            account,
+        )
+        self.tenant, self.target_project = tenant, project
+
+    def resolve(self, ctx: RequestContext, ref: Ref) -> ReferenceState:
+        return replace(super().resolve(ctx, ref), project_id=self.target_project)
 
     def body(self, ctx: RequestContext, ref: Ref) -> object:
         raise AssertionError("Reference validation must not request target body")
@@ -91,13 +101,25 @@ def test_legitimate_relations(account: str, tenant: str, project: str) -> None:
         ctx, port.grant, port.grant.locator, ctx.lease_ref, "read", NOW, port
     )
     assert auth.ownership.project.record_id == project
-    if project == "project":
-        assert (
-            resolve_reference_query(
-                json.dumps(request_data()), auth, port, expected_purpose="read", now=NOW
-            ).status
-            == "ok"
-        )
+
+    def read() -> str:
+        return resolve_reference_query(
+            json.dumps(request_data()), auth, port, expected_purpose="read", now=NOW
+        ).status
+
+    assert read() == "ok"
+    port.target_project = "side" if project != "side" else "project"
+    with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
+        read()
+    port.target_project = project
+    port.tenant = "other" if tenant != "other" else "tenant"
+    with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
+        read()
+    port.tenant = tenant
+    original_ref = auth.grant.target_refs[0]
+    port.replacement = original_ref.model_copy(update={"content_version": "test:v1:" + "2" * 64})
+    with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
+        read()
 
 
 @pytest.mark.parametrize(
@@ -163,6 +185,67 @@ def test_reference_rejections(fault: str, expected: str, calls: int) -> None:
             json.dumps(request_data()), auth, port, expected_purpose="read", now=NOW
         )
     assert port.resolve_calls == calls
+
+
+def test_issuance_versions_cannot_be_refreshed_by_reauthorization() -> None:
+    port = Catalog()
+    port.activate("owner", "tenant", "project")
+    old = port.grant
+    assert old is not None
+    ctx = old.context
+    auth = authorize_delegated_request(ctx, old, old.locator, ctx.lease_ref, "read", NOW, port)
+    port.projects["project"] = port.projects["project"].model_copy(
+        update={"locator": loc("Project", "project", 2)}
+    )
+    with pytest.raises(ContractBlocked, match="OWNERSHIP_VERSION_MISMATCH"):
+        resolve_reference_query(
+            json.dumps(request_data()), auth, port, expected_purpose="read", now=NOW
+        )
+    with pytest.raises(ContractBlocked, match="OWNERSHIP_VERSION_MISMATCH"):
+        authorize_delegated_request(ctx, old, old.locator, ctx.lease_ref, "read", NOW, port)
+    port.issued_ownership = None
+    with pytest.raises(ContractBlocked, match="DELEGATION_ISSUANCE_FACTS_REQUIRED"):
+        authorize_delegated_request(ctx, old, old.locator, ctx.lease_ref, "read", NOW, port)
+    assert port.resolve_calls == 0
+    new = old.model_copy(update={"locator": loc("Delegation", old.locator.record_id, 3)})
+    port.grant = new
+    port.issued_ownership = port.ownership_versions(auth.request_context, ctx.on_behalf_of_account)
+    fresh = authorize_delegated_request(ctx, new, new.locator, ctx.lease_ref, "read", NOW, port)
+    assert (
+        resolve_reference_query(
+            json.dumps(request_data()), fresh, port, expected_purpose="read", now=NOW
+        ).status
+        == "ok"
+    )
+
+
+def test_null_legacy_ownership_is_shape_only() -> None:
+    ref = loc("Scope", "legacy")
+    payload = {
+        "status": "legacy_incomplete",
+        "locator": ref.model_dump(),
+        "tenant_id": None,
+        "project_id": None,
+        "missing_fields": ["selection_history_ref"],
+    }
+    view = validate_object("LegacyIncomplete", payload, trusted=True)
+    assert isinstance(view, LegacyIncomplete)
+
+    class NullOwner:
+        def legacy(self, ctx: RequestContext, locator: RecordLocator, /) -> LegacyIncomplete:
+            return LegacyIncomplete.model_validate(view)
+
+    ctx = RequestContext("tenant", "project", "principal", "A5", "dev")
+    with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
+        read_legacy(ctx, ref, NullOwner())
+    assert view.tenant_id is None and view.project_id is None
+
+
+def test_payload_cannot_set_trusted_flag() -> None:
+    with pytest.raises(ContractBlocked, match="SERVICE_OWNED_CONTRACT"):
+        validate_object("PersonalAccount", '{"trusted":true}')
+    with pytest.raises(ValidationError):
+        validate_object("ReferenceRequest", request_data() | {"trusted": True})
 
 
 def test_legacy_separation() -> None:
