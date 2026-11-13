@@ -19,4 +19,4 @@
 - Windows CPython 3.12.14 在既有原锁隔离环境执行第九批 13 项及 Schema 检查，均通过。两侧 pydantic 2.14.3、pydantic-core 2.50.4、rfc8785 0.1.4、pytest 9.2.0。
 - 三种记录各有一组手列投影，独立标准库 JSON 得出预期规范 UTF-8 与 SHA-256。两侧向量一致，两份生成物在两侧分别与仓库文件逐字节一致。[Ubuntu](evidence/p1-2-batch9-ubuntu.json) · [Windows](evidence/p1-2-batch9-windows.json)
 - 专项覆盖两租户三项目、关系错配、错修订、缺关系、委派越项目及越目标、同 ID／哈希跨租户拒绝、服务与调用方解析入口、旧记录两种状态。关系和委派失败先于目标元数据解析，跨租户目标在元数据阶段拒绝。原九个金样例、手算记录、设计基线及锁文件无字节差异。
-- 远端 CI 待核验本批交付 SHA。
+- [远端 CI 43379368621](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43379368621) 在 main 手动触发，GitHub API 核实实际 SHA 为 `8a379647cc10a2d601c8fff78d611b80397bc6fd`，最终为 completed / success。2026-11-13 06:32:07 UTC 开始，06:32:34 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43379368621/job/131733291615)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。
