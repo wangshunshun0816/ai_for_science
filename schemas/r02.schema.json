@@ -3849,6 +3849,90 @@
       "title": "InternalOrigin",
       "type": "object"
     },
+    "InvocationRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "cost_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "model_profile_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "request_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Request Digest",
+          "type": "string"
+        },
+        "response_version": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Response Version"
+        },
+        "retry_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Retry Refs",
+          "type": "array"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "usage_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "purpose",
+        "model_profile_ref",
+        "request_digest",
+        "response_version",
+        "retry_refs",
+        "usage_ref",
+        "cost_ref"
+      ],
+      "title": "InvocationRecord",
+      "type": "object"
+    },
     "Known_Annotated_list_Annotated_str__FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_______FieldInfo_annotation_NoneType__required_True__metadata__MinLen_min_length_1_____": {
       "additionalProperties": false,
       "properties": {
@@ -6128,6 +6212,73 @@
       "title": "RoleOutputEnvelope",
       "type": "object"
     },
+    "RunRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        },
+        "attempts": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Attempts",
+          "type": "array"
+        },
+        "definition_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "exit_reason_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "usage_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "definition_ref",
+        "attempts",
+        "artifacts",
+        "exit_reason_ref",
+        "usage_ref"
+      ],
+      "title": "RunRecord",
+      "type": "object"
+    },
     "RunRequestDraft": {
       "additionalProperties": false,
       "properties": {
@@ -8222,6 +8373,7 @@
       "Handoff": "service_owned",
       "HandoffDraft": "caller_input",
       "ImageEvidence": "service_owned",
+      "InvocationRecord": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
       "OwnershipUnclaimed": "service_owned",
@@ -8243,6 +8395,7 @@
       "ResponseEnvelope": "service_owned",
       "RetryCheck": "service_owned",
       "RoleOutputEnvelope": "caller_input",
+      "RunRecord": "service_owned",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
       "SanityJobRef": "output_only",
@@ -8280,6 +8433,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "execution records require scoped R08 and exact related R07 facts",
       "exact protocol artifacts, current binding and report qualification",
       "current exact account, tenant and project ownership relations and revisions",
       "submission decision and report binding, gate evidence and R07 usage provenance",
@@ -8486,6 +8640,9 @@
     "ImageEvidence": {
       "$ref": "#/$defs/ImageEvidence"
     },
+    "InvocationRecord": {
+      "$ref": "#/$defs/InvocationRecord"
+    },
     "LegacyIncomplete": {
       "$ref": "#/$defs/LegacyIncomplete"
     },
@@ -8548,6 +8705,9 @@
     },
     "RoleOutputEnvelope": {
       "$ref": "#/$defs/RoleOutputEnvelope"
+    },
+    "RunRecord": {
+      "$ref": "#/$defs/RunRecord"
     },
     "RunRequestDraft": {
       "$ref": "#/$defs/RunRequestDraft"

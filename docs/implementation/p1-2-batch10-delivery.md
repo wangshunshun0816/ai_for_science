@@ -33,3 +33,7 @@ Windows CPython 3.12.14 使用临时隔离环境，通过现有依赖锁同步�
 - [整改 CI 43405543618](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43405543618) 在 main 运行。GitHub API 核实实际 SHA 为 `7159521436e8bd29daf12ea6aa39d03fc417977f`，最终结果为 completed / success。2026-11-13 09:58:48 UTC 开始，09:59:13 UTC 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43405543618/job/131818891358)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。 原 CI 保留为整改前证据。
 
 **仍待明确。** 当前绑定的选择规则，以及通用材料中哪些引用构成依赖边，均未定稿。合成端口验证通过仅证明守卫能够核验给定权威事实，不能关闭这两项。缺权威事实时继续阻断。
+
+## 后续签收
+
+Jack_Wang 于 2026-11-14 限定签收通过，提交 `a46798ed401c9d61cd91b98fb711ba1be23ca185`。见[验收记录](decisions/A0-P1-2-batch10-acceptance.md)。当前绑定选择规则和通用材料依赖语义继续待决。

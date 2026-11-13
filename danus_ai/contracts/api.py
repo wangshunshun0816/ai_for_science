@@ -13,6 +13,7 @@ from .claims import (
     claim_content_version,
 )
 from .context import ContextManifest
+from .execution_records import InvocationRecord, RunRecord
 from .first_objects import (
     CandidateDraft,
     CandidateRecord,
@@ -157,6 +158,8 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     ClaimSubmission,
     GateExecution,
     SanityReport,
+    RunRecord,
+    InvocationRecord,
     CheckSuite,
     ProtocolBundle,
     ResearchTask,
@@ -382,6 +385,7 @@ def schema_capabilities() -> dict[str, object]:
             "scope": "fixed_four_confirmation",
         },
         "runtime_only_checks": [
+            "execution records require scoped R08 and exact related R07 facts",
             "exact protocol artifacts, current binding and report qualification",
             "current exact account, tenant and project ownership relations and revisions",
             "submission decision and report binding, gate evidence and R07 usage provenance",
