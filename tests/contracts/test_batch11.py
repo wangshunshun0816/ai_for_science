@@ -17,7 +17,7 @@ from danus_ai.contracts.execution_records import (
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked, Ref, ReferenceState, RequestContext
 from danus_ai.contracts.references import RecordLocator, ScientificRef
-from danus_ai.contracts.transitions import AttemptFacts, AttemptSnapshot
+from danus_ai.contracts.transitions import AttemptFacts, AttemptSnapshot, SettlementFacts
 from tests.contracts.test_batch6 import CTX, SyntheticReader
 
 
@@ -67,6 +67,7 @@ class Port(SyntheticReader):
         self.facts: dict[str, ExecutionFact] = {}
         self.attempts: dict[str, AttemptSnapshot] = {}
         self.reads: list[str] = []
+        self.settlement_body: SettlementFacts | None = None
         self.run = ScientificRef.model_validate(raw_ref("RunRequest"))
 
     def resolve(self, ctx: RequestContext, ref: Ref) -> ReferenceState | None:
@@ -91,6 +92,10 @@ class Port(SyntheticReader):
 
     def attempt_evidence(self, ctx: RequestContext, ref: RecordLocator, /) -> AttemptFacts | None:
         return None
+
+    def settlement(self, ctx: RequestContext, ref: RecordLocator, /) -> SettlementFacts | None:
+        self.reads.append("settlement")
+        return self.settlement_body
 
     def artifact_subject(self, ctx: RequestContext, ref: ScientificRef, /) -> ScientificRef:
         self.reads.append("artifact")
@@ -178,6 +183,11 @@ def test_invocation_and_accounting_authority() -> None:
     check_invocation_record(record, CTX, p)
     for key, change in (
         ("retryInvocationRecord", {"subject": loc("InvocationRecord", "another")}),
+        ("retryInvocationRecord", {"tenant_id": "another"}),
+        (
+            "retryInvocationRecord",
+            {"locator": record.retry_refs[0].model_copy(update={"revision": 2})},
+        ),
         ("oneUsage", {"subject": loc("InvocationRecord", "another")}),
         ("oneSettlement", {"writer": "R08"}),
     ):
@@ -186,6 +196,13 @@ def test_invocation_and_accounting_authority() -> None:
         with pytest.raises(ContractBlocked, match="EXECUTION_FACT_UNAVAILABLE"):
             check_invocation_record(record, CTX, p)
         p.facts[key] = original
+    no_cost = record.model_copy(update={"cost_ref": None})
+    check_invocation_record(no_cost, CTX, p)
+    assert no_cost.model_dump()["cost_ref"] is None
+    for retry in [record.locator, *record.retry_refs]:
+        duplicate = record.model_copy(update={"retry_refs": [*record.retry_refs, retry]})
+        with pytest.raises((ValueError, ContractBlocked)):
+            check_invocation_record(duplicate, CTX, p)
     state = p.states["ModelProfile"]
     p.states["ModelProfile"] = replace(
         state,
@@ -194,6 +211,66 @@ def test_invocation_and_accounting_authority() -> None:
     with pytest.raises(ContractBlocked, match="VERSION_MISMATCH"):
         check_invocation_record(record, CTX, p)
     assert not p.reads
+
+
+@pytest.mark.parametrize(
+    "fault", ["settled", "no_charge", "run", "revision", "owner", "pending", "missing", "malformed"]
+)
+def test_exact_final_attempt_settlement(fault: str) -> None:
+    record, p = run_fixture()
+    prior = record.attempts[1]
+    current = prior.model_copy(update={"revision": prior.revision + 1})
+    settlement = loc("Settlement")
+    record = record.model_copy(update={"attempts": [record.attempts[0], current]})
+    p.put(current, record.definition_ref, "R08")
+    p.put(settlement, prior, "R07")
+    p.attempts[current.record_id] = p.attempts[current.record_id].model_copy(
+        update={
+            "attempt_ref": current,
+            "billing_pending": False,
+            "settlement_ref": settlement,
+        }
+    )
+    body = SettlementFacts(
+        settlement_ref=settlement,
+        run_ref=record.definition_ref,
+        attempt_ref=prior,
+        outcome="no_charge" if fault == "no_charge" else "settled",
+    )
+    if fault == "run":
+        body = body.model_copy(
+            update={
+                "run_ref": record.definition_ref.model_copy(update={"object_id": "other"}),
+            }
+        )
+    elif fault == "revision":
+        body = body.model_copy(update={"attempt_ref": current})
+    elif fault == "owner":
+        p.facts["oneSettlement"] = replace(p.facts["oneSettlement"], tenant_id="other")
+    elif fault == "pending":
+        body = body.model_copy(update={"outcome": "pending"})
+    elif fault == "malformed":
+        body = body.model_copy(update={"outcome": "failed"})
+    p.settlement_body = None if fault == "missing" else body
+    if fault in {"settled", "no_charge"}:
+        assert check_run_record(record, CTX, p)[1][0].billing_pending is False
+    else:
+        with pytest.raises(
+            ContractBlocked, match="SETTLEMENT_UNVERIFIED|EXECUTION_FACT_UNAVAILABLE"
+        ):
+            check_run_record(record, CTX, p)
+    assert ("settlement" in p.reads) == (fault != "owner")
+
+
+@pytest.mark.parametrize("revision", [1, 2])
+def test_ambiguous_attempt_history_is_preserved_and_blocked(revision: int) -> None:
+    record, p = run_fixture()
+    first = record.attempts[0]
+    record.attempts.append(first.model_copy(update={"revision": revision}))
+    before = record.model_dump()
+    with pytest.raises(ContractBlocked, match="EXECUTION_ATTEMPT_HISTORY_AMBIGUOUS"):
+        check_run_record(record, CTX, p)
+    assert not p.reads and record.model_dump() == before
 
 
 def vectors() -> dict[str, dict[str, str]]:

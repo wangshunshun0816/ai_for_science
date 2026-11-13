@@ -8,7 +8,14 @@ from pydantic import Field, model_validator
 from .guards import ContractBlocked, ReadOnlyPort, RequestContext, require_reference
 from .references import RecordLocator, ScientificRef, Text
 from .submission import ProjectRecord, RecordFact
-from .transitions import AttemptFacts, AttemptSnapshot, Qualification, scientific_qualification
+from .transitions import (
+    AttemptFacts,
+    AttemptSnapshot,
+    Qualification,
+    SettlementFacts,
+    apply_settlement,
+    scientific_qualification,
+)
 
 Digest = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 
@@ -80,6 +87,7 @@ class ExecutionReader(ReadOnlyPort, Protocol):
     def attempt_evidence(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> AttemptFacts | None: ...
+    def settlement(self, ctx: RequestContext, ref: RecordLocator, /) -> SettlementFacts | None: ...
     def artifact_subject(
         self, ctx: RequestContext, ref: ScientificRef, /
     ) -> ScientificRef | None: ...
@@ -111,6 +119,8 @@ def check_run_record(
     port: ExecutionReader,
 ) -> list[tuple[AttemptSnapshot, Qualification]]:
     record = RunRecord.model_validate(record)
+    if len({ref.record_id for ref in record.attempts}) != len(record.attempts):
+        raise ContractBlocked("EXECUTION_ATTEMPT_HISTORY_AMBIGUOUS")
     _fact(ctx, port, record.locator, "R08", record.definition_ref)
     if (record.tenant_id, record.project_id) != (ctx.tenant_id, ctx.project_id):
         raise ContractBlocked("EXECUTION_FACT_UNAVAILABLE")
@@ -142,6 +152,14 @@ def check_run_record(
                 raise ContractBlocked("SETTLEMENT_UNVERIFIED")
             prior = ref.model_copy(update={"revision": ref.revision - 1})
             _fact(ctx, port, attempt.settlement_ref, "R07", prior)
+            settlement = port.settlement(ctx, attempt.settlement_ref)
+            if settlement is None:
+                raise ContractBlocked("SETTLEMENT_UNVERIFIED")
+            try:
+                settlement = SettlementFacts.model_validate(settlement)
+            except ValueError as exc:
+                raise ContractBlocked("SETTLEMENT_UNVERIFIED") from exc
+            apply_settlement(attempt, settlement, "R07")
         elif not attempt.billing_pending:
             raise ContractBlocked("SETTLEMENT_UNVERIFIED")
         evidence = port.attempt_evidence(ctx, ref)
@@ -169,6 +187,8 @@ def check_invocation_record(
     port: ExecutionReader,
 ) -> None:
     record = InvocationRecord.model_validate(record)
+    if len({ref.record_id for ref in record.retry_refs}) != len(record.retry_refs):
+        raise ContractBlocked("INVOCATION_RETRY_HISTORY_AMBIGUOUS")
     if (record.tenant_id, record.project_id) != (ctx.tenant_id, ctx.project_id):
         raise ContractBlocked("EXECUTION_FACT_UNAVAILABLE")
     fact = _fact(ctx, port, record.locator, "R08", record.locator)
