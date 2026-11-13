@@ -26,4 +26,6 @@ I-SCHEMA 及两份生成物区分调用草稿、服务持有和仅输出报告�
 
 Ubuntu CPython 3.12.16 完整检查通过，271 项测试通过。执行 `bash scripts/verify.sh`。证据见[完整日志](evidence/p1-2-batch8-verify.log)。Windows CPython 3.12.14 使用第七批隔离环境及原锁，4 项通过。独立字节预期写在测试中，SanityRequest 的 1 组独立规范字节与完整 SHA-256 一致，见 [Ubuntu](evidence/p1-2-batch8-ubuntu.json) 和 [Windows](evidence/p1-2-batch8-windows.json)。原九个金样例及手算分母记录对比 `412e67e` 无字节差异。
 
-远端 CI 待对本批交付提交手动触发并登记准确 SHA。
+GitHub Actions [运行 43373228351](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43373228351) 在 `main` 手动触发。GitHub API 确认 `completed / success`，实际运行 SHA 为 `6f0f92575b3a374e2ddcf348081c6938952ed6c6`。UTC 05:37:23 开始，05:37:46 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43373228351/job/131713642231) 的 Checkout、固定工具与 Python 安装、锁定检查及构建均成功。
+
+验收复核发现两项缺口。当前调用模型和生成物使用 `run_refs`，与大方案 §5.1 的正式字段 `run_ids` 及 E-02 的旧样例显式适配约定不一致。跨平台逐字节证据仅覆盖 SanityRequest，未覆盖 ClaimSubmissionDraft、ClaimSubmission、SanityReport、EvidenceReport、GateExecution 或生成的两份 Schema。Windows 4 项行为测试另计。
