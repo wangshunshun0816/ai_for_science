@@ -36,4 +36,6 @@
 
 Ubuntu 3.12.16 完整工程检查 409 项及构建通过。Windows 3.12.14 同锁第十一至十四批专项 109 项及 Schema 检查通过。四组独立 UTF-8 与完整 SHA-256 保持原值，两份生成物仅更新运行时能力说明，双方分别与仓库逐字节对照一致。[Ubuntu](evidence/p1-2-batch14-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch14-remediation-windows.json) · [完整日志](evidence/p1-2-batch14-remediation-verify.log)。
 
-保留原 CI 证据提交 f773431fdb610640248e0b845d4d09d0db5f55a3，仅核验原运行摘要，未复查单步日志。整改后须核验新 CI。预算操作提案继续待审。
+保留原 CI 证据提交 f773431fdb610640248e0b845d4d09d0db5f55a3，仅核验原运行摘要，未复查单步日志。预算操作提案继续待审。
+
+[整改 CI 43580740448](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43580740448) 最终为 Success，实际 SHA 为 e36269634647f82a66794a8b5954bf66b069b929。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43580740448/job/132404748301) 的 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均显示 success。该提交的构建步骤调用 scripts/verify.sh，涵盖锁定安装、静态检查、导入边界、Schema、pytest 和发行包构建。步骤日志端点返回 404，证据限于运行摘要、任务页步骤结论与该提交脚本，未独立复核各子命令日志、远端测试数量或构建产物。Checkout 有 Node.js 20 退役、强制使用 Node.js 24 的警告。
