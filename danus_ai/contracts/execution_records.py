@@ -1,7 +1,7 @@
 """R08 execution records and exact R07 references (design §§5.1, 6.10–6.11)."""
 
 from dataclasses import dataclass
-from typing import Annotated, Protocol, Self
+from typing import Annotated, Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
@@ -67,6 +67,32 @@ class InvocationRecord(ProjectRecord):
 Subject = RecordLocator | ScientificRef
 
 
+class Usage(ProjectRecord):
+    """A single R07 fee fact, keyed to an exact execution subject."""
+
+    subject: Subject
+    purpose: Text
+    currency: Annotated[str, Field(pattern=r"^[A-Z]{3}$")]
+    unit: Literal["microcurrency"]
+    kind: Literal["estimate", "actual", "adjustment"]
+    amount: int | None
+
+    @model_validator(mode="after")
+    def reference_types(self) -> Self:
+        if (
+            self.locator.record_type != "Usage"
+            or (
+                isinstance(self.subject, ScientificRef) and self.subject.object_type != "RunRequest"
+            )
+            or (
+                isinstance(self.subject, RecordLocator)
+                and self.subject.record_type not in {"Attempt", "InvocationRecord"}
+            )
+        ):
+            raise ValueError("USAGE_REFERENCE_TYPE_MISMATCH")
+        return self
+
+
 @dataclass(frozen=True)
 class ExecutionFact(RecordFact):
     subject: Subject
@@ -83,6 +109,7 @@ class ExecutionReader(ReadOnlyPort, Protocol):
     def execution_fact(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> ExecutionFact | None: ...
+    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> Usage | None: ...
     def attempt(self, ctx: RequestContext, ref: RecordLocator, /) -> AttemptSnapshot | None: ...
     def attempt_evidence(
         self, ctx: RequestContext, ref: RecordLocator, /
@@ -113,6 +140,35 @@ def _fact(
     return fact
 
 
+def read_usage(
+    ctx: RequestContext,
+    port: ExecutionReader,
+    ref: RecordLocator,
+    subject: Subject,
+    purpose: str,
+) -> Usage:
+    if ref.record_type != "Usage":
+        raise ContractBlocked("USAGE_REFERENCE_TYPE_MISMATCH")
+    fact = _fact(ctx, port, ref, "R07", subject)
+    if not purpose or fact.purpose != purpose:
+        raise ContractBlocked("USAGE_PURPOSE_MISMATCH")
+    value = port.usage(ctx, ref)
+    if value is None:
+        raise ContractBlocked("USAGE_FACT_UNAVAILABLE")
+    value = Usage.model_validate(value)
+    if (
+        value.locator != ref
+        or value.subject != subject
+        or value.purpose != purpose
+        or (value.tenant_id, value.project_id) != (ctx.tenant_id, ctx.project_id)
+    ):
+        raise ContractBlocked("USAGE_BODY_MISMATCH")
+    # No adjustment linkage or aggregation rule has been specified.
+    if value.kind == "adjustment":
+        raise ContractBlocked("SPEC_UNRESOLVED: usage adjustment linkage")
+    return value
+
+
 def check_run_record(
     record: RunRecord,
     ctx: RequestContext,
@@ -121,7 +177,7 @@ def check_run_record(
     record = RunRecord.model_validate(record)
     if len({ref.record_id for ref in record.attempts}) != len(record.attempts):
         raise ContractBlocked("EXECUTION_ATTEMPT_HISTORY_AMBIGUOUS")
-    _fact(ctx, port, record.locator, "R08", record.definition_ref)
+    run_fact = _fact(ctx, port, record.locator, "R08", record.definition_ref)
     if (record.tenant_id, record.project_id) != (ctx.tenant_id, ctx.project_id):
         raise ContractBlocked("EXECUTION_FACT_UNAVAILABLE")
     owner = require_reference(ctx, record.definition_ref, port)
@@ -130,7 +186,7 @@ def check_run_record(
     if record.exit_reason_ref is not None:
         _fact(ctx, port, record.exit_reason_ref, "R08", record.definition_ref)
     if record.usage_ref is not None:
-        _fact(ctx, port, record.usage_ref, "R07", record.definition_ref)
+        read_usage(ctx, port, record.usage_ref, record.definition_ref, run_fact.purpose or "")
     for artifact in record.artifacts:
         require_reference(ctx, artifact, port)
         if port.artifact_subject(ctx, artifact) != record.definition_ref:
@@ -208,6 +264,7 @@ def check_invocation_record(
             record.request_digest,
         ):
             raise ContractBlocked("INVOCATION_RETRY_MISMATCH")
-    for charge_ref in (record.usage_ref, record.cost_ref):
-        if charge_ref is not None:
-            _fact(ctx, port, charge_ref, "R07", record.locator)
+    if record.usage_ref is not None:
+        read_usage(ctx, port, record.usage_ref, record.locator, record.purpose)
+    if record.cost_ref is not None:
+        _fact(ctx, port, record.cost_ref, "R07", record.locator)

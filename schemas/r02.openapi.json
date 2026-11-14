@@ -8230,6 +8230,84 @@
         "title": "Unknown",
         "type": "object"
       },
+      "Usage": {
+        "additionalProperties": false,
+        "description": "A single R07 fee fact, keyed to an exact execution subject.",
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "estimate",
+              "actual",
+              "adjustment"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "$ref": "#/components/schemas/ScientificRef"
+              }
+            ],
+            "title": "Subject"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "unit": {
+            "const": "microcurrency",
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "subject",
+          "purpose",
+          "currency",
+          "unit",
+          "kind",
+          "amount"
+        ],
+        "title": "Usage",
+        "type": "object"
+      },
       "WritingOutput": {
         "additionalProperties": false,
         "properties": {
@@ -8421,7 +8499,8 @@
       "TerminalCorrection": "service_owned",
       "TerminalFact": "service_owned",
       "TrustedObservation": "service_owned",
-      "TrustedRequestContext": "service_owned"
+      "TrustedRequestContext": "service_owned",
+      "Usage": "service_owned"
     },
     "ownership": {
       "checked_at": [
@@ -8441,6 +8520,7 @@
     ],
     "runtime_only_checks": [
       "execution records require scoped R08 and exact related R07 facts",
+      "Usage checks R07 metadata and purpose before reading the exact subject-bound body",
       "exact protocol artifacts, current binding and report qualification",
       "current exact account, tenant and project ownership relations and revisions",
       "submission decision and report binding, gate evidence and R07 usage provenance",
@@ -8772,6 +8852,9 @@
     },
     "TrustedRequestContext": {
       "$ref": "#/components/schemas/TrustedRequestContext"
+    },
+    "Usage": {
+      "$ref": "#/components/schemas/Usage"
     }
   }
 }

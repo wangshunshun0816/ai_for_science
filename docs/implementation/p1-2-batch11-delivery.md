@@ -39,3 +39,7 @@
 [整改 CI 43458155661](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43458155661) 在 main 运行。GitHub API 核实实际 SHA 为 `2f6b95fa774db8f95f4bd67dec43b5a15beff029`，最终为 completed / success。日本时间 2026-11-14 00:59:42 开始，01:00:08 更新为完成。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43458155661/job/131997719640)的 Checkout、固定工具与 Python 安装、锁定检查和构建均通过。
 
 **仍待明确。** 调用费用引用是否须指向最终结算、通用间接重试关系及汇总规则继续待决。缺费用事实保持空值，未经明确规则不得推导间接重试关系、择优或自动汇总。
+
+## 后续签收
+
+Jack_Wang 于 2026-11-14 限定签收通过，提交 `e48fdee97814d2646f74e4498ac5bc7f901452c9`。见[验收记录](decisions/A0-P1-2-batch11-acceptance.md)。调用费用最终结算要求、间接重试和汇总规则继续待决。

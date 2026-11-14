@@ -13,7 +13,7 @@ from .claims import (
     claim_content_version,
 )
 from .context import ContextManifest
-from .execution_records import InvocationRecord, RunRecord
+from .execution_records import InvocationRecord, RunRecord, Usage
 from .first_objects import (
     CandidateDraft,
     CandidateRecord,
@@ -159,6 +159,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     GateExecution,
     SanityReport,
     RunRecord,
+    Usage,
     InvocationRecord,
     CheckSuite,
     ProtocolBundle,
@@ -386,6 +387,7 @@ def schema_capabilities() -> dict[str, object]:
         },
         "runtime_only_checks": [
             "execution records require scoped R08 and exact related R07 facts",
+            "Usage checks R07 metadata and purpose before reading the exact subject-bound body",
             "exact protocol artifacts, current binding and report qualification",
             "current exact account, tenant and project ownership relations and revisions",
             "submission decision and report binding, gate evidence and R07 usage provenance",

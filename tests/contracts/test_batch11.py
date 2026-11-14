@@ -11,6 +11,7 @@ from danus_ai.contracts.execution_records import (
     ExecutionFact,
     InvocationRecord,
     RunRecord,
+    Usage,
     check_invocation_record,
     check_run_record,
 )
@@ -86,6 +87,20 @@ class Port(SyntheticReader):
     def execution_fact(self, ctx: RequestContext, ref: RecordLocator, /) -> ExecutionFact | None:
         return self.facts.get(ref.record_id + ref.record_type)
 
+    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> Usage:
+        fact = self.facts[ref.record_id + ref.record_type]
+        return Usage(
+            locator=ref,
+            tenant_id=ctx.tenant_id,
+            project_id=ctx.project_id,
+            subject=fact.subject,
+            purpose=fact.purpose or "missing",
+            currency="USD",
+            unit="microcurrency",
+            kind="actual",
+            amount=None,
+        )
+
     def attempt(self, ctx: RequestContext, ref: RecordLocator, /) -> AttemptSnapshot | None:
         self.reads.append(ref.record_id)
         return self.attempts.get(ref.record_id)
@@ -108,8 +123,10 @@ def run_fixture() -> tuple[RunRecord, Port]:
     p.add_ref(record.definition_ref)
     p.add_ref(record.artifacts[0])
     p.put(record.locator, record.definition_ref, "R08")
+    p.facts["oneRunRecord"] = replace(p.facts["oneRunRecord"], purpose="run")
     assert record.usage_ref is not None
     p.put(record.usage_ref, record.definition_ref, "R07")
+    p.facts["oneUsage"] = replace(p.facts["oneUsage"], purpose="run")
     for ref in record.attempts:
         p.put(ref, record.definition_ref, "R08")
         p.attempts[ref.record_id] = AttemptSnapshot.model_validate(
@@ -179,6 +196,7 @@ def test_invocation_and_accounting_authority() -> None:
         )
     assert record.usage_ref is not None and record.cost_ref is not None
     p.put(record.usage_ref, record.locator, "R07")
+    p.facts["oneUsage"] = replace(p.facts["oneUsage"], purpose=record.purpose)
     p.put(record.cost_ref, record.locator, "R07")
     check_invocation_record(record, CTX, p)
     for key, change in (
