@@ -19,4 +19,4 @@
 - Ubuntu CPython 3.12.16 完整检查和构建通过，327 项。Windows CPython 3.12.14 同一锁，第十一、十二批共 27 项及生成物检查通过。
 - 手列 Usage 载荷用独立标准库 JSON 编码并计算 SHA-256。规范 UTF-8 及完整摘要两侧一致，两份生成物均与仓库逐字节一致。[Ubuntu](evidence/p1-2-batch12-ubuntu.json) · [Windows](evidence/p1-2-batch12-windows.json) · [完整日志](evidence/p1-2-batch12-verify.log)
 - 覆盖错主体、修订、归属、用途、不可读和非 R07 来源的正文前拒绝，正文主体替换、浮点金额、错误单位、未知与显式零、no_charge 结算分离及普通入口拒绝。第十一批真实终结语义的合成回归与空费用用例继续通过。原九个金样例、手算、设计基线和锁文件无字节差异。
-- 远端 CI 待核验本批实际 SHA。
+- [远端 CI 43558963246](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43558963246) 手动触发，实际 SHA 为 `a263ff47b6cdba261082fb27d67b6dbb4d6f06be`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43558963246/job/132338126000)的 Checkout、固定工具及 Python 安装、锁定检查与构建均通过。
