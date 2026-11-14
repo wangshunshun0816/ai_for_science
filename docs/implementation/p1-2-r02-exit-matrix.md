@@ -39,3 +39,32 @@
 | 独立金样例及集成出口 | [原九件映射和新增参考](p1-2-contract-readiness.md#5-验证计划与独立期望) | 逐件登记调用双方、预期来源、Ubuntu／Windows 和当前 CI；待补真正抽样不确定、独立复现降级、候选改版等适用案例。服务效果不能用合成端口证明。 |
 
 收尾顺序为先维护此表并给阻断项指定决定责任，再推进数据边界、模型／资源／角色资格、科研生命周期与证据对象。预算可在相关决定签收后并行补齐。最后以同一出口提交核对所有 §5.1 对象、§6.4 金样例、七入口、调用兼容与跨平台证据。缺项须完成或由 A0 明确批准出口处理；模块数、Schema 数及测试数量仅作索引。
+
+## 逐项证据补录
+
+Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。测试入口链接覆盖对应子集；平台报告中的实际向量键是覆盖依据，未列同名向量的对象不计为已经完成平台逐对象验证。未列入补录的行仍缺逐项直接证据。
+
+| 子集 | Schema 定义键 | 专项正反例 | 平台证据及限制 |
+|---|---|---|---|
+| ResearchTask | ResearchTask、ResearchTaskDraft | [test_batch7.py](../../tests/contracts/test_batch7.py) | [7 批平台证据](evidence/p1-2-batch7-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch7-remediation-windows.json) |
+| CandidateHypothesis | CandidateDraft、CandidateRecord | [test_first_batch.py](../../tests/contracts/test_first_batch.py) | 缺直接平台证据 |
+| SelectionDecision | 通用键缺 | [test_first_batch.py](../../tests/contracts/test_first_batch.py)、[test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| Protocol、Arm | ProtocolDraft、ProtocolRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| Prereg | PreregDraft、PreregRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| RunRequest、ExecutionBinding | RunRequestDraft、RunRequestRecord、ExecutionBinding | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| RunRecord、Attempt | RunRecord、AttemptSnapshot | [test_batch11.py](../../tests/contracts/test_batch11.py) | [11 批平台证据](evidence/p1-2-batch11-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch11-remediation-windows.json) |
+| InvocationRecord | InvocationRecord | [test_batch11.py](../../tests/contracts/test_batch11.py) | [11 批平台证据](evidence/p1-2-batch11-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch11-remediation-windows.json) |
+| ClaimSubmission、EvidenceReport、GateExecution | ClaimSubmissionDraft、ClaimSubmission、EvidenceReport、GateExecution | [test_batch8.py](../../tests/contracts/test_batch8.py)、[test_batch12.py](../../tests/contracts/test_batch12.py) | [8 批平台证据](evidence/p1-2-batch8-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch8-remediation-windows.json)；[12 批平台证据](evidence/p1-2-batch12-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch12-remediation-windows.json) |
+| ClaimNode、EvidenceEvent | ClaimRecord、EvidenceEvent | [test_q04_q05.py](../../tests/contracts/test_q04_q05.py) | 缺直接平台证据 |
+| Budget、BudgetEvent、I-BUDGET | ReserveRequest、ReserveFacts、ReservePreflightResult、QuoteRequest、QuoteBasis、QuoteEstimate | [test_batch13.py](../../tests/contracts/test_batch13.py)、[test_batch14.py](../../tests/contracts/test_batch14.py) | [13 批平台证据](evidence/p1-2-batch13-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch13-remediation-windows.json)；[14 批平台证据](evidence/p1-2-batch14-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch14-remediation-windows.json) |
+| Usage | Usage | [test_batch12.py](../../tests/contracts/test_batch12.py) | [12 批平台证据](evidence/p1-2-batch12-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch12-remediation-windows.json) |
+| Approval | ApprovalSubject、ApprovalEvidence、ApprovalDisposition | [test_q04_q05.py](../../tests/contracts/test_q04_q05.py) | 缺直接平台证据 |
+| ReleaseManifest | ReleaseManifestBody、ReleaseReceipt | [test_q04_q05.py](../../tests/contracts/test_q04_q05.py) | 缺直接平台证据 |
+| ResearchQuestion、FamilyDeclaration、SelectionHistory／Set | FixedQuestion、FixedFamily、FixedSelectionHistory | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| PersonalAccount、PersonalTenant、Project | PersonalAccount、PersonalTenant、Project | [test_batch9.py](../../tests/contracts/test_batch9.py) | [9 批平台证据](evidence/p1-2-batch9-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch9-remediation-windows.json) |
+| TrustedRequestContext、Delegation、错误消息 | TrustedRequestContext、Delegation、ErrorDetail | [test_batch5.py](../../tests/contracts/test_batch5.py)、[test_batch9.py](../../tests/contracts/test_batch9.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json)；[9 批平台证据](evidence/p1-2-batch9-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch9-remediation-windows.json) |
+| TaskPlan、PlanRevision、PlanNode、TaskContract | TaskPlan、PlanRevision、PlanNode、TaskContract | [test_batch7.py](../../tests/contracts/test_batch7.py) | [7 批平台证据](evidence/p1-2-batch7-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch7-remediation-windows.json) |
+| ContextManifest、七角色输出与交接 | ContextManifest、RoleOutputEnvelope、HandoffDraft、Handoff | [test_batch7.py](../../tests/contracts/test_batch7.py) | [7 批平台证据](evidence/p1-2-batch7-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch7-remediation-windows.json) |
+| ProtocolBundle、CheckSuite、ValidationProfile | ProtocolBundle、CheckSuite | [test_batch10.py](../../tests/contracts/test_batch10.py) | [10 批平台证据](evidence/p1-2-batch10-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch10-remediation-windows.json) |
+| SanityRequest、SanityReport、SanityJobRef、SanityReportView | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [test_batch8.py](../../tests/contracts/test_batch8.py)、[test_batch10.py](../../tests/contracts/test_batch10.py) | [8 批平台证据](evidence/p1-2-batch8-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch8-remediation-windows.json)；[10 批平台证据](evidence/p1-2-batch10-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch10-remediation-windows.json) |
+| Scope、TheoremRef | Scope | [test_batch5.py](../../tests/contracts/test_batch5.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json) |

@@ -8992,7 +8992,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
-      "quote checks exact scoped R00 totals without rate calculation or authorization",
+      "quote requires an independent exact R00 version and a matching body",
       "reserve preflight requires current scoped R07 facts; budget_use unresolved",
       "execution records require scoped R08 and exact related R07 facts",
       "Usage checks R07 metadata and purpose before reading the exact subject-bound body",

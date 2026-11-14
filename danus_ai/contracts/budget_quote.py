@@ -68,6 +68,10 @@ class QuoteReader(Protocol):
         """Authorize both exact references and purpose without reading the basis body."""
         ...
 
+    def quote_version(self, ctx: RequestContext, ref: RecordLocator, /) -> QuoteBasis | None:
+        """Independent R00 version snapshot; never derived from quote_basis."""
+        ...
+
     def quote_basis(self, ctx: RequestContext, ref: RecordLocator, /) -> QuoteBasis | None: ...
 
 
@@ -93,14 +97,23 @@ def check_quote(request: QuoteRequest, ctx: RequestContext, reader: QuoteReader)
     if scope != expected:
         raise ContractBlocked("QUOTE_BASIS_SCOPE_MISMATCH")
 
+    version = reader.quote_version(ctx, request.basis_ref)
+    if version is None:
+        raise ContractBlocked("QUOTE_BASIS_VERSION_UNRESOLVED")
+    expected_basis = QuoteBasis.model_validate(version)
+    if (
+        QuoteBasisScope.model_validate(
+            expected_basis.model_dump(include=set(QuoteBasisScope.model_fields))
+        )
+        != scope
+    ):
+        raise ContractBlocked("QUOTE_BASIS_VERSION_MISMATCH")
+
     resolved = reader.quote_basis(ctx, request.basis_ref)
     if resolved is None:
         raise ContractBlocked("QUOTE_BASIS_UNAVAILABLE")
     basis = QuoteBasis.model_validate(resolved)
-    if (
-        QuoteBasisScope.model_validate(basis.model_dump(include=set(QuoteBasisScope.model_fields)))
-        != scope
-    ):
+    if basis != expected_basis:
         raise ContractBlocked("QUOTE_BASIS_BODY_MISMATCH")
     if (basis.currency, basis.unit) != (request.currency, request.unit):
         raise ContractBlocked("QUOTE_CURRENCY_OR_UNIT_MISMATCH")

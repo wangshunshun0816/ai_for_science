@@ -55,6 +55,8 @@ class SyntheticReader:
         self.scope: QuoteBasisScope | None = QuoteBasisScope.model_validate_json(SCOPE)
         self.body: QuoteBasis | None = QuoteBasis.model_validate_json(BASIS)
         self.reads = 0
+        self.version: QuoteBasis | None = QuoteBasis.model_validate_json(BASIS)
+        self.version_reads = 0
 
     def evaluation_time(self, ctx: RequestContext, /) -> datetime | None:
         return self.at
@@ -63,6 +65,10 @@ class SyntheticReader:
         self, ctx: RequestContext, request: QuoteRequest, /
     ) -> QuoteBasisScope | None:
         return self.scope
+
+    def quote_version(self, ctx: RequestContext, ref: RecordLocator, /) -> QuoteBasis | None:
+        self.version_reads += 1
+        return self.version
 
     def quote_basis(self, ctx: RequestContext, ref: RecordLocator, /) -> QuoteBasis | None:
         self.reads += 1
@@ -78,6 +84,9 @@ def test_quote_total_is_read_only() -> None:
     assert (reader.scope, reader.body) == before
     assert reader.reads == 1
     reader.body = QuoteBasis.model_validate_json(
+        BASIS.replace('"source_kind":"price"', '"source_kind":"conservative_upper_bound"')
+    )
+    reader.version = QuoteBasis.model_validate_json(
         BASIS.replace('"source_kind":"price"', '"source_kind":"conservative_upper_bound"')
     )
     assert check_quote(request, CTX, reader).source_kind == "conservative_upper_bound"
@@ -99,7 +108,7 @@ def test_quote_denies_metadata_before_read(change: dict[str, object]) -> None:
     reader.scope = QuoteBasisScope.model_validate(json.loads(SCOPE) | change)
     with pytest.raises(ContractBlocked, match="QUOTE_BASIS_SCOPE_MISMATCH"):
         check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
-    assert reader.reads == 0
+    assert reader.version_reads == reader.reads == 0
 
 
 def test_quote_needs_authority() -> None:
@@ -108,7 +117,7 @@ def test_quote_needs_authority() -> None:
     reader.scope = None
     with pytest.raises(ContractBlocked, match="QUOTE_BASIS_UNAVAILABLE"):
         check_quote(request, CTX, reader)
-    assert reader.reads == 0
+    assert reader.version_reads == reader.reads == 0
     reader = SyntheticReader()
     with pytest.raises(ContractBlocked, match="QUOTE_BASIS_SCOPE_MISMATCH"):
         check_quote(request, replace(CTX, tenant_id="foreign"), reader)
@@ -130,8 +139,74 @@ def test_quote_needs_authority() -> None:
 def test_quote_checks_body(change: dict[str, object], error: str) -> None:
     reader = SyntheticReader()
     reader.body = QuoteBasis.model_validate(json.loads(BASIS) | change)
+    if error != "QUOTE_BASIS_BODY_MISMATCH":
+        reader.version = QuoteBasis.model_validate(json.loads(BASIS) | change)
     with pytest.raises(ContractBlocked, match=error):
         check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"amount": 951},
+        {"source_kind": "conservative_upper_bound"},
+        {"valid_from": "2026-11-13T00:00:00Z"},
+        {"valid_until": "2026-11-16T00:00:00Z"},
+        {"currency": "EUR"},
+        {"tenant_id": "other"},
+        {"project_id": "other"},
+        {"principal_id": "other"},
+        {"purpose": "other"},
+        {"task_ref": {"record_id": "task", "record_type": "ResearchTask", "revision": 4}},
+        {"locator": {"record_id": "price", "record_type": "QuoteBasis", "revision": 1}},
+    ],
+)
+def test_same_revision_cannot_replace_body(change: dict[str, object]) -> None:
+    reader = SyntheticReader()
+    reader.body = QuoteBasis.model_validate(json.loads(BASIS) | change)
+    with pytest.raises(ContractBlocked, match="QUOTE_BASIS_BODY_MISMATCH"):
+        check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
+
+
+def test_quote_requires_independent_version_before_body() -> None:
+    reader = SyntheticReader()
+    reader.version = None
+    with pytest.raises(ContractBlocked, match="QUOTE_BASIS_VERSION_UNRESOLVED"):
+        check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
+    assert reader.reads == 0
+
+
+def test_quote_rejects_wrong_authority_revision_before_body() -> None:
+    reader = SyntheticReader()
+    old_ref = RecordLocator(record_id="price", record_type="QuoteBasis", revision=1)
+    reader.version = QuoteBasis.model_validate(json.loads(BASIS) | {"locator": old_ref})
+    with pytest.raises(ContractBlocked, match="QUOTE_BASIS_VERSION_MISMATCH"):
+        check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
+    assert reader.reads == 0
+
+
+def test_quote_rejects_changed_unit_or_writer() -> None:
+    for change in ({"unit": "minor"}, {"writer": "R07"}):
+        reader = SyntheticReader()
+        reader.body = QuoteBasis.model_construct(**(json.loads(BASIS) | change))
+        with pytest.raises(ValidationError):
+            check_quote(QuoteRequest.model_validate_json(REQUEST), CTX, reader)
+
+
+def test_new_quote_revision_is_bound_independently() -> None:
+    reader = SyntheticReader()
+    request = QuoteRequest.model_validate_json(REQUEST)
+    new_ref = RecordLocator(record_id="price", record_type="QuoteBasis", revision=3)
+    reader.scope = QuoteBasisScope.model_validate(json.loads(SCOPE) | {"locator": new_ref})
+    reader.version = QuoteBasis.model_validate(
+        json.loads(BASIS) | {"locator": new_ref, "amount": 951}
+    )
+    reader.body = reader.version.model_copy(deep=True)
+    with pytest.raises(ContractBlocked, match="QUOTE_BASIS_SCOPE_MISMATCH"):
+        check_quote(request, CTX, reader)
+    assert reader.version_reads == reader.reads == 0
+    updated = QuoteRequest.model_validate(request.model_dump() | {"basis_ref": new_ref})
+    assert check_quote(updated, CTX, reader).amount == 951
 
 
 @pytest.mark.parametrize(
