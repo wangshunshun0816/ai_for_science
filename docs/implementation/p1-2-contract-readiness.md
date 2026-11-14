@@ -205,4 +205,8 @@ A0 已验收第六批固定四题纯契约交付及整改。签收提交为 [`8e
 
 ## 17. 第十三批预算预检
 
-见[第十三批交付](p1-2-batch13-delivery.md)。已交付 reserve 请求、受信事实和只读额度预检，待人工验收。budget_use 条款、完整 Budget／BudgetEvent 与其余 I-BUDGET 操作、数据边界、角色资格和整体出口仍待跟踪。既有待决边界继续有效。
+见[第十三批交付](p1-2-batch13-delivery.md)。已交付 reserve 请求、受信事实和只读额度预检，A0 已限定签收，见[第十三批签收](decisions/A0-P1-2-batch13-acceptance.md)（`17f9e0490e5d99d6ef9c6ce1d5d069062035cd4a`）。budget_use 条款、完整 Budget／BudgetEvent 与其余 I-BUDGET 操作、数据边界、角色资格和整体出口仍待跟踪。既有待决边界继续有效。
+
+## 18. 第十四批及整体验收索引
+
+见[第十四批交付](p1-2-batch14-delivery.md)、[整体出口台账](p1-2-r02-exit-matrix.md)及[预算操作待审提案](decisions/A0-P1-2-budget-operations-proposal.md)。§12–§16 为各批历史快照，账户归属、固定 Sanity 工件、运行记录和 Usage 的现行限定签收见整体台账及对应验收记录。

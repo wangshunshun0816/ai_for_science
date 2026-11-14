@@ -5408,6 +5408,233 @@
         "title": "ProtocolRecord",
         "type": "object"
       },
+      "QuoteBasis": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "exclusiveMinimum": 0,
+            "title": "Amount",
+            "type": "integer"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "principal_id": {
+            "minLength": 1,
+            "title": "Principal Id",
+            "type": "string"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "source_kind": {
+            "enum": [
+              "price",
+              "conservative_upper_bound"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "unit": {
+            "const": "microcurrency",
+            "title": "Unit",
+            "type": "string"
+          },
+          "valid_from": {
+            "title": "Valid From",
+            "type": "string"
+          },
+          "valid_until": {
+            "title": "Valid Until",
+            "type": "string"
+          },
+          "writer": {
+            "const": "R00",
+            "title": "Writer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "writer",
+          "task_ref",
+          "tenant_id",
+          "project_id",
+          "principal_id",
+          "purpose",
+          "source_kind",
+          "currency",
+          "unit",
+          "amount",
+          "valid_from",
+          "valid_until"
+        ],
+        "title": "QuoteBasis",
+        "type": "object"
+      },
+      "QuoteBasisScope": {
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "principal_id": {
+            "minLength": 1,
+            "title": "Principal Id",
+            "type": "string"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "writer": {
+            "const": "R00",
+            "title": "Writer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "writer",
+          "task_ref",
+          "tenant_id",
+          "project_id",
+          "principal_id",
+          "purpose"
+        ],
+        "title": "QuoteBasisScope",
+        "type": "object"
+      },
+      "QuoteEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "exclusiveMinimum": 0,
+            "title": "Amount",
+            "type": "integer"
+          },
+          "basis_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "nature": {
+            "const": "planning_estimate",
+            "title": "Nature",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "source_kind": {
+            "enum": [
+              "price",
+              "conservative_upper_bound"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "unit": {
+            "const": "microcurrency",
+            "title": "Unit",
+            "type": "string"
+          },
+          "valid_until": {
+            "title": "Valid Until",
+            "type": "string"
+          }
+        },
+        "required": [
+          "nature",
+          "basis_ref",
+          "task_ref",
+          "purpose",
+          "source_kind",
+          "currency",
+          "unit",
+          "amount",
+          "valid_until"
+        ],
+        "title": "QuoteEstimate",
+        "type": "object"
+      },
+      "QuoteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "basis_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "title": "Currency",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "task_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "unit": {
+            "const": "microcurrency",
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_ref",
+          "basis_ref",
+          "purpose",
+          "currency",
+          "unit"
+        ],
+        "title": "QuoteRequest",
+        "type": "object"
+      },
       "RecordLocator": {
         "additionalProperties": false,
         "properties": {
@@ -8711,6 +8938,10 @@
       "ProtocolBundle": "service_owned",
       "ProtocolDraft": "caller_input",
       "ProtocolRecord": "service_owned",
+      "QuoteBasis": "service_owned",
+      "QuoteBasisScope": "service_owned",
+      "QuoteEstimate": "output_only",
+      "QuoteRequest": "caller_input",
       "ReferenceRequest": "caller_input",
       "ReleaseManifestBody": "service_owned",
       "ReleaseReceipt": "service_owned",
@@ -8761,6 +8992,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "quote checks exact scoped R00 totals without rate calculation or authorization",
       "reserve preflight requires current scoped R07 facts; budget_use unresolved",
       "execution records require scoped R08 and exact related R07 facts",
       "Usage checks R07 metadata and purpose before reading the exact subject-bound body",
@@ -9011,6 +9243,18 @@
     },
     "ProtocolRecord": {
       "$ref": "#/components/schemas/ProtocolRecord"
+    },
+    "QuoteBasis": {
+      "$ref": "#/components/schemas/QuoteBasis"
+    },
+    "QuoteBasisScope": {
+      "$ref": "#/components/schemas/QuoteBasisScope"
+    },
+    "QuoteEstimate": {
+      "$ref": "#/components/schemas/QuoteEstimate"
+    },
+    "QuoteRequest": {
+      "$ref": "#/components/schemas/QuoteRequest"
     },
     "ReferenceRequest": {
       "$ref": "#/components/schemas/ReferenceRequest"
