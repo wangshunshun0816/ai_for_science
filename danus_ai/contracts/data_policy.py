@@ -100,13 +100,27 @@ class DataConstraintAccess:
 
 
 @dataclass(frozen=True)
-class DataApplicability:
-    """Resolved policy applicability to the exact query, never a caller assertion."""
+class ClassificationSpecification:
+    locator: RecordLocator
+    codes: frozenset[str]
 
+
+@dataclass(frozen=True)
+class ClassificationMapping:
+    locator: RecordLocator
+    specification: RecordLocator
     access: DataConstraintAccess
     sensitivity: str
-    policy_ethics: EthicsRequirement
-    permit_ethics: EthicsRequirement
+
+
+@dataclass(frozen=True)
+class EthicsEvidence:
+    locator: RecordLocator | ApprovalLocator
+    target: RecordLocator
+    access: DataConstraintAccess
+    expires_at: UTCTime
+    revoked_at: UTCTime | None
+    reason: str | None
 
 
 class DataConstraintReader(ReferenceQueryPort, Protocol):
@@ -124,11 +138,55 @@ class DataConstraintReader(ReferenceQueryPort, Protocol):
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> DataPolicy | SendPermit | None: ...
 
-    def data_applicability(
-        self, ctx: RequestContext, access: DataConstraintAccess, at: datetime, /
-    ) -> DataApplicability | None:
-        """Resolve current classification mapping and exact applicable ethics evidence."""
+    def classification_refs(
+        self, ctx: RequestContext, policy: RecordLocator, /
+    ) -> tuple[RecordLocator, RecordLocator] | None:
+        """Independently resolve the current specification and mapping revisions."""
         ...
+
+    def classification_specification(
+        self, ctx: RequestContext, ref: RecordLocator, /
+    ) -> ClassificationSpecification | None: ...
+
+    def classification_mapping(
+        self, ctx: RequestContext, ref: RecordLocator, /
+    ) -> ClassificationMapping | None:
+        """Read the exact mapping from the classification authority."""
+        ...
+
+    def ethics_evidence(
+        self, ctx: RequestContext, ref: RecordLocator | ApprovalLocator, target: RecordLocator, /
+    ) -> EthicsEvidence | None:
+        """Resolve current evidence independently of the policy and permit bodies."""
+        ...
+
+
+def _check_ethics(
+    version: DataConstraints,
+    access: DataConstraintAccess,
+    ctx: RequestContext,
+    at: datetime,
+    reader: DataConstraintReader,
+) -> None:
+    ethics = version.ethics
+    ref = ethics.approval_ref if ethics.status == "required_and_approved" else ethics.basis_ref
+    if ref is None:
+        raise ContractBlocked("DATA_ETHICS_EVIDENCE_REQUIRED")
+    if isinstance(ref, ApprovalLocator) and ref.purpose != "data_use":
+        raise ContractBlocked("DATA_ETHICS_APPROVAL_PURPOSE_MISMATCH")
+    evidence = reader.ethics_evidence(ctx, ref, version.locator)
+    if evidence is None:
+        raise ContractBlocked("DATA_ETHICS_EVIDENCE_REQUIRED")
+    if evidence.locator != ref or evidence.target != version.locator:
+        raise ContractBlocked("DATA_ETHICS_TARGET_MISMATCH")
+    if evidence.access != access or evidence.reason != ethics.reason:
+        raise ContractBlocked("DATA_ETHICS_SCOPE_MISMATCH")
+    if at >= datetime.fromisoformat(evidence.expires_at) or (
+        evidence.revoked_at is not None and at >= datetime.fromisoformat(evidence.revoked_at)
+    ):
+        raise ContractBlocked("DATA_ETHICS_EVIDENCE_INACTIVE")
+    if isinstance(ref, ApprovalLocator):
+        raise ContractBlocked("DATA_ETHICS_APPROVAL_TERMS_UNRESOLVED")
 
 
 def check_data_constraints(
@@ -188,10 +246,24 @@ def check_data_constraints(
             raise ContractBlocked("DATA_CONSTRAINT_SCOPE_MISMATCH")
         if version.ethics.status == "unresolved":
             raise ContractBlocked("DATA_ETHICS_UNRESOLVED")
-    if reader.data_applicability(ctx, access, at) != DataApplicability(
-        access, policy.sensitivity, policy.ethics, permit.ethics
-    ):
-        raise ContractBlocked("DATA_APPLICABILITY_UNRESOLVED")
+    refs = reader.classification_refs(ctx, policy.locator)
+    if refs is None:
+        raise ContractBlocked("DATA_CLASSIFICATION_UNRESOLVED")
+    specification, mapping_ref = refs
+    spec = reader.classification_specification(ctx, specification)
+    if spec is None or policy.sensitivity not in spec.codes:
+        raise ContractBlocked("DATA_CLASSIFICATION_UNRESOLVED")
+    if spec.locator != specification:
+        raise ContractBlocked("DATA_CLASSIFICATION_VERSION_MISMATCH")
+    mapping = reader.classification_mapping(ctx, mapping_ref)
+    if mapping is None:
+        raise ContractBlocked("DATA_CLASSIFICATION_UNRESOLVED")
+    if (mapping.locator, mapping.specification) != (mapping_ref, specification):
+        raise ContractBlocked("DATA_CLASSIFICATION_VERSION_MISMATCH")
+    if mapping.access != access or mapping.sensitivity != policy.sensitivity:
+        raise ContractBlocked("DATA_CLASSIFICATION_SCOPE_MISMATCH")
+    for version in (policy, permit):
+        _check_ethics(version, access, ctx, at, reader)
     for version in (policy, permit):
         body = reader.data_body(ctx, version.locator)
         if type(body) is not type(version) or type(version).model_validate(body) != version:

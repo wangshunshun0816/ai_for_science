@@ -11,11 +11,13 @@ from pydantic import ValidationError
 from danus_ai.contracts.api import validate_object
 from danus_ai.contracts.canonicalization import canonicalize
 from danus_ai.contracts.data_policy import (
-    DataApplicability,
+    ClassificationMapping,
+    ClassificationSpecification,
     DataConstraintAccess,
     DataConstraintQuery,
     DataConstraintResult,
     DataPolicy,
+    EthicsEvidence,
     EthicsRequirement,
     SendPermit,
     check_data_constraints,
@@ -92,9 +94,24 @@ class SyntheticReader(Catalog):
         self.policy_body = DataPolicy.model_validate_json(POLICY)
         self.permit_body = SendPermit.model_validate_json(PERMIT)
         self.access = DataConstraintAccess(self.query, "tenant", "project", "agent")
-        self.applicability = DataApplicability(
-            self.access, "mapped", self.policy.ethics, self.permit.ethics
+        self.refs: tuple[RecordLocator, RecordLocator] | None = (
+            loc("ClassificationSpec", "spec"),
+            loc("ClassificationMapping", "mapping"),
         )
+        self.spec = ClassificationSpecification(self.refs[0], frozenset({"mapped"}))
+        self.mapping: ClassificationMapping | None = ClassificationMapping(
+            self.refs[1], self.refs[0], self.access, "mapped"
+        )
+        self.evidence = {}
+        for record in (self.policy, self.permit):
+            self.evidence[record.locator.record_id] = EthicsEvidence(
+                loc("EthicsBasis", "e"),
+                record.locator,
+                self.access,
+                "2030-01-01T00:00:00Z",
+                None,
+                "recorded rationale",
+            )
         self.revoked = False
         self.reads = 0
 
@@ -112,10 +129,25 @@ class SyntheticReader(Catalog):
         self.reads += 1
         return self.policy_body if ref == self.query.policy_ref else self.permit_body
 
-    def data_applicability(
-        self, ctx: RequestContext, access: DataConstraintAccess, at: datetime
-    ) -> DataApplicability | None:
-        return self.applicability
+    def classification_refs(
+        self, ctx: RequestContext, policy: RecordLocator
+    ) -> tuple[RecordLocator, RecordLocator] | None:
+        return self.refs
+
+    def classification_specification(
+        self, ctx: RequestContext, ref: RecordLocator
+    ) -> ClassificationSpecification | None:
+        return self.spec
+
+    def classification_mapping(
+        self, ctx: RequestContext, ref: RecordLocator
+    ) -> ClassificationMapping | None:
+        return self.mapping
+
+    def ethics_evidence(
+        self, ctx: RequestContext, ref: RecordLocator | ApprovalLocator, target: RecordLocator
+    ) -> EthicsEvidence | None:
+        return self.evidence.get(target.record_id)
 
     def check(self) -> DataConstraintResult:
         assert self.grant is not None
@@ -138,7 +170,7 @@ class SyntheticReader(Catalog):
         ({"storage_region": "other"}, "SCOPE_MISMATCH"),
         ({"processing_region": "other"}, "SCOPE_MISMATCH"),
         ({"expires_at": "2020-01-01T00:00:00Z"}, "EXPIRED"),
-        ({"sensitivity": "unmapped"}, "APPLICABILITY_UNRESOLVED"),
+        ({"sensitivity": "unmapped"}, "CLASSIFICATION_UNRESOLVED"),
         (
             {
                 "ethics": EthicsRequirement(
@@ -195,15 +227,90 @@ def test_same_revision_body_replacement(attr: str, field: str, value: object) ->
         reader.check()
 
 
-def test_approval_locator_alone_does_not_pass() -> None:
+@pytest.mark.parametrize(
+    "fault,code",
+    [
+        ("purpose", "APPROVAL_PURPOSE_MISMATCH"),
+        ("target", "TARGET_MISMATCH"),
+        ("revision", "TARGET_MISMATCH"),
+        ("scope", "SCOPE_MISMATCH"),
+        ("expired", "EVIDENCE_INACTIVE"),
+        ("revoked", "EVIDENCE_INACTIVE"),
+        ("missing", "EVIDENCE_REQUIRED"),
+        ("unapproved_terms", "APPROVAL_TERMS_UNRESOLVED"),
+    ],
+)
+def test_ethics_approval_without_applicable_authority(fault: str, code: str) -> None:
     reader = SyntheticReader()
+    ref = ApprovalLocator(
+        purpose="budget_use" if fault == "purpose" else "data_use",
+        record_id="a",
+        revision=1,
+    )
     reader.permit.ethics = EthicsRequirement(
         status="required_and_approved",
         basis_ref=None,
         reason=None,
-        approval_ref=ApprovalLocator(purpose="data_use", record_id="a", revision=1),
+        approval_ref=ref,
     )
-    with pytest.raises(ContractBlocked, match="APPLICABILITY_UNRESOLVED"):
+    reader.permit_body = reader.permit.model_copy(deep=True)
+    evidence = EthicsEvidence(
+        ref, reader.permit.locator, reader.access, "2030-01-01T00:00:00Z", None, None
+    )
+    if fault == "target":
+        evidence = replace(evidence, target=loc("SendPermit", "other"))
+    if fault == "revision":
+        evidence = replace(evidence, locator=ref.model_copy(update={"revision": 2}))
+    if fault == "scope":
+        evidence = replace(evidence, access=replace(reader.access, project_id="other"))
+    if fault == "expired":
+        evidence = replace(evidence, expires_at="2020-01-01T00:00:00Z")
+    if fault == "revoked":
+        evidence = replace(evidence, revoked_at="2020-01-01T00:00:00Z")
+    reader.evidence["s"] = evidence
+    if fault == "missing":
+        del reader.evidence["s"]
+    with pytest.raises(ContractBlocked, match=code):
+        reader.check()
+    assert reader.reads == 0
+
+
+@pytest.mark.parametrize(
+    "fault,code",
+    [
+        ("unknown", "CLASSIFICATION_UNRESOLVED"),
+        ("missing_refs", "CLASSIFICATION_UNRESOLVED"),
+        ("wrong_spec", "CLASSIFICATION_VERSION_MISMATCH"),
+        ("wrong_mapping", "CLASSIFICATION_VERSION_MISMATCH"),
+        ("scope", "CLASSIFICATION_SCOPE_MISMATCH"),
+    ],
+)
+def test_classification_requires_independent_exact_mapping(fault: str, code: str) -> None:
+    reader = SyntheticReader()
+    assert reader.mapping is not None
+    if fault == "unknown":
+        reader.policy.sensitivity = "unmapped"
+        reader.policy_body = reader.policy.model_copy(deep=True)
+        reader.mapping = replace(reader.mapping, sensitivity="unmapped")
+    if fault == "missing_refs":
+        reader.refs = None
+    if fault == "wrong_spec":
+        reader.mapping = replace(reader.mapping, specification=loc("ClassificationSpec", "spec", 2))
+    if fault == "wrong_mapping":
+        reader.mapping = replace(reader.mapping, locator=loc("ClassificationMapping", "mapping", 2))
+    if fault == "scope":
+        reader.mapping = replace(
+            reader.mapping, access=replace(reader.access, principal_id="other")
+        )
+    with pytest.raises(ContractBlocked, match=code):
+        reader.check()
+    assert reader.reads == 0
+
+
+def test_exemption_requires_independent_basis() -> None:
+    reader = SyntheticReader()
+    del reader.evidence["p"]
+    with pytest.raises(ContractBlocked, match="ETHICS_EVIDENCE_REQUIRED"):
         reader.check()
     assert reader.reads == 0
 

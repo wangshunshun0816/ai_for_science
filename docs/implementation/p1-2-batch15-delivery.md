@@ -31,3 +31,13 @@
 Ubuntu CPython 3.12.16 完整检查及构建通过，430 项测试。[日志](evidence/p1-2-batch15-verify.log)。Windows CPython 3.12.14 以 uv sync --offline --locked 重建隔离环境，第十五批专项 21 项及两份生成物检查通过。四组手列规范 UTF-8 与完整 SHA-256 两侧一致；两份 Schema 各侧与仓库字节一致。[Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json) · [专项](../../tests/contracts/test_batch15.py)。
 
 [CI 43591714267](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43591714267) 最终 Success，实际 SHA 为 5535e91883c6e18cfdf2f7c62b1871f153121694。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43591714267/job/132437658164) 的 Checkout、固定工具、固定 Python、Locked local checks and build 均显示 success。构建步骤运行该提交的 scripts/verify.sh。步骤日志端点返回 404，核验限于运行摘要、任务步骤结论和提交脚本，未独立核验远端子命令输出、测试数量或制品。任务页有 Checkout 的 Node.js 20 弃用警告。原九个金样例、手算、设计基线及锁文件保留原字节。
+
+## 伦理与分类整改
+
+独立端口解析当前分类规范、映射及各政策／许可的伦理依据。分类代码须属于规范，映射须对应精确规范和映射修订、主体／归属、不可变数据版本和用途／地域／接收方。伦理依据核验定位与修订、精确目标、请求范围、理由及当前期限和撤销。无关 budget_use 直接拒绝；即使 data_use 定位与独立事实匹配，伦理批准用途与条款尚未审定的路径仍阻断。已有不适用依据的只读合成案例通过。独立事实必须由真实服务认证，接口本身不定义生产分类词表、审批结构或发送授权。
+
+回归覆盖共用未知分类字符串、缺映射／规范依据、错规范或映射修订、错范围，以及伦理批准错用途／目标／修订／范围、过期、撤销、缺依据或条款未审定。拒绝路径均不调用受限正文端口。政策和许可交集、委派及撤销复验和正文绑定保留。
+
+Ubuntu 3.12.16 完整工程检查 443 项及构建通过，Windows 3.12.14 同锁第十五批专项 34 项及生成物检查通过。四组独立规范 UTF-8 与完整 SHA-256、两份生成物在两侧与原交付一致。[Ubuntu](evidence/p1-2-batch15-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch15-remediation-windows.json) · [日志](evidence/p1-2-batch15-remediation-verify.log)。
+
+保留原 CI 证据提交 6af7fab357f6d1609a9330b0dccfa017dff47e71，原运行详细日志未取得。整改 CI 待核验。预算提案继续待审。
