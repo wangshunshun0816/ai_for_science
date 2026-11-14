@@ -22,3 +22,13 @@ budget_use 条款未审定，预检输出固定保留授权阻断。预检只读
 - Windows CPython 3.12.14 同锁第十一至十三批 62 项及生成物检查通过。三种合同各一组手列载荷，独立标准库编码的规范 UTF-8 与完整 SHA-256 两侧一致。两份 Schema 在两侧分别与仓库生成物逐字节相同。[Ubuntu](evidence/p1-2-batch13-ubuntu.json) · [Windows](evidence/p1-2-batch13-windows.json)
 - 正例覆盖五层等额边界及事实未改动。反例覆盖逐层缺失及不足、错单位／币种／定位／归属／用途、请求伪造根任务或批准、子任务共用根额度、缺权威事实。已有结算、pending、零金额与 no_charge 用例继续通过。原九个金样例、手算、设计基线与锁文件无字节差异。
 - [远端 CI 43569810315](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43569810315) 在 main 手动触发，实际 SHA 为 `d092e77df0a87d21f053b93fb6dcdb24f8ec5b80`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43569810315/job/132371526021)的 Checkout、固定工具及 Python 安装、锁定检查和构建均通过。
+
+## 验收整改
+
+依据大方案 §6.10 的多层额度和根任务保护，五层各携带精确预算修订、原币与微货币单位、租户／项目／主体／用途／根任务适用范围、金额和明确有效区间。各层区间可不同，以服务提供的同一评价时点核验。区间按权威端口提供的起点和失效点检查，守卫不计算月界、时区或重置周期。缺区间或权威期间依据时不得提供可用额度事实。
+
+独立的 TaskRootFact 端口按精确请求任务提供根关系。关系缺失、歧义、根定位或修订不符、错归属均阻断。此结构用于传递已有权威关系，根任务派生规则和月界规则仍待明确。实际来源认证、额度作用域投影和事务内重验留待服务验收。零额、旧 minor 字段及缺层继续拒绝，预检仍只读，budget_use 保持未决。
+
+Ubuntu 3.12.16 完整检查与构建通过，370 项。Windows 3.12.14 同锁第十一至十三批 70 项及 Schema 检查通过。三组手列向量和两份生成物在两侧逐字节对照一致，原九个金样例、手算、设计基线和依赖锁原字节保留。[完整日志](evidence/p1-2-batch13-remediation-verify.log) · [Ubuntu](evidence/p1-2-batch13-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch13-remediation-windows.json)
+
+整改 SHA 的远端 CI 待核验。前次运行保留为整改前证据。

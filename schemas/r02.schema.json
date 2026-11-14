@@ -5937,28 +5937,67 @@
       "title": "ReserveFacts",
       "type": "object"
     },
+    "ReserveLimit": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "title": "Amount",
+          "type": "integer"
+        },
+        "budget_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/ReserveScope"
+        },
+        "unit": {
+          "const": "microcurrency",
+          "title": "Unit",
+          "type": "string"
+        },
+        "valid_from": {
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_until": {
+          "title": "Valid Until",
+          "type": "string"
+        }
+      },
+      "required": [
+        "budget_ref",
+        "scope",
+        "currency",
+        "unit",
+        "valid_from",
+        "valid_until",
+        "amount"
+      ],
+      "title": "ReserveLimit",
+      "type": "object"
+    },
     "ReserveLimits": {
       "additionalProperties": false,
       "properties": {
         "monthly": {
-          "title": "Monthly",
-          "type": "integer"
+          "$ref": "#/$defs/ReserveLimit"
         },
         "project": {
-          "title": "Project",
-          "type": "integer"
+          "$ref": "#/$defs/ReserveLimit"
         },
         "purpose": {
-          "title": "Purpose",
-          "type": "integer"
+          "$ref": "#/$defs/ReserveLimit"
         },
         "root_task": {
-          "title": "Root Task",
-          "type": "integer"
+          "$ref": "#/$defs/ReserveLimit"
         },
         "tenant": {
-          "title": "Tenant",
-          "type": "integer"
+          "$ref": "#/$defs/ReserveLimit"
         }
       },
       "required": [
@@ -6037,6 +6076,43 @@
         "unit"
       ],
       "title": "ReserveRequest",
+      "type": "object"
+    },
+    "ReserveScope": {
+      "additionalProperties": false,
+      "properties": {
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "root_task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "principal_id",
+        "purpose",
+        "root_task_ref"
+      ],
+      "title": "ReserveScope",
       "type": "object"
     },
     "ResponseEnvelope": {
