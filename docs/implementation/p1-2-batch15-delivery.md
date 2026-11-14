@@ -30,4 +30,4 @@
 
 Ubuntu CPython 3.12.16 完整检查及构建通过，430 项测试。[日志](evidence/p1-2-batch15-verify.log)。Windows CPython 3.12.14 以 uv sync --offline --locked 重建隔离环境，第十五批专项 21 项及两份生成物检查通过。四组手列规范 UTF-8 与完整 SHA-256 两侧一致；两份 Schema 各侧与仓库字节一致。[Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json) · [专项](../../tests/contracts/test_batch15.py)。
 
-远端 CI 待实际交付 SHA 运行。原九个金样例、手算、设计基线及锁文件保留原字节。
+[CI 43591714267](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43591714267) 最终 Success，实际 SHA 为 5535e91883c6e18cfdf2f7c62b1871f153121694。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43591714267/job/132437658164) 的 Checkout、固定工具、固定 Python、Locked local checks and build 均显示 success。构建步骤运行该提交的 scripts/verify.sh。步骤日志端点返回 404，核验限于运行摘要、任务步骤结论和提交脚本，未独立核验远端子命令输出、测试数量或制品。任务页有 Checkout 的 Node.js 20 弃用警告。原九个金样例、手算、设计基线及锁文件保留原字节。
