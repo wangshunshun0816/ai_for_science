@@ -103,13 +103,20 @@ class ExecutionFact(RecordFact):
     response_version: str | None = None
 
 
-class ExecutionReader(ReadOnlyPort, Protocol):
-    """Service-assembled read port. Metadata methods must not load target bodies."""
+class UsageReader(Protocol):
+    """Separates authorization metadata from authenticated body provenance."""
 
     def execution_fact(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> ExecutionFact | None: ...
-    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> Usage | None: ...
+    def usage(
+        self, ctx: RequestContext, ref: RecordLocator, /
+    ) -> tuple[ExecutionFact, Usage] | None: ...
+
+
+class ExecutionReader(ReadOnlyPort, UsageReader, Protocol):
+    """Service-assembled read port. Metadata methods must not load target bodies."""
+
     def attempt(self, ctx: RequestContext, ref: RecordLocator, /) -> AttemptSnapshot | None: ...
     def attempt_evidence(
         self, ctx: RequestContext, ref: RecordLocator, /
@@ -122,7 +129,7 @@ class ExecutionReader(ReadOnlyPort, Protocol):
 
 def _fact(
     ctx: RequestContext,
-    port: ExecutionReader,
+    port: UsageReader,
     ref: RecordLocator,
     writer: str,
     subject: Subject,
@@ -142,7 +149,7 @@ def _fact(
 
 def read_usage(
     ctx: RequestContext,
-    port: ExecutionReader,
+    port: UsageReader,
     ref: RecordLocator,
     subject: Subject,
     purpose: str,
@@ -152,10 +159,13 @@ def read_usage(
     fact = _fact(ctx, port, ref, "R07", subject)
     if not purpose or fact.purpose != purpose:
         raise ContractBlocked("USAGE_PURPOSE_MISMATCH")
-    value = port.usage(ctx, ref)
-    if value is None:
+    resolved = port.usage(ctx, ref)
+    if resolved is None:
         raise ContractBlocked("USAGE_FACT_UNAVAILABLE")
-    value = Usage.model_validate(value)
+    provenance, body = resolved
+    if provenance != fact:
+        raise ContractBlocked("USAGE_BODY_MISMATCH")
+    value = Usage.model_validate(body)
     if (
         value.locator != ref
         or value.subject != subject
@@ -166,7 +176,57 @@ def read_usage(
     # No adjustment linkage or aggregation rule has been specified.
     if value.kind == "adjustment":
         raise ContractBlocked("SPEC_UNRESOLVED: usage adjustment linkage")
+    if value.amount is not None and value.amount < 0:
+        raise ContractBlocked("SPEC_UNRESOLVED: negative usage amount")
     return value
+
+
+def read_attempt_usage(
+    ctx: RequestContext,
+    port: ExecutionReader,
+    usage_ref: RecordLocator,
+    attempt_ref: RecordLocator,
+    parent: RunRecord,
+) -> Usage:
+    parent = RunRecord.model_validate(parent)
+    if (
+        (parent.tenant_id, parent.project_id) != (ctx.tenant_id, ctx.project_id)
+        or attempt_ref.record_type != "Attempt"
+        or [ref for ref in parent.attempts if ref.record_id == attempt_ref.record_id]
+        != [attempt_ref]
+    ):
+        raise ContractBlocked("USAGE_ATTEMPT_PARENT_MISMATCH")
+    run = _fact(ctx, port, parent.locator, "R08", parent.definition_ref)
+    if require_reference(ctx, parent.definition_ref, port).project_id != ctx.project_id:
+        raise ContractBlocked("USAGE_ATTEMPT_PARENT_MISMATCH")
+    attempt = _fact(ctx, port, attempt_ref, "R08", parent.definition_ref)
+    if not run.purpose or attempt.purpose != run.purpose:
+        raise ContractBlocked("USAGE_PURPOSE_MISMATCH")
+    return read_usage(ctx, port, usage_ref, attempt_ref, run.purpose)
+
+
+def check_gate_usage(
+    ctx: RequestContext,
+    port: UsageReader,
+    ref: RecordLocator,
+    invocation_refs: list[RecordLocator],
+) -> None:
+    metadata = port.execution_fact(ctx, ref)
+    if (
+        metadata is None
+        or not metadata.readable
+        or metadata.locator != ref
+        or metadata.writer != "R07"
+        or (metadata.tenant_id, metadata.project_id) != (ctx.tenant_id, ctx.project_id)
+    ):
+        raise ContractBlocked("EXECUTION_FACT_UNAVAILABLE")
+    subject = metadata.subject
+    if not isinstance(subject, RecordLocator) or subject.record_type != "InvocationRecord":
+        raise ContractBlocked("SPEC_UNRESOLVED: gate usage association")
+    if subject not in invocation_refs:
+        raise ContractBlocked("GATE_USAGE_SUBJECT_MISMATCH")
+    invocation = _fact(ctx, port, subject, "R08", subject)
+    read_usage(ctx, port, ref, subject, invocation.purpose or "")
 
 
 def check_run_record(

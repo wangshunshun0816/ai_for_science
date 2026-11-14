@@ -8,12 +8,18 @@ from pydantic import ValidationError
 
 from danus_ai.contracts.api import validate_object
 from danus_ai.contracts.canonicalization import canonicalize
-from danus_ai.contracts.execution_records import Usage, read_usage
+from danus_ai.contracts.execution_records import (
+    ExecutionFact,
+    Usage,
+    check_run_record,
+    read_attempt_usage,
+    read_usage,
+)
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked, RequestContext
 from danus_ai.contracts.references import RecordLocator
 from tests.contracts.test_batch6 import CTX
-from tests.contracts.test_batch11 import Port, loc
+from tests.contracts.test_batch11 import Port, loc, run_fixture
 
 
 def payload() -> dict[str, object]:
@@ -36,10 +42,11 @@ class UsagePort(Port):
         self.body = body
         self.put(body.locator, body.subject, "R07")
         self.facts["oneUsage"] = replace(self.facts["oneUsage"], purpose=body.purpose)
+        self.provenance = self.facts["oneUsage"]
 
-    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> Usage:
+    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> tuple[ExecutionFact, Usage]:
         self.reads.append("usage")
-        return self.body
+        return self.provenance, self.body
 
 
 @pytest.mark.parametrize("fault", ["subject", "revision", "owner", "purpose", "writer", "readable"])
@@ -78,12 +85,74 @@ def test_fee_is_not_settlement() -> None:
         validate_object("Usage", payload())
 
 
-def test_body_must_match_authorized_metadata() -> None:
+@pytest.mark.parametrize(
+    "field", ["subject", "locator", "revision", "tenant_id", "project_id", "purpose", "writer"]
+)
+def test_body_must_match_authorized_metadata(field: str) -> None:
     body = Usage.model_validate(payload())
     port = UsagePort(body)
-    port.body = body.model_copy(update={"subject": loc("Attempt", "other")})
+    if field == "writer":
+        port.provenance = replace(port.provenance, writer="R08")
+    else:
+        changes = {
+            "subject": loc("Attempt", "other"),
+            "locator": loc("Usage", "other"),
+            "revision": body.locator.model_copy(update={"revision": 2}),
+            "tenant_id": "other",
+            "project_id": "other",
+            "purpose": "other",
+        }
+        port.body = body.model_copy(
+            update={"locator" if field == "revision" else field: changes[field]}
+        )
     with pytest.raises(ContractBlocked, match="USAGE_BODY_MISMATCH"):
         read_usage(CTX, port, body.locator, body.subject, body.purpose)
+
+
+@pytest.mark.parametrize("kind", ["estimate", "actual"])
+def test_negative_is_parseable_but_blocked(kind: str) -> None:
+    body = Usage.model_validate(payload() | {"kind": kind, "amount": -1})
+    with pytest.raises(ContractBlocked, match="SPEC_UNRESOLVED: negative"):
+        read_usage(CTX, UsagePort(body), body.locator, body.subject, body.purpose)
+    assert body.amount == -1
+
+
+@pytest.mark.parametrize("fault", ["none", "parent", "purpose", "revision", "missing"])
+def test_attempt_usage_uses_authoritative_parent_and_purpose(fault: str) -> None:
+    parent, source = run_fixture()
+    attempt_ref = parent.attempts[0]
+    body = Usage.model_validate(payload() | {"subject": attempt_ref, "purpose": "run"})
+    port = UsagePort(body)
+    port.states.update(source.states)
+    port.facts.update({key: value for key, value in source.facts.items() if key != "oneUsage"})
+    fact = replace(port.facts["failedAttempt"], purpose="run")
+    if fault == "parent":
+        fact = replace(
+            fact, subject=parent.definition_ref.model_copy(update={"object_id": "other"})
+        )
+    if fault == "purpose":
+        fact = replace(fact, purpose="other")
+    if fault == "revision":
+        fact = replace(fact, locator=attempt_ref.model_copy(update={"revision": 2}))
+    port.facts["failedAttempt"] = fact
+    if fault == "missing":
+        del port.facts["oneRunRecord"]
+    if fault == "none":
+        assert read_attempt_usage(CTX, port, body.locator, attempt_ref, parent) == body
+    else:
+        with pytest.raises(ContractBlocked):
+            read_attempt_usage(CTX, port, body.locator, attempt_ref, parent)
+        assert not port.reads
+
+
+def test_zero_run_usage_keeps_attempts_pending() -> None:
+    run, source = run_fixture()
+    body = Usage.model_validate(payload() | {"subject": run.definition_ref, "purpose": "run"})
+    port = UsagePort(body)
+    port.states.update(source.states)
+    port.facts.update({key: value for key, value in source.facts.items() if key != "oneUsage"})
+    port.attempts.update(source.attempts)
+    assert all(attempt.billing_pending for attempt, _ in check_run_record(run, CTX, port))
 
 
 def vectors() -> dict[str, dict[str, str]]:

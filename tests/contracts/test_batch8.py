@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from danus_ai.contracts.api import validate_object
 from danus_ai.contracts.base import StrictContract
 from danus_ai.contracts.canonicalization import canonicalize
+from danus_ai.contracts.execution_records import ExecutionFact, Usage, UsageReader
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked, RequestContext
 from danus_ai.contracts.observations import FixedFourPolicy, ObservationBinding, TrustedObservation
@@ -46,8 +47,37 @@ class Reader(SyntheticReader):
         super().__init__()
         self.gates = {}
 
+    usage_reads = 0
+    usage_subject = locator("InvocationRecord")
+
+    @property
+    def usage_reader(self) -> UsageReader:
+        return self
+
+    def execution_fact(self, ctx: RequestContext, ref: RecordLocator, /) -> ExecutionFact:
+        writer = self.usage_writer if ref.record_type == "Usage" else "R08"
+        subject = self.usage_subject if ref.record_type == "Usage" else ref
+        return ExecutionFact(ref, ctx.tenant_id, ctx.project_id, writer, True, subject, "check")
+
+    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> tuple[ExecutionFact, Usage]:
+        self.usage_reads += 1
+        fact = self.execution_fact(ctx, ref)
+        return fact, Usage(
+            locator=ref,
+            tenant_id=ctx.tenant_id,
+            project_id=ctx.project_id,
+            subject=fact.subject,
+            purpose="check",
+            currency="USD",
+            unit="microcurrency",
+            kind="actual",
+            amount=0,
+        )
+
     def record(self, ctx: RequestContext, ref: RecordLocator) -> RecordFact:
-        writer = {"Attempt": "R08", "Usage": self.usage_writer}.get(ref.record_type, "R13")
+        writer = {"Attempt": "R08", "InvocationRecord": "R08", "Usage": self.usage_writer}.get(
+            ref.record_type, "R13"
+        )
         return RecordFact(ref, ctx.tenant_id, ctx.project_id, writer, True)
 
     def run(self, ctx: RequestContext, ref: ScientificRef) -> RunFact | None:
@@ -250,7 +280,7 @@ def test_report_outcomes_and_usage() -> None:
                 "attempt": 1,
                 "policy_ref": policy_ref,
                 "trace_ref": policy_ref,
-                "invocation_refs": [],
+                "invocation_refs": [locator("InvocationRecord")],
                 "usage_refs": [locator("Usage")],
                 "started_at": "2026-11-13T00:00:00Z",
                 "ended_at": "2026-11-13T00:00:00Z",
@@ -279,9 +309,17 @@ def test_report_outcomes_and_usage() -> None:
         repair_scope=None,
     )
     check_submission_report(submission, report, ctx, reader)
-    reader.usage_writer = "R08"
-    with pytest.raises(ContractBlocked, match="SUBMISSION_RECORD_UNAVAILABLE"):
+    reads = reader.usage_reads
+    assert reads == 3
+    reader.usage_subject = locator("InvocationRecord").model_copy(update={"revision": 2})
+    with pytest.raises(ContractBlocked, match="GATE_USAGE_SUBJECT_MISMATCH"):
         check_submission_report(submission, report, ctx, reader)
+    assert reader.usage_reads == reads
+    reader.usage_subject = locator("InvocationRecord")
+    reader.usage_writer = "R08"
+    with pytest.raises(ContractBlocked, match="EXECUTION_FACT_UNAVAILABLE"):
+        check_submission_report(submission, report, ctx, reader)
+    assert reader.usage_reads == reads
     reader.usage_writer = "R07"
     reader.observed = policy, rows[:-1]
     with pytest.raises(ContractBlocked, match="SUBMISSION_ACCEPTANCE_EVIDENCE_MISMATCH"):

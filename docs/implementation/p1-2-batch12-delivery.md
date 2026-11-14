@@ -20,3 +20,12 @@
 - 手列 Usage 载荷用独立标准库 JSON 编码并计算 SHA-256。规范 UTF-8 及完整摘要两侧一致，两份生成物均与仓库逐字节一致。[Ubuntu](evidence/p1-2-batch12-ubuntu.json) · [Windows](evidence/p1-2-batch12-windows.json) · [完整日志](evidence/p1-2-batch12-verify.log)
 - 覆盖错主体、修订、归属、用途、不可读和非 R07 来源的正文前拒绝，正文主体替换、浮点金额、错误单位、未知与显式零、no_charge 结算分离及普通入口拒绝。第十一批真实终结语义的合成回归与空费用用例继续通过。原九个金样例、手算、设计基线和锁文件无字节差异。
 - [远端 CI 43558963246](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43558963246) 手动触发，实际 SHA 为 `a263ff47b6cdba261082fb27d67b6dbb4d6f06be`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43558963246/job/132338126000)的 Checkout、固定工具及 Python 安装、锁定检查与构建均通过。
+
+## 验收整改
+
+- 负 estimate／actual 保留结构解析，业务读取返回 SPEC_UNRESOLVED，原值保留。调整关联及金额符号、计量口径保持待决。
+- Usage 先核元数据再读正文。正文端口同时返回受信来源事实，与已授权元数据逐项比对，再检查正文定位、修订、主体、租户／项目和用途。合成端口覆盖来源替换。真实来源认证和元数据不预读正文仍须服务验收。
+- Attempt 用量核对父运行的精确定义、尝试精确修订在父记录中的唯一匹配、R08 父子事实及一致的权威用途。缺事实即阻断。此守卫验证给定关联，不自动发现逐尝试用量或推断汇总。
+- GateExecution 依据 §6.10 已明确的 GateExecution → Invocation → Usage 链，要求 Usage 精确属于关口已列调用，使用 R08 调用权威用途及统一正文守卫。没有设计依据的 Gate 到运行／尝试映射阻断，保持待决。费用读取不改变结算、预算或发送授权。零金额待结回归及第十一批独立 no_charge 仍通过。
+- Ubuntu 3.12.16 完整检查及构建通过，341 项。Windows 3.12.14 同锁第八、十一、十二批 46 项与生成物检查通过。原 Usage 向量、两份 Schema、设计基线、原九个金样例、手算及依赖锁无字节差异。[日志](evidence/p1-2-batch12-remediation-verify.log) · [Ubuntu](evidence/p1-2-batch12-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch12-remediation-windows.json)
+- 整改 SHA 的远端 CI 待核验。原 CI 保留为整改前证据。

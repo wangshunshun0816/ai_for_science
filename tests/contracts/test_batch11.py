@@ -87,9 +87,9 @@ class Port(SyntheticReader):
     def execution_fact(self, ctx: RequestContext, ref: RecordLocator, /) -> ExecutionFact | None:
         return self.facts.get(ref.record_id + ref.record_type)
 
-    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> Usage:
+    def usage(self, ctx: RequestContext, ref: RecordLocator, /) -> tuple[ExecutionFact, Usage]:
         fact = self.facts[ref.record_id + ref.record_type]
-        return Usage(
+        return fact, Usage(
             locator=ref,
             tenant_id=ctx.tenant_id,
             project_id=ctx.project_id,

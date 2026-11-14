@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Annotated, Literal, Protocol, Self
+from typing import TYPE_CHECKING, Annotated, Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
@@ -179,8 +179,15 @@ class RunFact:
     scope_ref: ScientificRef
 
 
+if TYPE_CHECKING:
+    from .execution_records import UsageReader
+
+
 class SubmissionReader(ReadOnlyPort, Protocol):
     """Service-assembled read port. Values never come from caller JSON."""
+
+    @property
+    def usage_reader(self) -> "UsageReader | None": ...
 
     def run(self, ctx: RequestContext, ref: ScientificRef) -> RunFact | None: ...
     def record(self, ctx: RequestContext, ref: RecordLocator) -> RecordFact | None: ...
@@ -316,7 +323,12 @@ def check_submission_report(
         for invocation in gate.invocation_refs:
             _record(ctx, port, invocation, "R08")
         for usage in gate.usage_refs:
-            _record(ctx, port, usage, "R07")
+            from .execution_records import check_gate_usage
+
+            usage_reader = port.usage_reader
+            if usage_reader is None:
+                raise ContractBlocked("SPEC_UNRESOLVED: gate usage reader")
+            check_gate_usage(ctx, usage_reader, usage, gate.invocation_refs)
         if gate.rework_parent_ref is not None:
             _record(ctx, port, gate.rework_parent_ref)
         results.setdefault(gate.gate, set()).add(gate.result)
