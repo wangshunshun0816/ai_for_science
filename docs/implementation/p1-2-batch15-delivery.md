@@ -40,4 +40,12 @@ Ubuntu CPython 3.12.16 完整检查及构建通过，430 项测试。[日志](ev
 
 Ubuntu 3.12.16 完整工程检查 443 项及构建通过，Windows 3.12.14 同锁第十五批专项 34 项及生成物检查通过。四组独立规范 UTF-8 与完整 SHA-256、两份生成物在两侧与原交付一致。[Ubuntu](evidence/p1-2-batch15-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch15-remediation-windows.json) · [日志](evidence/p1-2-batch15-remediation-verify.log)。
 
-保留原 CI 证据提交 6af7fab357f6d1609a9330b0dccfa017dff47e71，原运行详细日志未取得。整改 CI 待核验。预算提案继续待审。
+保留原 CI 证据提交 6af7fab357f6d1609a9330b0dccfa017dff47e71，原运行详细日志未取得。整改 CI 已核验，见下节；预算提案继续待审。
+
+## 整改远端 CI 核验
+
+[整改 CI 43592470752](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43592470752) 已 completed / success，实际 head_sha 为 `1b7e44f7088bd72828dbce592e79956248a3c77b`，与整改提交完全一致。2026-11-14 通过 GitHub REST 运行接口及 jobs 接口直接核验。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43592470752/job/132439936969) 的 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均为 completed / success。
+
+核对该提交的工作流与 scripts/verify.sh：构建步骤调用锁检查、锁定安装、Ruff、mypy、导入边界、Schema 检查、pytest 和发行包构建。详细日志接口 `/actions/jobs/132439936969/logs` 本次返回 HTTP 403，提示需要仓库管理权限，未取得详细日志。证据仅限运行及步骤 API 结论和对应提交脚本，未独立核验远端子命令输出、测试数量或制品；此前原交付日志端点返回 404 的历史记录保留，不视为本次结果。本次未独立核验警告详情，不沿用旧运行警告作为本次证据。本轮仅更新证据文档，未重跑本地测试。
+
+通过的合成案例不代表伦理批准条款或通用分类规则已获审定。真实事实认证仍待服务验收，data_use 未审定路径继续阻断。预算操作提案保持待审，第十六批未启动，人工验收待 A0 签收。
