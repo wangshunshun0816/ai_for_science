@@ -28,4 +28,6 @@
 - Attempt 用量核对父运行的精确定义、尝试精确修订在父记录中的唯一匹配、R08 父子事实及一致的权威用途。缺事实即阻断。此守卫验证给定关联，不自动发现逐尝试用量或推断汇总。
 - GateExecution 依据 §6.10 已明确的 GateExecution → Invocation → Usage 链，要求 Usage 精确属于关口已列调用，使用 R08 调用权威用途及统一正文守卫。没有设计依据的 Gate 到运行／尝试映射阻断，保持待决。费用读取不改变结算、预算或发送授权。零金额待结回归及第十一批独立 no_charge 仍通过。
 - Ubuntu 3.12.16 完整检查及构建通过，341 项。Windows 3.12.14 同锁第八、十一、十二批 46 项与生成物检查通过。原 Usage 向量、两份 Schema、设计基线、原九个金样例、手算及依赖锁无字节差异。[日志](evidence/p1-2-batch12-remediation-verify.log) · [Ubuntu](evidence/p1-2-batch12-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch12-remediation-windows.json)
-- 整改 SHA 的远端 CI 待核验。原 CI 保留为整改前证据。
+- [整改 CI 43560080614](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43560080614) 在 main 手动触发，实际 SHA 为 `f3d25b898b664e891d4a34aed7aec050fcb8be8b`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43560080614/job/132341587837)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。 原 CI 保留为整改前证据。
+
+**仍待明确。** 负金额的业务适用条件、调整关联、计量口径及缺依据的 GateExecution 到运行／尝试映射保持待决。负金额和调整的业务读取继续阻断。CI 通过覆盖已实现的守卫及其拒绝行为。
