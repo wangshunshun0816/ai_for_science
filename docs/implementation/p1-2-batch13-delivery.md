@@ -21,4 +21,4 @@ budget_use 条款未审定，预检输出固定保留授权阻断。预检只读
 - Ubuntu CPython 3.12.16 完整工程检查及构建通过，362 项测试通过。[日志](evidence/p1-2-batch13-verify.log)
 - Windows CPython 3.12.14 同锁第十一至十三批 62 项及生成物检查通过。三种合同各一组手列载荷，独立标准库编码的规范 UTF-8 与完整 SHA-256 两侧一致。两份 Schema 在两侧分别与仓库生成物逐字节相同。[Ubuntu](evidence/p1-2-batch13-ubuntu.json) · [Windows](evidence/p1-2-batch13-windows.json)
 - 正例覆盖五层等额边界及事实未改动。反例覆盖逐层缺失及不足、错单位／币种／定位／归属／用途、请求伪造根任务或批准、子任务共用根额度、缺权威事实。已有结算、pending、零金额与 no_charge 用例继续通过。原九个金样例、手算、设计基线与锁文件无字节差异。
-- 远端 CI 待核验本批实际 SHA。
+- [远端 CI 43569810315](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43569810315) 在 main 手动触发，实际 SHA 为 `d092e77df0a87d21f053b93fb6dcdb24f8ec5b80`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43569810315/job/132371526021)的 Checkout、固定工具及 Python 安装、锁定检查和构建均通过。
