@@ -1932,6 +1932,169 @@
         "title": "CorrectionCheck",
         "type": "object"
       },
+      "DataConstraintQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "permit_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "policy_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/DataUseScope"
+          }
+        },
+        "required": [
+          "scope",
+          "policy_ref",
+          "permit_ref"
+        ],
+        "title": "DataConstraintQuery",
+        "type": "object"
+      },
+      "DataConstraintResult": {
+        "additionalProperties": false,
+        "properties": {
+          "authorization": {
+            "const": "data_use_terms_unresolved",
+            "title": "Authorization",
+            "type": "string"
+          },
+          "query": {
+            "$ref": "#/components/schemas/DataConstraintQuery"
+          },
+          "status": {
+            "const": "constraints_checked_only",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "authorization",
+          "query"
+        ],
+        "title": "DataConstraintResult",
+        "type": "object"
+      },
+      "DataPolicy": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "data_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "ethics": {
+            "$ref": "#/components/schemas/EthicsRequirement"
+          },
+          "expires_at": {
+            "title": "Expires At",
+            "type": "string"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "principal_id": {
+            "minLength": 1,
+            "title": "Principal Id",
+            "type": "string"
+          },
+          "processing_region": {
+            "minLength": 1,
+            "title": "Processing Region",
+            "type": "string"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Recipients",
+            "type": "array"
+          },
+          "sensitivity": {
+            "minLength": 1,
+            "title": "Sensitivity",
+            "type": "string"
+          },
+          "storage_region": {
+            "minLength": 1,
+            "title": "Storage Region",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "data_ref",
+          "tenant_id",
+          "project_id",
+          "principal_id",
+          "allowed_purposes",
+          "recipients",
+          "storage_region",
+          "processing_region",
+          "expires_at",
+          "ethics",
+          "sensitivity"
+        ],
+        "title": "DataPolicy",
+        "type": "object"
+      },
+      "DataUseScope": {
+        "additionalProperties": false,
+        "properties": {
+          "data_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "processing_region": {
+            "minLength": 1,
+            "title": "Processing Region",
+            "type": "string"
+          },
+          "purpose": {
+            "minLength": 1,
+            "title": "Purpose",
+            "type": "string"
+          },
+          "recipient": {
+            "minLength": 1,
+            "title": "Recipient",
+            "type": "string"
+          },
+          "storage_region": {
+            "minLength": 1,
+            "title": "Storage Region",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_ref",
+          "purpose",
+          "recipient",
+          "storage_region",
+          "processing_region"
+        ],
+        "title": "DataUseScope",
+        "type": "object"
+      },
       "Delegation": {
         "additionalProperties": false,
         "properties": {
@@ -2289,6 +2452,60 @@
           "basis_ref"
         ],
         "title": "Estimate",
+        "type": "object"
+      },
+      "EthicsRequirement": {
+        "additionalProperties": false,
+        "properties": {
+          "approval_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "basis_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "required_and_approved",
+              "not_applicable",
+              "unresolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "approval_ref",
+          "basis_ref",
+          "reason"
+        ],
+        "title": "EthicsRequirement",
         "type": "object"
       },
       "EvaluationView": {
@@ -7755,6 +7972,84 @@
         "title": "SelectionTerms",
         "type": "object"
       },
+      "SendPermit": {
+        "additionalProperties": false,
+        "properties": {
+          "allowed_purposes": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Allowed Purposes",
+            "type": "array"
+          },
+          "data_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "ethics": {
+            "$ref": "#/components/schemas/EthicsRequirement"
+          },
+          "expires_at": {
+            "title": "Expires At",
+            "type": "string"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "policy_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "principal_id": {
+            "minLength": 1,
+            "title": "Principal Id",
+            "type": "string"
+          },
+          "processing_region": {
+            "minLength": 1,
+            "title": "Processing Region",
+            "type": "string"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "recipients": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Recipients",
+            "type": "array"
+          },
+          "storage_region": {
+            "minLength": 1,
+            "title": "Storage Region",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "data_ref",
+          "tenant_id",
+          "project_id",
+          "principal_id",
+          "allowed_purposes",
+          "recipients",
+          "storage_region",
+          "processing_region",
+          "expires_at",
+          "ethics",
+          "policy_ref"
+        ],
+        "title": "SendPermit",
+        "type": "object"
+      },
       "SettlementCheck": {
         "additionalProperties": false,
         "properties": {
@@ -8895,6 +9190,9 @@
       "ConfirmationProfile": "service_owned",
       "ContextManifest": "service_owned",
       "CorrectionCheck": "service_owned",
+      "DataConstraintQuery": "caller_input",
+      "DataConstraintResult": "output_only",
+      "DataPolicy": "service_owned",
       "Delegation": "service_owned",
       "DependencyEvidence": "service_owned",
       "EngineeringCheck": "service_owned",
@@ -8963,6 +9261,7 @@
       "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
       "SelectionRule": "service_owned",
+      "SendPermit": "service_owned",
       "SettlementCheck": "service_owned",
       "SignatureEnvelope": "service_owned",
       "TaskContract": "service_owned",
@@ -8992,6 +9291,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "data policy and permit constraints intersect; data_use terms remain unresolved",
       "quote requires an independent exact R00 version and a matching body",
       "reserve preflight requires current scoped R07 facts; budget_use unresolved",
       "execution records require scoped R08 and exact related R07 facts",
@@ -9114,6 +9414,15 @@
     },
     "CorrectionCheck": {
       "$ref": "#/components/schemas/CorrectionCheck"
+    },
+    "DataConstraintQuery": {
+      "$ref": "#/components/schemas/DataConstraintQuery"
+    },
+    "DataConstraintResult": {
+      "$ref": "#/components/schemas/DataConstraintResult"
+    },
+    "DataPolicy": {
+      "$ref": "#/components/schemas/DataPolicy"
     },
     "Delegation": {
       "$ref": "#/components/schemas/Delegation"
@@ -9318,6 +9627,9 @@
     },
     "SelectionRule": {
       "$ref": "#/components/schemas/SelectionRule"
+    },
+    "SendPermit": {
+      "$ref": "#/components/schemas/SendPermit"
     },
     "SettlementCheck": {
       "$ref": "#/components/schemas/SettlementCheck"

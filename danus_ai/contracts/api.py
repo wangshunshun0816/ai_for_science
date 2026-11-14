@@ -15,6 +15,7 @@ from .claims import (
     claim_content_version,
 )
 from .context import ContextManifest
+from .data_policy import DataConstraintQuery, DataConstraintResult, DataPolicy, SendPermit
 from .execution_records import InvocationRecord, RunRecord, Usage
 from .first_objects import (
     CandidateDraft,
@@ -144,6 +145,7 @@ class EngineeringCheck(StrictContract):
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     ReserveRequest,
     QuoteRequest,
+    DataConstraintQuery,
     ClaimSubmissionDraft,
     SanityRequest,
     CandidateDraft,
@@ -161,6 +163,8 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     ReserveFacts,
     QuoteBasisScope,
+    DataPolicy,
+    SendPermit,
     QuoteBasis,
     ClaimSubmission,
     GateExecution,
@@ -241,6 +245,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
 _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
     ReservePreflightResult,
     QuoteEstimate,
+    DataConstraintResult,
     EvaluationView,
     EvidenceReport,
     SanityJobRef,
@@ -395,6 +400,7 @@ def schema_capabilities() -> dict[str, object]:
             "scope": "fixed_four_confirmation",
         },
         "runtime_only_checks": [
+            "data policy and permit constraints intersect; data_use terms remain unresolved",
             "quote requires an independent exact R00 version and a matching body",
             "reserve preflight requires current scoped R07 facts; budget_use unresolved",
             "execution records require scoped R08 and exact related R07 facts",

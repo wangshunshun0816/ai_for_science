@@ -1,6 +1,6 @@
 # P1-2 第十四批 quote 只读契约
 
-基线为[第十三批限定签收](decisions/A0-P1-2-batch13-acceptance.md)提交 17f9e0490e5d99d6ef9c6ce1d5d069062035cd4a。依据大方案 §5.1、§6.10、§6.14 及开发指南 §3.10／§5.3。人工验收另行进行。
+基线为[第十三批限定签收](decisions/A0-P1-2-batch13-acceptance.md)提交 17f9e0490e5d99d6ef9c6ce1d5d069062035cd4a。依据大方案 §5.1、§6.10、§6.14 及开发指南 §3.10／§5.3。A0 已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）。
 
 ## 适用计算规则及字段
 
