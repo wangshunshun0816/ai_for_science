@@ -24,6 +24,6 @@
 - Windows CPython 3.12.14 使用第十三批同锁隔离环境，运行 pytest 第十一至十四批 94 项及 scripts/export_r02_schema.py --check，全部通过。环境中 19 项已安装发行包版本均与 uv.lock 对应。
 - 四组预期 JSON 规范字节手列于 [专项测试](../../tests/contracts/test_batch14.py)，由标准库对独立预期字节计算完整 SHA-256。Windows／Ubuntu 两侧规范字节、完整摘要及 Schema 字节数／摘要一致，各侧同时与两份仓库生成物逐字节核对。[Ubuntu](evidence/p1-2-batch14-ubuntu.json) · [Windows](evidence/p1-2-batch14-windows.json)
 - 正例覆盖价格、保守上界及事实未改动；反例覆盖缺依据、精确修订、身份／用途错误且正文未读、正文范围替换、期间、单位、币种、非法金额、夹带权威字段及消费端混用。九个金样例、手算、设计基线和依赖锁与基线原字节一致。
-- 远端工作流为手动触发，尚待第十四批实际提交的运行证据。
+- [远端 CI 43575759816](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43575759816) 的运行页最终显示 Success，提交链接指向完整 SHA b1b754ab112a1d1f6e7d012d33322135123aeafc。该结论来自运行摘要。
 
 整体未完见[出口台账](p1-2-r02-exit-matrix.md)。[预算操作提案](decisions/A0-P1-2-budget-operations-proposal.md)待审。完整 Budget／BudgetEvent、根任务派生、月界、budget_use、零额、负金额、调整关联、计量、调用最终结算、通用间接重试、汇总和关口映射仍保留原边界。真实报价服务、预占、余额变更、结算、对账及外发未实施。
