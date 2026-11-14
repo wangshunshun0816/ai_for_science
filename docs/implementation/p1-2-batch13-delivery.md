@@ -31,4 +31,6 @@ budget_use 条款未审定，预检输出固定保留授权阻断。预检只读
 
 Ubuntu 3.12.16 完整检查与构建通过，370 项。Windows 3.12.14 同锁第十一至十三批 70 项及 Schema 检查通过。三组手列向量和两份生成物在两侧逐字节对照一致，原九个金样例、手算、设计基线和依赖锁原字节保留。[完整日志](evidence/p1-2-batch13-remediation-verify.log) · [Ubuntu](evidence/p1-2-batch13-remediation-ubuntu.json) · [Windows](evidence/p1-2-batch13-remediation-windows.json)
 
-整改 SHA 的远端 CI 待核验。前次运行保留为整改前证据。
+[整改 CI 43570782374](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43570782374) 的 GitHub Actions 运行页显示最终结果为 Success，运行页提交链接指向完整 SHA `ac09487890a9b1f0ddef0a753bf24271f0e53452`。 前次运行保留为整改前证据。
+
+**仍待明确。** 根任务派生、月界规则及 `budget_use` 条款继续待决。合成权威事实下的校验通过仅覆盖只读预检及其拒绝行为。真实授权保持阻断，预检不产生预占回执，实际服务须在事务内重新核验。
