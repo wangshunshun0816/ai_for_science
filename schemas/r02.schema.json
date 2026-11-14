@@ -5876,6 +5876,169 @@
       "title": "ResearchTaskDraft",
       "type": "object"
     },
+    "ReserveFacts": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "$ref": "#/$defs/ReserveLimits"
+        },
+        "budget_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "root_task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "unit": {
+          "const": "microcurrency",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "budget_ref",
+        "task_ref",
+        "root_task_ref",
+        "tenant_id",
+        "project_id",
+        "principal_id",
+        "purpose",
+        "currency",
+        "unit",
+        "available"
+      ],
+      "title": "ReserveFacts",
+      "type": "object"
+    },
+    "ReserveLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "monthly": {
+          "title": "Monthly",
+          "type": "integer"
+        },
+        "project": {
+          "title": "Project",
+          "type": "integer"
+        },
+        "purpose": {
+          "title": "Purpose",
+          "type": "integer"
+        },
+        "root_task": {
+          "title": "Root Task",
+          "type": "integer"
+        },
+        "tenant": {
+          "title": "Tenant",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "tenant",
+        "project",
+        "monthly",
+        "purpose",
+        "root_task"
+      ],
+      "title": "ReserveLimits",
+      "type": "object"
+    },
+    "ReservePreflightResult": {
+      "additionalProperties": false,
+      "properties": {
+        "authorization": {
+          "const": "budget_use_terms_unresolved",
+          "title": "Authorization",
+          "type": "string"
+        },
+        "budget_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "root_task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "status": {
+          "const": "limits_checked_only",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "budget_ref",
+        "root_task_ref",
+        "authorization"
+      ],
+      "title": "ReservePreflightResult",
+      "type": "object"
+    },
+    "ReserveRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "amount": {
+          "exclusiveMinimum": 0,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "budget_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "budget_request": {
+          "$ref": "#/$defs/BudgetRequest"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "unit": {
+          "const": "microcurrency",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "budget_ref",
+        "task_ref",
+        "budget_request",
+        "amount",
+        "currency",
+        "unit"
+      ],
+      "title": "ReserveRequest",
+      "type": "object"
+    },
     "ResponseEnvelope": {
       "additionalProperties": false,
       "allOf": [
@@ -8470,6 +8633,9 @@
       "ReleaseReceipt": "service_owned",
       "ResearchTask": "service_owned",
       "ResearchTaskDraft": "caller_input",
+      "ReserveFacts": "service_owned",
+      "ReservePreflightResult": "output_only",
+      "ReserveRequest": "caller_input",
       "ResponseEnvelope": "service_owned",
       "RetryCheck": "service_owned",
       "RoleOutputEnvelope": "caller_input",
@@ -8512,6 +8678,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "reserve preflight requires current scoped R07 facts; budget_use unresolved",
       "execution records require scoped R08 and exact related R07 facts",
       "Usage checks R07 metadata and purpose before reading the exact subject-bound body",
       "exact protocol artifacts, current binding and report qualification",
@@ -8776,6 +8943,15 @@
     },
     "ResearchTaskDraft": {
       "$ref": "#/$defs/ResearchTaskDraft"
+    },
+    "ReserveFacts": {
+      "$ref": "#/$defs/ReserveFacts"
+    },
+    "ReservePreflightResult": {
+      "$ref": "#/$defs/ReservePreflightResult"
+    },
+    "ReserveRequest": {
+      "$ref": "#/$defs/ReserveRequest"
     },
     "ResponseEnvelope": {
       "$ref": "#/$defs/ResponseEnvelope"

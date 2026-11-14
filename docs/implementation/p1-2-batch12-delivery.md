@@ -31,3 +31,7 @@
 - [整改 CI 43560080614](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43560080614) 在 main 手动触发，实际 SHA 为 `f3d25b898b664e891d4a34aed7aec050fcb8be8b`，最终为 completed / success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43560080614/job/132341587837)的 Checkout、固定工具与 Python 安装、锁定检查及构建均通过。 原 CI 保留为整改前证据。
 
 **仍待明确。** 负金额的业务适用条件、调整关联、计量口径及缺依据的 GateExecution 到运行／尝试映射保持待决。负金额和调整的业务读取继续阻断。CI 通过覆盖已实现的守卫及其拒绝行为。
+
+## 后续签收
+
+Jack_Wang 于 2026-11-14 限定签收通过，提交 `9326ae204e071169dc6b400bf999300e1b685b1f`。见[验收记录](decisions/A0-P1-2-batch12-acceptance.md)。负金额适用条件、调整关联、计量口径与缺依据的关口到运行／尝试映射继续待决。

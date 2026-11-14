@@ -4,6 +4,7 @@ from typing import Literal, get_args
 
 from .approval_conflicts import ApprovalDisposition, ApprovalEvidence, ApprovalReview
 from .base import StrictContract
+from .budget_preflight import ReserveFacts, ReservePreflightResult, ReserveRequest
 from .claims import (
     AuditCheckpoint,
     AuditEntry,
@@ -140,6 +141,7 @@ class EngineeringCheck(StrictContract):
 
 
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    ReserveRequest,
     ClaimSubmissionDraft,
     SanityRequest,
     CandidateDraft,
@@ -155,6 +157,7 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    ReserveFacts,
     ClaimSubmission,
     GateExecution,
     SanityReport,
@@ -232,6 +235,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     EngineeringCheck,
 )
 _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
+    ReservePreflightResult,
     EvaluationView,
     EvidenceReport,
     SanityJobRef,
@@ -386,6 +390,7 @@ def schema_capabilities() -> dict[str, object]:
             "scope": "fixed_four_confirmation",
         },
         "runtime_only_checks": [
+            "reserve preflight requires current scoped R07 facts; budget_use unresolved",
             "execution records require scoped R08 and exact related R07 facts",
             "Usage checks R07 metadata and purpose before reading the exact subject-bound body",
             "exact protocol artifacts, current binding and report qualification",
