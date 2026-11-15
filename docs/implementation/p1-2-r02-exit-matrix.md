@@ -1,6 +1,6 @@
 # P1-2 整体出口覆盖台账
 
-以大方案 §5.1、§5.2–5.5、§6.4 和开发指南 §3.4／§5.3 为出口依据。字段详见 [R02 台账](r02-field-matrix.md)。下表的批次记录链接到各批独立测试、Windows／Ubuntu 对照及验收范围。两份生成物为 [JSON Schema](../../schemas/r02.schema.json) 和 [OpenAPI](../../schemas/r02.openapi.json)，入口注册与运行时守卫见 [api.py](../../danus_ai/contracts/api.py)。子类型未单独注册时，不视为已有通用入口。第十四批已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）；第十五批待验收。
+以大方案 §5.1、§5.2–5.5、§6.4 和开发指南 §3.4／§5.3 为出口依据。字段详见 [R02 台账](r02-field-matrix.md)。下表的批次记录链接到各批独立测试、Windows／Ubuntu 对照及验收范围。两份生成物为 [JSON Schema](../../schemas/r02.schema.json) 和 [OpenAPI](../../schemas/r02.openapi.json)，入口注册与运行时守卫见 [api.py](../../danus_ai/contracts/api.py)。子类型未单独注册时，不视为已有通用入口。第十四批已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）；第十五批整改 CI 已登记，人工签收待填写。见[收尾计划](p1-2-closure-plan.md)。
 
 | 设计对象／要求 | 类型、入口、守卫及证据 | 现状与剩余出口 |
 |---|---|---|
@@ -69,3 +69,7 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 | SanityRequest、SanityReport、SanityJobRef、SanityReportView | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [test_batch8.py](../../tests/contracts/test_batch8.py)、[test_batch10.py](../../tests/contracts/test_batch10.py) | [8 批平台证据](evidence/p1-2-batch8-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch8-remediation-windows.json)；[10 批平台证据](evidence/p1-2-batch10-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch10-remediation-windows.json) |
 | Scope、TheoremRef | Scope | [test_batch5.py](../../tests/contracts/test_batch5.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json) |
 | DataPolicy／SendPermit 只读子集 | DataConstraintQuery、DataPolicy、SendPermit、DataConstraintResult | [专项](../../tests/contracts/test_batch15.py) | [Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json)，四个根合同及两份 Schema。 |
+
+## 收尾与 P1-3 准备
+
+[收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。集中决策草稿由 A0 单独审阅，目前未签收。原证据及工作卡出口范围继续有效。
