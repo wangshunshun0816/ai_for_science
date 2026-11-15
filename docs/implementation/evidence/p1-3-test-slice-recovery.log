@@ -1,0 +1,19 @@
+run=/home/wangshunshun/.cache/danus-ai/pytest/slice-t93d5f1w mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569824256 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-55aiio0h mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569742336 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-noy301a0 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569652224 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-ipxut0_a mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569570304 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-xhhxzfmx mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569484288 uid=1000 gid=1000 umask=0077
+snapshot=/home/wangshunshun/.cache/danus-ai/pytest/slice-xhhxzfmx/backups restore=/home/wangshunshun/.cache/danus-ai/pytest/slice-xhhxzfmx/restore-check verified_artifact=245fd66339cac6745eaa998e51b4d206195173f51f2167a9206029788ea70b91
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-vbyajnkl mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569209856 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-2636clx3 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022569017344 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-lqrvus56 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022568931328 uid=1000 gid=1000 umask=0077
+.
+8 passed in 5.71s
