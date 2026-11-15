@@ -28,6 +28,14 @@ Ubuntu WSL 的 CPython 3.12.16、SQLite 3.53.1。使用锁定环境运行：
 
 恢复见 [专项日志](evidence/p1-3-test-slice-recovery.log)，本次快照在 /home/wangshunshun/.cache/danus-ai/pytest/slice-xhhxzfmx/backups/，恢复在同 run-id 的 restore-check/，已校验制品 SHA-256 为 245fd66339cac6745eaa998e51b4d206195173f51f2167a9206029788ea70b91。测试数据保留在各自隔离目录供复核。
 
-[完整工程日志](evidence/p1-3-test-slice-verify.log)记录 Ruff、mypy、导入边界、Schema 检查、451 项测试及 wheel/sdist 构建通过。普通 CI 不设置 DANUS_P13_TEST，现场 SQLite 专项仅在签收路径显式启用。本轮未核验远端 CI。原九个金样例、手算、设计基线、Schema 及依赖锁均原字节保留。
+[完整工程日志](evidence/p1-3-test-slice-verify.log)记录 Ruff、mypy、导入边界、Schema 检查、451 项测试及 wheel/sdist 构建通过。普通 CI 不设置 DANUS_P13_TEST，现场 SQLite 专项仅在签收路径显式启用。远端 CI 核验见下节。原九个金样例、手算、设计基线、Schema 及依赖锁均原字节保留。
 
 测试身份与就绪来源为受控合成事实。实际覆盖仅为本地私有单项目候选、初始迁移、版本写入、受权精确读取及独立恢复。真实认证、运行库、预算、外发、模型及付费资源未启用。P1-2、P1-3 的整体出口及人工验收仍独立登记。
+
+## 远端 CI 与独立复核
+
+[运行 43777277306](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43777277306) 最终 Success，实际 SHA 为 6e01f5c3e6c2cfd34d66f051363b79df95d421b4。[foundation](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43777277306/job/133006325106) 的 Checkout、固定工具与 Python 安装、Locked local checks and build 均为 success。详细步骤日志端点返回 HTTP 404，未取得子命令输出、远端测试计数或构建产物。任务页显示 Checkout 的 Node.js 20 弃用警告。
+
+该 SHA 的工作流及验证脚本未设置 DANUS_P13_TEST，未启用 SQLite 集成测试。WSL 上以关闭开关复验得到 8 skipped。原交付的 SQLite 8 项及完整工程 451 项为 WSL 本地证据。远端成功只覆盖既有工程 CI。
+
+另用隔离目录 slice-zldf5gpl 复验。注入延迟外键导致 COMMIT 失败，新增记录及触发器副作用回滚；未引用制品留存但未被备份纳入。禁止读取原库与原制品后，恢复和查询成功，数据库实际只打开备份与恢复库，查询只打开恢复目录制品。观察到索引 digest 被篡改为同 ID／同科学版本的外租户制品时，会先打开外租户制品再拒绝，未返回正文。该项待整改，人工验收另行登记。
