@@ -50,4 +50,10 @@ Ubuntu WSL 的 CPython 3.12.16、SQLite 3.53.1。使用锁定环境运行：
 
 Ubuntu CPython 3.12.16、SQLite 3.53.1，按签收路径执行，umask 077。以 DANUS_P13_TEST=1 执行专项 18 项通过，完整工程检查 461 项及 wheel/sdist 构建通过。分别见[SQLite 专项与恢复日志](evidence/p1-3-artifact-binding-sqlite.log)和[完整工程日志](evidence/p1-3-artifact-binding-verify.log)。原九个金样例、手算、设计基线、Schema 和依赖锁原字节保留。
 
-保留原复核证据提交 b93b10e0905100e11708da6c197e0356b0e5c571。原远端 CI 未启用 SQLite 专项，详细日志端点返回 HTTP 404。当前工作流未改动；启用专项需先确认 runner 能完成签收路径、身份和文件系统条件检查。整改 SHA 对应的新 CI 待核验。人工验收另行进行。
+保留原复核证据提交 b93b10e0905100e11708da6c197e0356b0e5c571。原远端 CI 未启用 SQLite 专项，详细日志端点返回 HTTP 404。当前工作流未改动；启用专项需先确认 runner 能完成签收路径、身份和文件系统条件检查。整改 CI 核验见下节。人工验收另行进行。
+
+## 整改远端 CI 与定向复核
+
+[整改 CI 43792574877](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43792574877) 最终为 Success，实际 SHA 为 4a98631a542905cf96eceab39efb19c1f54ecb82。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43792574877/job/133054154682) 的 Checkout、固定工具安装、固定 Python 安装及 Locked local checks and build 均显示 success。详细日志端点返回 HTTP 404。证据来自运行摘要、任务步骤结论与该提交的工作流和验证脚本，未取得远端各子命令输出、测试数量或构建制品。任务页显示 Checkout 的 Node.js 20 弃用警告。工作流及验证脚本未启用 DANUS_P13_TEST，远端运行未执行隔离 SQLite 专项。启用 DANUS_P13_TEST=1 的 SQLite 18 项、完整工程 461 项及构建通过均为 WSL 本地整改证据。
+
+本轮在新的 WSL 隔离目录启用 DANUS_P13_TEST=1 定向复跑，10 项通过、8 项未选中。六种异常均断言零次打开正文：外租户同 ID／同科学版本、同租户错项目、错候选、错版本、缺绑定及摘要不一致。COMMIT 失败无成功返回，索引和绑定回滚，备份仅含已引用制品（slice-pc0d6dun）。恢复及授权查询期间阻断原库和原制品，实际仅打开备份库与恢复库并读取恢复制品（slice-3ddo6qf4）。已有候选数据的版本 1 测试库拒绝升级并保留数据，未引用制品仍无自动清理。人工验收仅对应隔离测试切片。
