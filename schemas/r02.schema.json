@@ -1977,6 +1977,68 @@
       "title": "DataConstraintResult",
       "type": "object"
     },
+    "DataExposure": {
+      "additionalProperties": false,
+      "properties": {
+        "exposed_at": {
+          "title": "Exposed At",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "subject": {
+          "$ref": "#/$defs/ExposureSubject"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject",
+        "tenant_id",
+        "project_id",
+        "exposed_at"
+      ],
+      "title": "DataExposure",
+      "type": "object"
+    },
+    "DataExposureQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/ExposureSubject"
+        }
+      },
+      "required": [
+        "subject"
+      ],
+      "title": "DataExposureQuery",
+      "type": "object"
+    },
+    "DataExposureResult": {
+      "additionalProperties": false,
+      "properties": {
+        "event_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "status": {
+          "const": "historical_contact_verified",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "event_ref"
+      ],
+      "title": "DataExposureResult",
+      "type": "object"
+    },
     "DataPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -3033,6 +3095,35 @@
         "no_candidate_reason"
       ],
       "title": "ExplorationOutput",
+      "type": "object"
+    },
+    "ExposureSubject": {
+      "additionalProperties": false,
+      "properties": {
+        "data_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "event_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "principal_id": {
+          "minLength": 1,
+          "title": "Principal Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event_ref",
+        "data_ref",
+        "principal_id",
+        "purpose"
+      ],
+      "title": "ExposureSubject",
       "type": "object"
     },
     "ExternalOrigin": {
@@ -9442,6 +9533,9 @@
       "CorrectionCheck": "service_owned",
       "DataConstraintQuery": "caller_input",
       "DataConstraintResult": "output_only",
+      "DataExposure": "service_owned",
+      "DataExposureQuery": "caller_input",
+      "DataExposureResult": "output_only",
       "DataPolicy": "service_owned",
       "Delegation": "service_owned",
       "DependencyEvidence": "service_owned",
@@ -9545,6 +9639,7 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "data exposure history requires current delegated access and an exact R08c anchor",
       "versioned execution evidence requires current same-project delegated references",
       "plan and invocation evidence matching does not enable roles or resources",
       "data policy and permit constraints intersect; data_use terms remain unresolved",
@@ -9676,6 +9771,15 @@
     },
     "DataConstraintResult": {
       "$ref": "#/$defs/DataConstraintResult"
+    },
+    "DataExposure": {
+      "$ref": "#/$defs/DataExposure"
+    },
+    "DataExposureQuery": {
+      "$ref": "#/$defs/DataExposureQuery"
+    },
+    "DataExposureResult": {
+      "$ref": "#/$defs/DataExposureResult"
     },
     "DataPolicy": {
       "$ref": "#/$defs/DataPolicy"

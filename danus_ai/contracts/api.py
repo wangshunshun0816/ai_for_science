@@ -15,6 +15,7 @@ from .claims import (
     claim_content_version,
 )
 from .context import ContextManifest
+from .data_exposure import DataExposure, DataExposureQuery, DataExposureResult
 from .data_policy import DataConstraintQuery, DataConstraintResult, DataPolicy, SendPermit
 from .execution_records import InvocationRecord, RunRecord, Usage
 from .first_objects import (
@@ -147,6 +148,7 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     ReserveRequest,
     QuoteRequest,
     DataConstraintQuery,
+    DataExposureQuery,
     ClaimSubmissionDraft,
     SanityRequest,
     CandidateDraft,
@@ -170,6 +172,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     QuoteBasisScope,
     DataPolicy,
     SendPermit,
+    DataExposure,
     QuoteBasis,
     ClaimSubmission,
     GateExecution,
@@ -251,6 +254,7 @@ _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
     ReservePreflightResult,
     QuoteEstimate,
     DataConstraintResult,
+    DataExposureResult,
     EvaluationView,
     EvidenceReport,
     SanityJobRef,
@@ -405,6 +409,7 @@ def schema_capabilities() -> dict[str, object]:
             "scope": "fixed_four_confirmation",
         },
         "runtime_only_checks": [
+            "data exposure history requires current delegated access and an exact R08c anchor",
             "versioned execution evidence requires current same-project delegated references",
             "plan and invocation evidence matching does not enable roles or resources",
             "data policy and permit constraints intersect; data_use terms remain unresolved",

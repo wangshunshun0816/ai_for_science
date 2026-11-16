@@ -15,7 +15,7 @@
 | InvocationRecord | [尝试和调用守卫](../../danus_ai/contracts/execution_records.py)、[第十一批](p1-2-batch11-delivery.md) | 精确调用和重试子集已签收；通用间接关系及费用最终结算待决。 |
 | ClaimSubmission、EvidenceReport、GateExecution | [submission](../../danus_ai/contracts/submission.py)、[第八批](p1-2-batch8-delivery.md)、[第十二批](p1-2-batch12-delivery.md) | 固定四题已签收，正式 run_ids 经独立适配读取旧样例；关口到运行／尝试映射与混合结果选择待决，真实关口后续。 |
 | ClaimNode、EvidenceEvent | [claims](../../danus_ai/contracts/claims.py)、[第四批](p1-2-batch4-delivery.md) | 科学内容、定义性来源、事件／审计摘要分离已签收；历史标记清除权限待决。 |
-| ModelProfile、ModelLineage | [字段台账](r02-field-matrix.md)、[调用记录](../../danus_ai/contracts/execution_records.py) | 同项目精确配置／谱系核验子集已交付；同修订正文绑定已本地复验，待人工验收，完整谱系、配置和启用条款仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
+| ModelProfile、ModelLineage | [字段台账](r02-field-matrix.md)、[调用记录](../../danus_ai/contracts/execution_records.py) | 同项目精确配置／谱系核验子集已交付；同修订正文绑定已[限定签收](decisions/A0-P1-2-execution-qualification-acceptance.md)，完整谱系、配置和启用条款仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
 | Budget、BudgetEvent、I-BUDGET | [reserve](../../danus_ai/contracts/budget_preflight.py)、[quote](../../danus_ai/contracts/budget_quote.py)、[第十三批](p1-2-batch13-delivery.md)、[第十四批](p1-2-batch14-delivery.md) | reserve 只读预检已签收；quote 限 R00 总额投影。其余操作及 Budget／BudgetEvent 待补，待决见 [提案](decisions/A0-P1-2-budget-operations-proposal.md)。 |
 | Usage | [R07 读取守卫](../../danus_ai/contracts/execution_records.py)、[第十二批](p1-2-batch12-delivery.md) | 精确读取、金额及来源边界已签收；负金额、调整关系、计量及汇总待决，真实账务后续。 |
 | Approval | [signing](../../danus_ai/contracts/signing.py)、[approval_conflicts](../../danus_ai/contracts/approval_conflicts.py)、[第四批](p1-2-batch4-delivery.md) | 精确目标、用途、签名和歧义阻断已签收；缺已审定条款的用途继续阻断。 |
@@ -24,13 +24,13 @@
 | RandomnessPlan、DiscriminationPlan | [字段台账](r02-field-matrix.md)、[固定预注册](../../danus_ai/contracts/fixed_four.py) | 固定枚举和确定性守卫可复用；完整随机性计划、抽样及区分性设计依赖方法与启用决定。 |
 | OutcomeLearningRecord | [字段台账](r02-field-matrix.md) | 通用合同、引用、复用限制及拒绝测试未交付。 |
 | ParameterDecision、CalibrationTask、数字性质、ScientificStatistics | [字段台账](r02-field-matrix.md)、[第八批固定结果](p1-2-batch8-delivery.md) | 固定结果与性质已有子集；数值依据通用入口、参数批准和校准合同未齐。 |
-| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已限定签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。DataExposure 未交付。 |
+| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已限定签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。[DataExposure 已交付实际接触只读子集](p1-2-data-exposure.md)，待限定验收；接收方、许可及用途／事件映射继续待定，真实台账与执行留服务验收。 |
 | ReauditTask、AuditProfile、AuditReport | [审计摘要](../../danus_ai/contracts/claims.py)、[角色输出](../../danus_ai/contracts/role_outputs.py)、[第七批](p1-2-batch7-delivery.md) | 已有审计链和 A7 输出子集；通用配置、报告及复审任务入口未齐。 |
 | ProductUseEvent、EvaluationCampaign | [字段台账](r02-field-matrix.md) | 冻结范围、独立性、采用事实和投入的通用合同未交付，实际评测后续。 |
 | PersonalAccount、PersonalTenant、Project | [ownership](../../danus_ai/contracts/ownership.py)、[第九批](p1-2-batch9-delivery.md) | 精确关系和待认领边界已签收；真实认证、创建、迁移与认领后续。 |
 | TrustedRequestContext、Delegation、错误消息 | [messages](../../danus_ai/contracts/messages.py)、[第五批](p1-2-batch5-delivery.md)、[第九批](p1-2-batch9-delivery.md) | 纯契约和撤销／旧修订拒绝已签收；真实鉴权、委派签发和适配器不预读后续。 |
 | TaskPlan、PlanRevision、PlanNode、TaskContract | [planning](../../danus_ai/contracts/planning.py)、[第七批](p1-2-batch7-delivery.md) | 已签收任务计划、DAG、激活授权守卫；原子 CAS、调度及真实租约后续。 |
-| RoleQualification、ResourceAdmission | [planning](../../danus_ai/contracts/planning.py)、[字段台账](r02-field-matrix.md) | 计划／调用已覆盖版本兼容与单资源准入证据定位；同修订报告／许可替换拒绝已本地复验，待人工验收，真实能力启用、完整费用／权限条款及资源选择映射仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
+| RoleQualification、ResourceAdmission | [planning](../../danus_ai/contracts/planning.py)、[字段台账](r02-field-matrix.md) | 计划／调用已覆盖版本兼容与单资源准入证据定位；同修订报告／许可替换拒绝已[限定签收](decisions/A0-P1-2-execution-qualification-acceptance.md)，真实能力启用、完整费用／权限条款及资源选择映射仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
 | ContextManifest、七角色输出与交接 | [context](../../danus_ai/contracts/context.py)、[role_outputs](../../danus_ai/contracts/role_outputs.py)、[第七批](p1-2-batch7-delivery.md) | 最小输入输出、接收和隔离已签收；各角色全目标合同和实际模型质量后续。 |
 | ProtocolBundle、CheckSuite、ValidationProfile | [sanity_artifacts](../../danus_ai/contracts/sanity_artifacts.py)、[第十批](p1-2-batch10-delivery.md) | 固定子集已签收；通用材料依赖与适用扩展待明确。 |
 | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [submission](../../danus_ai/contracts/submission.py)、[sanity_artifacts](../../danus_ai/contracts/sanity_artifacts.py)、[第八批](p1-2-batch8-delivery.md)、[第十批](p1-2-batch10-delivery.md) | 固定四题与当前绑定检查已签收；绑定选择规则仍待决。 |
@@ -70,6 +70,7 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 | Scope、TheoremRef | Scope | [test_batch5.py](../../tests/contracts/test_batch5.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json) |
 | DataPolicy／SendPermit 只读子集 | DataConstraintQuery、DataPolicy、SendPermit、DataConstraintResult | [专项](../../tests/contracts/test_batch15.py) | [Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json)，四个根合同及两份 Schema。 |
 | A 组执行证据已定子集 | ModelProfile、ModelLineage、RoleQualification、ResourceAdmission | [两入口专项](../../tests/contracts/test_execution_qualification.py) | [Ubuntu](evidence/p1-2-execution-qualification-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-windows.json)，四组规范字节和两份生成物；原运行早于 A 组交付；[整改工程 CI 已核验成功](p1-2-execution-qualification.md#整改-ci-与本轮定向复核)，详细步骤日志未取得，SQLite 专项跳过。 |
+| DataExposure 实际接触只读子集 | DataExposureQuery、DataExposure、DataExposureResult | [专项](../../tests/contracts/test_data_exposure.py) | [Ubuntu](evidence/p1-2-data-exposure-ubuntu.json) · [Windows](evidence/p1-2-data-exposure-windows.json)，三组独立向量及两份生成物；对应 CI 待核。 |
 
 ## 收尾与 P1-3 准备
 

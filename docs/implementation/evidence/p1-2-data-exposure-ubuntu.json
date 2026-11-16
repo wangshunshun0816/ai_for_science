@@ -1,0 +1,29 @@
+{
+  "python": "3.12.16",
+  "platform": "Linux",
+  "lock_sha256": "d6fdad8f186ce5ffae470fed8889992fe8809adb5a292a559128c21987886e63",
+  "vectors": {
+    "DataExposureQuery": {
+      "canonical_utf8": "{\"subject\":{\"data_ref\":{\"content_version\":\"dataset:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_id\":\"d\",\"object_type\":\"Dataset\"},\"event_ref\":{\"record_id\":\"contact\",\"record_type\":\"DataExposure\",\"revision\":2},\"principal_id\":\"agent\",\"purpose\":\"read\"}}",
+      "sha256": "9a85ccb0407c3cf9680eba9db49d70ccbca062023ff6a63ef1433e79fb0dac01"
+    },
+    "DataExposure": {
+      "canonical_utf8": "{\"exposed_at\":\"2026-11-12T00:00:00Z\",\"project_id\":\"project\",\"subject\":{\"data_ref\":{\"content_version\":\"dataset:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_id\":\"d\",\"object_type\":\"Dataset\"},\"event_ref\":{\"record_id\":\"contact\",\"record_type\":\"DataExposure\",\"revision\":2},\"principal_id\":\"agent\",\"purpose\":\"read\"},\"tenant_id\":\"tenant\"}",
+      "sha256": "fae1a25d47b2b6fa65caca3a32dd47bf973c760db08b87a4f2263454565a0274"
+    },
+    "DataExposureResult": {
+      "canonical_utf8": "{\"event_ref\":{\"record_id\":\"contact\",\"record_type\":\"DataExposure\",\"revision\":2},\"status\":\"historical_contact_verified\"}",
+      "sha256": "5bb2e8969cf627e2622be00af9a32e82d26f583d65dd48a648b33ca7324ff866"
+    }
+  },
+  "schemas": {
+    "r02.schema.json": {
+      "bytes": 239201,
+      "sha256": "6d666874ae238ac69f5e20cfda0555c09fb2dc6d0525b1b4e53c96dcdb3202f1"
+    },
+    "r02.openapi.json": {
+      "bytes": 267360,
+      "sha256": "b2a32bd5756bf85fe72f4a91738ef6477369c508639ba1d48b8fa3f4042cd6e1"
+    }
+  }
+}
