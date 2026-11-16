@@ -1,0 +1,41 @@
+run=/home/wangshunshun/.cache/danus-ai/pytest/slice-1wetxb43 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022555537408 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-np3z9485 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022555439104 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-g9j258_g mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022555332608 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-c_i2m8vg mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022555234304 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-qw_94ma8 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022555131904 uid=1000 gid=1000 umask=0077
+snapshot=/home/wangshunshun/.cache/danus-ai/pytest/slice-qw_94ma8/backups restore=/home/wangshunshun/.cache/danus-ai/pytest/slice-qw_94ma8/restore-check verified_artifact=b5e182143185d3d0aa9788d29ab52211b18e9a0935ece2b0f54c0d92bda08985
+original database and artifacts blocked throughout restore and recovered query
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-idx9w1en mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554808320 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-nnngqign mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554583040 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-abr8_1n6 mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554480640 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-_nu8g68d mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554386432 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-no1bwa3o mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554284032 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-maz1khsm mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554181632 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-x0yj0h3u mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022554079232 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-y7at8fe_ mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553976832 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-kh_9rza_ mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553878528 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-fvjo2_jc mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553780224 uid=1000 gid=1000 umask=0077
+commit rollback verified; /home/wangshunshun/.cache/danus-ai/pytest/slice-fvjo2_jc/backups contains only b62dbb5117dfde80d5d30f4c2657b848f6826baad63cbc0719060dea50186bb7
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-y95wdw2e mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553575424 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-8ao4b4hw mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553468928 uid=1000 gid=1000 umask=0077
+.run=/home/wangshunshun/.cache/danus-ai/pytest/slice-hzhvamis mount=/ /dev/sdd ext4 rw,relatime,discard,errors=remount-ro,data=ordered SQLite=3.53.1
+available_bytes=1022553374720 uid=1000 gid=1000 umask=0077
+.
+18 passed in 8.44s

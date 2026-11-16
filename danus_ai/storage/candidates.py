@@ -37,7 +37,7 @@ from danus_ai.contracts.references import (
     Version,
 )
 
-from .migration import MIGRATION, VERSION
+from .migration import VERSION, migrate
 from .test_paths import check_db_path, check_path, check_run, mount
 
 
@@ -69,11 +69,7 @@ class CandidateStore:
             if mount(path) != mount(self.run):
                 raise ValueError("Test layout spans different mounts")
         with closing(self._connect(self.database, create=True)) as db:
-            version = db.execute("PRAGMA user_version").fetchone()[0]
-            if version == 0:
-                db.executescript(MIGRATION)
-            elif version != VERSION:
-                raise ValueError("Unsupported migration revision")
+            migrate(db)
 
     def _connect(
         self, path: Path, *, create: bool = False, readonly: bool = False
@@ -97,6 +93,8 @@ class CandidateStore:
         with closing(self._connect(self.database)) as db:
             db.execute("BEGIN IMMEDIATE" if write else "BEGIN")
             with db:
+                if db.execute("PRAGMA user_version").fetchone() != (VERSION,):
+                    raise ValueError("Unsupported migration revision")
                 yield db
 
     def seed_ownership(
@@ -202,16 +200,9 @@ class CandidateStore:
                     raise ContractBlocked("CANDIDATE_VERSION_CONFLICT")
             else:
                 self._publish(data, digest)
-                db.execute(
-                    "INSERT INTO candidate_version VALUES (?, ?, ?, ?, ?)",
-                    (
-                        ctx.tenant_id,
-                        ctx.project_id,
-                        ref.object_id,
-                        version,
-                        digest,
-                    ),
-                )
+                binding = (ctx.tenant_id, ctx.project_id, ref.object_id, version, digest)
+                db.execute("INSERT INTO artifact_binding VALUES (?, ?, ?, ?, ?)", binding)
+                db.execute("INSERT INTO candidate_version VALUES (?, ?, ?, ?, ?)", binding)
         return ref
 
     def query(
@@ -285,11 +276,20 @@ class CandidateStore:
 
 def _digest(db: sqlite3.Connection, ctx: RequestContext, ref: ScientificRef) -> str | None:
     row = db.execute(
-        "SELECT digest FROM candidate_version WHERE tenant_id=? AND project_id=?"
-        " AND object_id=? AND content_version=?",
+        """
+        SELECT v.digest, b.digest
+        FROM candidate_version v
+        LEFT JOIN artifact_binding b USING (tenant_id, project_id, object_id, content_version)
+        WHERE v.tenant_id=? AND v.project_id=? AND v.object_id=? AND v.content_version=?
+        """,
         (ctx.tenant_id, ctx.project_id, ref.object_id, ref.content_version),
     ).fetchone()
-    return str(row[0]) if row is not None else None
+    if row is None:
+        return None
+    indexed_digest, bound_digest = row
+    if bound_digest is None or indexed_digest != bound_digest:
+        raise ContractBlocked("REFERENCE_UNAVAILABLE")
+    return str(bound_digest)
 
 
 def _authorize(

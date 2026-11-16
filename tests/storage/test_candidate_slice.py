@@ -3,6 +3,7 @@ import os
 import sqlite3
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from dataclasses import replace
 from datetime import timedelta
 from hashlib import sha256
@@ -17,6 +18,7 @@ from danus_ai.contracts.messages import AuthorizedDelegation, authorize_delegate
 from danus_ai.contracts.references import ScientificRef
 from danus_ai.storage import candidates
 from danus_ai.storage.candidates import CandidateStore
+from danus_ai.storage.migration import INITIAL_SCHEMA
 from danus_ai.storage.recovery import backup, restore
 from danus_ai.storage.test_paths import check_path, check_run, mount, new_run
 from tests.contracts.test_batch5 import NOW
@@ -88,7 +90,7 @@ def test_migration_and_composite_foreign_key(store: CandidateStore) -> None:
     with store._transaction(write=True) as db:
         assert db.execute("PRAGMA journal_mode").fetchone() == ("wal",)
         assert db.execute("PRAGMA foreign_keys").fetchone() == (1,)
-        assert db.execute("PRAGMA user_version").fetchone() == (1,)
+        assert db.execute("PRAGMA user_version").fetchone() == (2,)
         for suffix in ("", "-wal", "-shm"):
             check_path(Path(f"{store.database}{suffix}"), 0o600, directory=False)
         with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY"):
@@ -177,10 +179,30 @@ def test_write_failure_does_not_create_valid_row(store: CandidateStore) -> None:
     assert store.query(target, grant(store, target), NOW).prediction == "p"
 
 
-def test_restore_checks_integrity_and_current_authorization(store: CandidateStore) -> None:
+def test_restore_checks_integrity_and_current_authorization(
+    store: CandidateStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
     target = save(store)
     auth = grant(store, target)
     source = backup(store)
+    connect = CandidateStore._connect
+    read_artifact = CandidateStore._read_artifact
+    opened: set[Path] = set()
+    restored_artifacts = store.run / "restore-check" / "artifacts"
+
+    def connection(
+        instance: CandidateStore, path: Path, *, create: bool = False, readonly: bool = False
+    ) -> sqlite3.Connection:
+        assert path != store.database, "Restore fell back to the original database"
+        opened.add(path)
+        return connect(instance, path, create=create, readonly=readonly)
+
+    def restored_read(instance: CandidateStore, digest: str) -> bytes:
+        assert instance.artifacts == restored_artifacts, "Restore fell back to a live artifact"
+        return read_artifact(instance, digest)
+
+    monkeypatch.setattr(CandidateStore, "_connect", connection)
+    monkeypatch.setattr(CandidateStore, "_read_artifact", restored_read)
     copy = restore(store)
     assert copy.database != store.database
     with copy._transaction() as db:
@@ -198,7 +220,9 @@ def test_restore_checks_integrity_and_current_authorization(store: CandidateStor
     port.grant = port.grant.model_copy(update={"revoked": True})
     with pytest.raises(ContractBlocked, match="DELEGATION_INVALID"):
         copy.query(target, auth, NOW)
+    assert opened == {source / "control.db", copy.database}
     print(f"snapshot={source} restore={copy.base} verified_artifact={digest}")
+    print("original database and artifacts blocked throughout restore and recovered query")
 
 
 def test_corrupt_snapshot_cannot_restore(store: CandidateStore) -> None:
@@ -240,3 +264,139 @@ def test_write_rechecks_candidate_scope_reference(store: CandidateStore) -> None
     with store._transaction() as db:
         assert db.execute("SELECT count(*) FROM candidate_version").fetchone() == (0,)
     assert list(store.artifacts.iterdir()) == [store.artifacts / ".staging"]
+
+
+@pytest.mark.parametrize(
+    "case", ["tenant", "project", "candidate", "version", "missing", "mismatch"]
+)
+def test_tampered_index_is_rejected_before_read(
+    store: CandidateStore, monkeypatch: pytest.MonkeyPatch, case: str
+) -> None:
+    monkeypatch.setattr(candidates, "uuid4", lambda: UUID(int=37))
+    target = save(store)
+    tenant, project = "tenant", "project"
+    substitute = target
+    if case == "tenant":
+        tenant, project = "other", "b1"
+        assert save(store, project=project) == target
+    elif case == "project":
+        project = "side"
+        assert save(store, project=project) == target
+    elif case == "candidate":
+        monkeypatch.setattr(candidates, "uuid4", lambda: UUID(int=38))
+        substitute = save(store)
+        assert substitute.content_version == target.content_version
+    elif case == "version":
+        draft = CandidateDraft.model_validate(candidate() | {"prediction": "other version"})
+        substitute = store.save(
+            draft, grant(store, target, write=True), NOW, existing_id=target.object_id
+        )
+    key = ("tenant", "project", target.object_id, target.content_version)
+    # Bypass SQLite write constraints to model a damaged index on disk.
+    with closing(store._connect(store.database)) as db:
+        db.execute("PRAGMA foreign_keys=OFF")
+        if case == "missing":
+            db.execute(
+                "DELETE FROM artifact_binding WHERE tenant_id=? AND project_id=?"
+                " AND object_id=? AND content_version=?",
+                key,
+            )
+        elif case == "mismatch":
+            db.execute(
+                "UPDATE artifact_binding SET digest=? WHERE tenant_id=? AND project_id=?"
+                " AND object_id=? AND content_version=?",
+                ("0" * 64, *key),
+            )
+        else:
+            digest = db.execute(
+                "SELECT digest FROM candidate_version WHERE tenant_id=? AND project_id=?"
+                " AND object_id=? AND content_version=?",
+                (tenant, project, substitute.object_id, substitute.content_version),
+            ).fetchone()[0]
+            update = (
+                "UPDATE candidate_version SET digest=? WHERE tenant_id=? AND project_id=?"
+                " AND object_id=? AND content_version=?"
+            )
+            db.execute("PRAGMA foreign_keys=ON")
+            with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY"):
+                db.execute(update, (digest, *key))
+            db.execute("PRAGMA foreign_keys=OFF")
+            db.execute(update, (digest, *key))
+
+    def unexpected(digest: str) -> bytes:
+        pytest.fail(f"Invalid binding opened artifact {digest}")
+
+    monkeypatch.setattr(store, "_read_artifact", unexpected)
+    with pytest.raises(ContractBlocked, match="REFERENCE_UNAVAILABLE"):
+        store.query(target, grant(store, target), NOW)
+
+
+def test_failed_commit_rolls_back_binding_and_excludes_orphan_from_backup(
+    store: CandidateStore,
+) -> None:
+    original = save(store)
+    with store._transaction(write=True) as db:
+        db.execute("""
+            CREATE TABLE commit_fault (
+                id TEXT REFERENCES account(id) DEFERRABLE INITIALLY DEFERRED
+            )
+        """)
+        db.execute("""
+            CREATE TRIGGER fail_at_commit AFTER INSERT ON candidate_version
+            BEGIN INSERT INTO commit_fault VALUES ('absent'); END
+        """)
+    with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY constraint failed"):
+        save(store)
+    with store._transaction() as db:
+        assert db.execute("SELECT count(*) FROM candidate_version").fetchone() == (1,)
+        assert db.execute("SELECT count(*) FROM artifact_binding").fetchone() == (1,)
+        assert db.execute("SELECT count(*) FROM commit_fault").fetchone() == (0,)
+        live_digest = db.execute("SELECT digest FROM candidate_version").fetchone()[0]
+    assert len([path for path in store.artifacts.iterdir() if path.is_file()]) == 2
+    snapshot = backup(store)
+    assert [path.name for path in (snapshot / "artifacts").iterdir()] == [live_digest]
+    assert json.loads((snapshot / "manifest.json").read_bytes()) == [live_digest]
+    assert store.query(original, grant(store, original), NOW).prediction == "p"
+    print(f"commit rollback verified; {snapshot} contains only {live_digest}")
+
+
+def test_backup_rejects_missing_binding_before_artifact_read(
+    store: CandidateStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    save(store)
+    with closing(store._connect(store.database)) as db:
+        db.execute("PRAGMA foreign_keys=OFF")
+        db.execute("DELETE FROM artifact_binding")
+
+    def unexpected(digest: str) -> bytes:
+        pytest.fail(f"Backup opened unbound artifact {digest}")
+
+    monkeypatch.setattr(store, "_read_artifact", unexpected)
+    with pytest.raises(ValueError, match="SQLite foreign key check failed"):
+        backup(store)
+    assert not (store.run / "backups" / "manifest.json").exists()
+
+
+@pytest.mark.parametrize("populated", [False, True])
+def test_v1_migration_never_infers_candidate_bindings(
+    store: CandidateStore, populated: bool
+) -> None:
+    with closing(store._connect(store.database)) as db:
+        db.execute("DROP TABLE candidate_version")
+        db.execute("DROP TABLE artifact_binding")
+        legacy_candidate = INITIAL_SCHEMA[INITIAL_SCHEMA.index("CREATE TABLE candidate_version") :]
+        db.executescript(legacy_candidate + "PRAGMA user_version = 1;")
+        if populated:
+            db.execute(
+                "INSERT INTO candidate_version VALUES ('tenant','project','legacy','v','digest')"
+            )
+    if populated:
+        with pytest.raises(ValueError, match="lack artifact bindings"):
+            store.initialize()
+        with closing(store._connect(store.database)) as db:
+            assert db.execute("PRAGMA user_version").fetchone() == (1,)
+            assert db.execute("SELECT object_id FROM candidate_version").fetchall() == [("legacy",)]
+    else:
+        store.initialize()
+        with store._transaction() as db:
+            assert db.execute("PRAGMA user_version").fetchone() == (2,)
