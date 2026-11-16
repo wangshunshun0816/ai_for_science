@@ -69,10 +69,10 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 | SanityRequest、SanityReport、SanityJobRef、SanityReportView | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [test_batch8.py](../../tests/contracts/test_batch8.py)、[test_batch10.py](../../tests/contracts/test_batch10.py) | [8 批平台证据](evidence/p1-2-batch8-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch8-remediation-windows.json)；[10 批平台证据](evidence/p1-2-batch10-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch10-remediation-windows.json) |
 | Scope、TheoremRef | Scope | [test_batch5.py](../../tests/contracts/test_batch5.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json) |
 | DataPolicy／SendPermit 只读子集 | DataConstraintQuery、DataPolicy、SendPermit、DataConstraintResult | [专项](../../tests/contracts/test_batch15.py) | [Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json)，四个根合同及两份 Schema。 |
-| A 组执行证据已定子集 | ModelProfile、ModelLineage、RoleQualification、ResourceAdmission | [两入口专项](../../tests/contracts/test_execution_qualification.py) | [Ubuntu](evidence/p1-2-execution-qualification-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-windows.json)，四组规范字节和两份生成物；所供远端运行早于 A 组交付，对应 CI 待核验。 |
+| A 组执行证据已定子集 | ModelProfile、ModelLineage、RoleQualification、ResourceAdmission | [两入口专项](../../tests/contracts/test_execution_qualification.py) | [Ubuntu](evidence/p1-2-execution-qualification-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-windows.json)，四组规范字节和两份生成物；原运行早于 A 组交付；[整改工程 CI 已核验成功](p1-2-execution-qualification.md#整改-ci-与本轮定向复核)，详细步骤日志未取得，SQLite 专项跳过。 |
 
 ## 收尾与 P1-3 准备
 
 [收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。P1-3 隔离切片专节已获限定授权，交付及整改已[限定验收](decisions/A0-P1-3-test-slice-acceptance.md)（454503c29065f99be170cacad4188376c9664583）。集中决策中的其他提案仍待审。原证据及工作卡出口范围继续有效。
 
-[A 组同修订正文整改](p1-2-execution-qualification.md#同修订正文绑定整改)覆盖四类合同的独立版本快照及两条入口的替换拒绝。CI 43797949960 只覆盖旧提交 4d20e18，整改 CI 尚待核验。其余字段、语义与服务责任继续按行登记。
+[A 组同修订正文整改](p1-2-execution-qualification.md#同修订正文绑定整改)覆盖四类合同的独立版本快照及两条入口的替换拒绝。CI 43797949960 只覆盖旧提交 4d20e18，整改 CI 43800243706 对应整改 SHA 且成功，详细日志未取得。其余字段、语义与服务责任继续按行登记。

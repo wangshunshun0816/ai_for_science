@@ -42,4 +42,12 @@
 
 Ubuntu CPython 3.12.16 专项 45 项、完整工程检查 489 项及 wheel／sdist 构建通过，18 项 SQLite 专项按开关跳过。Windows CPython 3.12.14 同锁专项 45 项通过。四组规范 UTF-8、完整 SHA-256、两份 Schema 与原交付一致；两端均逐字节核对现行生成物。[Ubuntu](evidence/p1-2-execution-qualification-remediation-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-remediation-windows.json) · [完整检查](evidence/p1-2-execution-qualification-remediation-verify.log)。原九个金样例、手算及设计基线保留原字节，本轮无新增存储验收证据。
 
-保留原发现及其证据提交 0789883f95a715c4e58940e20853bc8ab82609f9。CI 43797949960 只覆盖旧提交 4d20e183dcbc476d9bf2d90d440fd6362bb3c5e0，详细步骤日志返回 HTTP 404。整改 SHA 的新 CI 待核验。人工验收另行进行。
+保留原发现及其证据提交 0789883f95a715c4e58940e20853bc8ab82609f9。CI 43797949960 只覆盖旧提交 4d20e183dcbc476d9bf2d90d440fd6362bb3c5e0，详细步骤日志返回 HTTP 404。整改 CI 及本轮复核见下节。人工验收另行进行。
+
+## 整改 CI 与本轮定向复核
+
+[整改 CI 43800243706](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43800243706) 最终为 Success，实际 SHA 为 e72b082853a4fad109ce1b762447a3e3f73c9f9b。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43800243706/job/133078494624) 的 Checkout、固定工具安装、固定 Python 安装及 Locked local checks and build 均显示 success。任务页有 Checkout 的 Node.js 20 弃用警告。详细步骤日志端点返回 HTTP 404，未取得各子命令输出、远端测试数量或构建产物。证据限运行摘要、任务步骤结论及相应提交的工作流和验证脚本。
+
+该提交默认执行 pytest -q，本轮用相同默认配置在 WSL 确认收集执行资格专项 45 项。CI 未启用 DANUS_P13_TEST，SQLite 专项按开关跳过，本轮无新增存储验收证据。远端单项用例结果未独立核验。原 WSL 完整检查 489 项通过、18 项 SQLite 跳过及两端各 45 项专项通过仍属既有本地证据。
+
+本轮在 WSL 定向复跑 22 项通过、23 项未选中。八个同修订正文替换用例在计划与调用两个入口均拒绝，独立绑定的合法新修订在两入口通过，撤销、恰到期及委派范围外均断言快照／正文读取次数为零。缺、错修订或错归属的独立快照使正文读取次数为零。真实权威快照来源认证、资格签发和资源使用授权继续留服务验收。
