@@ -26,4 +26,10 @@
 
 - Ubuntu CPython 3.12.16 完整工程检查 474 项通过、18 项隔离 SQLite 测试跳过，Ruff、mypy、导入边界、Schema 及 sdist/wheel 构建通过。未建库。[完整日志](evidence/p1-2-execution-qualification-verify.log)
 - Windows CPython 3.12.14 同锁专项 30 项通过。双方四组规范 UTF-8 字节及完整 SHA-256 一致，两份 Schema 各自与仓库生成物逐字节一致。[Ubuntu](evidence/p1-2-execution-qualification-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-windows.json)
-- 对应工程 CI 待核验，A0 人工验收另行进行。
+- 对应工程 CI 待核验，本轮复核见下节。
+
+## 远端运行核对与独立复核
+
+[运行 43797949960](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43797949960) 最终为 Success，实际 SHA 为 4d20e183dcbc476d9bf2d90d440fd6362bb3c5e0，早于 A 组交付 5b1f7f9ff8355c79796b260ac22561a79ea84c76。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43797949960/job/133070987675) 的 Checkout、固定工具和 Python 安装、Locked local checks and build 均显示 success。任务页显示 Checkout 的 Node.js 20 弃用警告。详细步骤日志端点返回 HTTP 404，未取得单项输出、远端测试计数或制品。运行 SHA 的 Git 树不包含 A 组测试，本运行不计为 A 组 CI。A 组交付 SHA 在 WSL 按默认 pytest 配置收集到 30 项，本轮定向复跑 30 项通过。工作流未启用 DANUS_P13_TEST，SQLite 专项按开关跳过，本轮无新增存储验收证据。
+
+两入口合成复核在保持证据定位、归属、期限与可见性不变时，均接受了同版本扩写模型配置的任务范围、将资格报告或许可依据换成另一个可读精确引用、以及配置与谱系同时把版本值改为 v-unbound。当前元数据没有独立的正文绑定。撤销、恰到期及不在委派目标内三项反例在计划和调用入口均拒绝，正文打开次数为零。详见未跟踪验收草稿，A 组对应 SHA 的远端 CI 仍待核验。
