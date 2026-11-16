@@ -1,11 +1,11 @@
 # P1-2 整体出口覆盖台账
 
-以大方案 §5.1、§5.2–5.5、§6.4 和开发指南 §3.4／§5.3 为出口依据。字段详见 [R02 台账](r02-field-matrix.md)。下表的批次记录链接到各批独立测试、Windows／Ubuntu 对照及验收范围。两份生成物为 [JSON Schema](../../schemas/r02.schema.json) 和 [OpenAPI](../../schemas/r02.openapi.json)，入口注册与运行时守卫见 [api.py](../../danus_ai/contracts/api.py)。子类型未单独注册时，不视为已有通用入口。第十四批已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）；第十五批整改 CI 已登记，人工签收待填写。见[收尾计划](p1-2-closure-plan.md)。
+以大方案 §5.1、§5.2–5.5、§6.4 和开发指南 §3.4／§5.3 为出口依据。字段详见 [R02 台账](r02-field-matrix.md)。下表的批次记录链接到各批独立测试、Windows／Ubuntu 对照及验收范围。两份生成物为 [JSON Schema](../../schemas/r02.schema.json) 和 [OpenAPI](../../schemas/r02.openapi.json)，入口注册与运行时守卫见 [api.py](../../danus_ai/contracts/api.py)。子类型未单独注册时，不视为已有通用入口。第十四批已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）；第十五批已[限定签收](decisions/A0-P1-2-batch15-acceptance.md)（b69299896cf2c737146b1a42e893f0fc63dde2b7）。见[收尾计划](p1-2-closure-plan.md)。
 
 | 设计对象／要求 | 类型、入口、守卫及证据 | 现状与剩余出口 |
 |---|---|---|
 | ResearchTask | [planning](../../danus_ai/contracts/planning.py)、[任务转换](../../danus_ai/contracts/transitions.py)、[第七批](p1-2-batch7-delivery.md) | 已签收草稿、活动快照及权限拒绝子集；真实激活与持久化后续验收。 |
-| CandidateHypothesis | [first_objects](../../danus_ai/contracts/first_objects.py)、[projections](../../danus_ai/contracts/projections.py)、[第三批](p1-2-batch3-delivery.md) | 固定首包及内容版本已签收；整体需独立候选改版失效样例。 |
+| CandidateHypothesis | [first_objects](../../danus_ai/contracts/first_objects.py)、[projections](../../danus_ai/contracts/projections.py)、[第三批](p1-2-batch3-delivery.md) | 固定首包及内容版本已签收；候选改版后旧批准不适用的独立样例已有两端证据，见[样例交付](p1-2-candidate-revision-golden.md)。 |
 | IdeationReport | [字段台账](r02-field-matrix.md) | 通用记录、入口和独立预期未交付；真实评估后续。 |
 | SelectionDecision | [SelectionTerms](../../danus_ai/contracts/first_objects.py)、[第三批](p1-2-batch3-delivery.md) | 已有批准条款子集；完整决定记录、权限和独立向量仍缺。 |
 | Protocol、Arm | [first_objects](../../danus_ai/contracts/first_objects.py)、[fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定四题投影和跨对象守卫已签收；采样／描述型继续阻断。 |
@@ -24,7 +24,7 @@
 | RandomnessPlan、DiscriminationPlan | [字段台账](r02-field-matrix.md)、[固定预注册](../../danus_ai/contracts/fixed_four.py) | 固定枚举和确定性守卫可复用；完整随机性计划、抽样及区分性设计依赖方法与启用决定。 |
 | OutcomeLearningRecord | [字段台账](r02-field-matrix.md) | 通用合同、引用、复用限制及拒绝测试未交付。 |
 | ParameterDecision、CalibrationTask、数字性质、ScientificStatistics | [字段台账](r02-field-matrix.md)、[第八批固定结果](p1-2-batch8-delivery.md) | 固定结果与性质已有子集；数值依据通用入口、参数批准和校准合同未齐。 |
-| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已交付待签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。DataExposure 未交付。 |
+| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已限定签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。DataExposure 未交付。 |
 | ReauditTask、AuditProfile、AuditReport | [审计摘要](../../danus_ai/contracts/claims.py)、[角色输出](../../danus_ai/contracts/role_outputs.py)、[第七批](p1-2-batch7-delivery.md) | 已有审计链和 A7 输出子集；通用配置、报告及复审任务入口未齐。 |
 | ProductUseEvent、EvaluationCampaign | [字段台账](r02-field-matrix.md) | 冻结范围、独立性、采用事实和投入的通用合同未交付，实际评测后续。 |
 | PersonalAccount、PersonalTenant、Project | [ownership](../../danus_ai/contracts/ownership.py)、[第九批](p1-2-batch9-delivery.md) | 精确关系和待认领边界已签收；真实认证、创建、迁移与认领后续。 |
@@ -36,7 +36,7 @@
 | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [submission](../../danus_ai/contracts/submission.py)、[sanity_artifacts](../../danus_ai/contracts/sanity_artifacts.py)、[第八批](p1-2-batch8-delivery.md)、[第十批](p1-2-batch10-delivery.md) | 固定四题与当前绑定检查已签收；绑定选择规则仍待决。 |
 | Scope、TheoremRef | [scope](../../danus_ai/contracts/scope.py)、[第五批](p1-2-batch5-delivery.md) | 三值逻辑已签收；跨 Scope 映射待决，数学精确引用的通用目标合同未交付。 |
 | 哈希、版本、状态与兼容 | [规范化](../../danus_ai/contracts/canonicalization.py)、[状态边](../../danus_ai/contracts/transitions.py)、[第二批](p1-2-batch2-delivery.md)、[第四批](p1-2-batch4-delivery.md) | 基础规则已有实现；待逐对象核对七入口、状态边、投影／明确不适用、错误与迁移适配。 |
-| 独立金样例及集成出口 | [原九件映射和新增参考](p1-2-contract-readiness.md#5-验证计划与独立期望) | 逐件登记调用双方、预期来源、Ubuntu／Windows 和当前 CI；待补真正抽样不确定、独立复现降级、候选改版等适用案例。服务效果不能用合成端口证明。 |
+| 独立金样例及集成出口 | [原九件映射和新增参考](p1-2-contract-readiness.md#5-验证计划与独立期望) | 逐件登记调用双方、预期来源、Ubuntu／Windows 和当前 CI；候选改版失效样例已补；仍待真正抽样不确定、独立复现降级等适用案例。服务效果不能用合成端口证明。 |
 
 收尾顺序为先维护此表并给阻断项指定决定责任，再推进数据边界、模型／资源／角色资格、科研生命周期与证据对象。预算可在相关决定签收后并行补齐。最后以同一出口提交核对所有 §5.1 对象、§6.4 金样例、七入口、调用兼容与跨平台证据。缺项须完成或由 A0 明确批准出口处理；模块数、Schema 数及测试数量仅作索引。
 
@@ -72,4 +72,4 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 
 ## 收尾与 P1-3 准备
 
-[收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。集中决策草稿由 A0 单独审阅，目前未签收。原证据及工作卡出口范围继续有效。
+[收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。P1-3 隔离切片专节已获限定授权，交付及整改已[限定验收](decisions/A0-P1-3-test-slice-acceptance.md)（454503c29065f99be170cacad4188376c9664583）。集中决策中的其他提案仍待审。原证据及工作卡出口范围继续有效。
