@@ -52,6 +52,8 @@ class EvidencePort:
         self.bodies: dict[str, EvidenceBody] = {}
         self.facts: dict[str, EvidenceValidity] = {}
         self.reads: list[str] = []
+        self.snapshots: dict[str, EvidenceBody] = {}
+        self.version_reads: list[str] = []
 
     def access(self, context: TrustedRequestContext, operation: str) -> AccessFact:
         return self.plan.access(context, operation)
@@ -63,6 +65,12 @@ class EvidencePort:
         self, context: TrustedRequestContext, ref: EvidenceRef
     ) -> EvidenceValidity | None:
         return self.facts.get(key(ref))
+
+    def execution_version(
+        self, context: TrustedRequestContext, ref: EvidenceRef
+    ) -> EvidenceBody | None:
+        self.version_reads.append(key(ref))
+        return self.snapshots.get(key(ref))
 
     def execution_body(
         self, context: TrustedRequestContext, ref: EvidenceRef
@@ -76,7 +84,7 @@ def key(ref: EvidenceRef) -> str:
 
 
 class Application:
-    def __init__(self) -> None:
+    def __init__(self, *, admission_revision: int = 0) -> None:
         self.chain = chain = Chain()
         node = chain.plan.nodes[0]
         chain.plan = chain.plan.model_copy(update={"nodes": [node]})
@@ -89,6 +97,19 @@ class Application:
         assert isinstance(lineage, ModelLineage)
         assert isinstance(qualification, RoleQualification)
         assert isinstance(admission, ResourceAdmission)
+        if admission_revision:
+            updated_license = admission.license_ref.model_copy(
+                update={"object_id": "new-license-basis"}
+            )
+            admission = ResourceAdmission.model_validate(
+                admission.model_dump()
+                | {
+                    "locator": admission.locator.model_copy(
+                        update={"revision": admission_revision}
+                    ),
+                    "license_ref": updated_license,
+                }
+            )
         self.selection = ExecutionEvidence(
             versions=qualification.versions,
             lineage_ref=lineage.locator,
@@ -113,6 +134,7 @@ class Application:
         )
         for ref, body in pairs:
             evidence.bodies[key(ref)] = body
+            evidence.snapshots[key(ref)] = body.model_copy(deep=True)
             evidence.facts[key(ref)] = EvidenceValidity(
                 ref, PROJECT["tenant_id"], PROJECT["project_id"], NOW + timedelta(days=1), False
             )
@@ -275,10 +297,13 @@ def test_qualification_rejections(entry: str, case: str, code: str) -> None:
         )
     elif case == "delegation":
         reader.targets.remove(app.selection.admission_ref)
+    if case in {"role", "task", "model", "tool", "purpose", "resource"}:
+        # These tests exercise semantic checks after valid authoritative binding.
+        evidence.snapshots = {name: body.model_copy(deep=True) for name, body in bodies.items()}
     with pytest.raises(ContractBlocked, match=code):
         app.run(entry)
     if case in {"owner", "expired", "revoked", "missing", "substituted_locator", "delegation"}:
-        assert evidence.reads == []
+        assert evidence.reads == evidence.version_reads == []
 
 
 def test_execution_evidence_cannot_bypass_read_port() -> None:
@@ -336,6 +361,72 @@ def evidence_report() -> dict[str, object]:
 
 def test_independent_vectors_and_schema() -> None:
     evidence_report()
+
+
+@pytest.mark.parametrize("entry", ["plan", "invocation"])
+@pytest.mark.parametrize("case", ["task_range", "report", "license", "model_and_lineage"])
+def test_same_revision_body_replacement(entry: str, case: str) -> None:
+    app = Application()
+    bodies = app.evidence.bodies
+    if case == "task_range":
+        bodies["ModelProfile"] = bodies["ModelProfile"].model_copy(
+            update={"task_kinds": ["explore", "unrelated"]}
+        )
+    elif case == "report":
+        report = loc("EvaluationReport", "other-readable-report")
+        app.chain.reader.targets.append(report)
+        bodies["RoleQualification"] = bodies["RoleQualification"].model_copy(
+            update={"report_ref": report}
+        )
+    elif case == "license":
+        license_ref = ScientificRef.model_validate(
+            {
+                "object_type": "License",
+                "object_id": "other-readable-license",
+                "content_version": "synthetic:v1:" + "1" * 64,
+            }
+        )
+        app.chain.reader.targets.append(license_ref)
+        bodies["ResourceAdmission"] = bodies["ResourceAdmission"].model_copy(
+            update={"license_ref": license_ref}
+        )
+    else:
+        bodies["ModelProfile"] = bodies["ModelProfile"].model_copy(
+            update={"model_version": "v-unbound"}
+        )
+        bodies["ModelLineage"] = bodies["ModelLineage"].model_copy(update={"version": "v-unbound"})
+    with pytest.raises(ContractBlocked, match="EXECUTION_QUALIFICATION_VERSION_BODY_MISMATCH"):
+        app.run(entry)
+
+
+@pytest.mark.parametrize("entry", ["plan", "invocation"])
+@pytest.mark.parametrize("case", ["missing", "wrong_revision", "wrong_owner"])
+def test_missing_or_mismatched_snapshot_blocks_before_body(entry: str, case: str) -> None:
+    app = Application()
+    snapshots = app.evidence.snapshots
+    admission = snapshots["ResourceAdmission"]
+    assert isinstance(admission, ResourceAdmission)
+    if case == "missing":
+        del snapshots["ResourceAdmission"]
+    elif case == "wrong_revision":
+        snapshots["ResourceAdmission"] = admission.model_copy(
+            update={"locator": admission.locator.model_copy(update={"revision": 1})}
+        )
+    else:
+        snapshots["ResourceAdmission"] = admission.model_copy(update={"project_id": "foreign"})
+    with pytest.raises(
+        ContractBlocked, match="EXECUTION_QUALIFICATION_VERSION_(UNAVAILABLE|MISMATCH)"
+    ):
+        app.run(entry)
+    assert app.evidence.reads == []
+
+
+def test_independently_bound_new_revision_is_accepted() -> None:
+    app = Application(admission_revision=1)
+    assert app.selection.admission_ref.revision == 1
+    app.run("plan")
+    app.run("invocation")
+    assert app.evidence.reads.count("ResourceAdmission") == 2
 
 
 if __name__ == "__main__":

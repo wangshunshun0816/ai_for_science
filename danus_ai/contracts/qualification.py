@@ -134,6 +134,12 @@ class QualificationReader(Protocol):
         self, context: TrustedRequestContext, ref: EvidenceRef, /
     ) -> EvidenceValidity | None: ...
 
+    def execution_version(
+        self, context: TrustedRequestContext, ref: EvidenceRef, /
+    ) -> EvidenceBody | None:
+        """Independent authoritative version snapshot; never derived from execution_body."""
+        ...
+
     def execution_body(
         self, context: TrustedRequestContext, ref: EvidenceRef, /
     ) -> EvidenceBody | None: ...
@@ -176,6 +182,20 @@ def check_execution_evidence(
             raise ContractBlocked("EXECUTION_QUALIFICATION_EVIDENCE_UNAVAILABLE")
         if fact.revoked or fact.expires_at.utcoffset() is None or now >= fact.expires_at:
             raise ContractBlocked("EXECUTION_QUALIFICATION_EVIDENCE_INACTIVE")
+    snapshots: list[EvidenceBody] = []
+    body_types = (ModelProfile, ModelLineage, RoleQualification, ResourceAdmission)
+    for ref, body_type in zip(roots, body_types, strict=True):
+        snapshot = reader.execution_version(context, ref)
+        if snapshot is None:
+            raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_UNAVAILABLE")
+        if type(snapshot) is not body_type:
+            raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_MISMATCH")
+        snapshot = body_type.model_validate(snapshot.model_dump())
+        bound_ref = snapshot.ref if isinstance(snapshot, ModelProfile) else snapshot.locator
+        if bound_ref != ref or (snapshot.tenant_id, snapshot.project_id) != owner:
+            raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_MISMATCH")
+        snapshots.append(snapshot)
+
     profile = reader.execution_body(context, profile_ref)
     lineage = reader.execution_body(context, selection.lineage_ref)
     qualification = reader.execution_body(context, selection.qualification_ref)
@@ -198,6 +218,8 @@ def check_execution_evidence(
         for item in (profile, lineage, qualification, admission)
     ):
         raise ContractBlocked("EXECUTION_QUALIFICATION_BODY_MISMATCH")
+    if [profile, lineage, qualification, admission] != snapshots:
+        raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_BODY_MISMATCH")
     if (
         lineage.model_profile_ref != profile_ref
         or (lineage.provider, lineage.base_model, lineage.version)

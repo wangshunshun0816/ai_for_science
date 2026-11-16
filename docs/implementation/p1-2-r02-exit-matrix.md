@@ -15,7 +15,7 @@
 | InvocationRecord | [尝试和调用守卫](../../danus_ai/contracts/execution_records.py)、[第十一批](p1-2-batch11-delivery.md) | 精确调用和重试子集已签收；通用间接关系及费用最终结算待决。 |
 | ClaimSubmission、EvidenceReport、GateExecution | [submission](../../danus_ai/contracts/submission.py)、[第八批](p1-2-batch8-delivery.md)、[第十二批](p1-2-batch12-delivery.md) | 固定四题已签收，正式 run_ids 经独立适配读取旧样例；关口到运行／尝试映射与混合结果选择待决，真实关口后续。 |
 | ClaimNode、EvidenceEvent | [claims](../../danus_ai/contracts/claims.py)、[第四批](p1-2-batch4-delivery.md) | 科学内容、定义性来源、事件／审计摘要分离已签收；历史标记清除权限待决。 |
-| ModelProfile、ModelLineage | [字段台账](r02-field-matrix.md)、[调用记录](../../danus_ai/contracts/execution_records.py) | 同项目精确配置／谱系核验子集已交付；同修订正文绑定待整改，完整谱系、配置和启用条款仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
+| ModelProfile、ModelLineage | [字段台账](r02-field-matrix.md)、[调用记录](../../danus_ai/contracts/execution_records.py) | 同项目精确配置／谱系核验子集已交付；同修订正文绑定已本地复验，待人工验收，完整谱系、配置和启用条款仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
 | Budget、BudgetEvent、I-BUDGET | [reserve](../../danus_ai/contracts/budget_preflight.py)、[quote](../../danus_ai/contracts/budget_quote.py)、[第十三批](p1-2-batch13-delivery.md)、[第十四批](p1-2-batch14-delivery.md) | reserve 只读预检已签收；quote 限 R00 总额投影。其余操作及 Budget／BudgetEvent 待补，待决见 [提案](decisions/A0-P1-2-budget-operations-proposal.md)。 |
 | Usage | [R07 读取守卫](../../danus_ai/contracts/execution_records.py)、[第十二批](p1-2-batch12-delivery.md) | 精确读取、金额及来源边界已签收；负金额、调整关系、计量及汇总待决，真实账务后续。 |
 | Approval | [signing](../../danus_ai/contracts/signing.py)、[approval_conflicts](../../danus_ai/contracts/approval_conflicts.py)、[第四批](p1-2-batch4-delivery.md) | 精确目标、用途、签名和歧义阻断已签收；缺已审定条款的用途继续阻断。 |
@@ -30,7 +30,7 @@
 | PersonalAccount、PersonalTenant、Project | [ownership](../../danus_ai/contracts/ownership.py)、[第九批](p1-2-batch9-delivery.md) | 精确关系和待认领边界已签收；真实认证、创建、迁移与认领后续。 |
 | TrustedRequestContext、Delegation、错误消息 | [messages](../../danus_ai/contracts/messages.py)、[第五批](p1-2-batch5-delivery.md)、[第九批](p1-2-batch9-delivery.md) | 纯契约和撤销／旧修订拒绝已签收；真实鉴权、委派签发和适配器不预读后续。 |
 | TaskPlan、PlanRevision、PlanNode、TaskContract | [planning](../../danus_ai/contracts/planning.py)、[第七批](p1-2-batch7-delivery.md) | 已签收任务计划、DAG、激活授权守卫；原子 CAS、调度及真实租约后续。 |
-| RoleQualification、ResourceAdmission | [planning](../../danus_ai/contracts/planning.py)、[字段台账](r02-field-matrix.md) | 计划／调用已覆盖版本兼容与单资源准入证据定位；同修订报告／许可替换待整改，真实能力启用、完整费用／权限条款及资源选择映射仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
+| RoleQualification、ResourceAdmission | [planning](../../danus_ai/contracts/planning.py)、[字段台账](r02-field-matrix.md) | 计划／调用已覆盖版本兼容与单资源准入证据定位；同修订报告／许可替换拒绝已本地复验，待人工验收，真实能力启用、完整费用／权限条款及资源选择映射仍受阻。见[A 组字段与证据](p1-2-execution-qualification.md)。 |
 | ContextManifest、七角色输出与交接 | [context](../../danus_ai/contracts/context.py)、[role_outputs](../../danus_ai/contracts/role_outputs.py)、[第七批](p1-2-batch7-delivery.md) | 最小输入输出、接收和隔离已签收；各角色全目标合同和实际模型质量后续。 |
 | ProtocolBundle、CheckSuite、ValidationProfile | [sanity_artifacts](../../danus_ai/contracts/sanity_artifacts.py)、[第十批](p1-2-batch10-delivery.md) | 固定子集已签收；通用材料依赖与适用扩展待明确。 |
 | SanityRequest、SanityReport、SanityJobRef、SanityReportView | [submission](../../danus_ai/contracts/submission.py)、[sanity_artifacts](../../danus_ai/contracts/sanity_artifacts.py)、[第八批](p1-2-batch8-delivery.md)、[第十批](p1-2-batch10-delivery.md) | 固定四题与当前绑定检查已签收；绑定选择规则仍待决。 |
@@ -74,3 +74,5 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 ## 收尾与 P1-3 准备
 
 [收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。P1-3 隔离切片专节已获限定授权，交付及整改已[限定验收](decisions/A0-P1-3-test-slice-acceptance.md)（454503c29065f99be170cacad4188376c9664583）。集中决策中的其他提案仍待审。原证据及工作卡出口范围继续有效。
+
+[A 组同修订正文整改](p1-2-execution-qualification.md#同修订正文绑定整改)覆盖四类合同的独立版本快照及两条入口的替换拒绝。CI 43797949960 只覆盖旧提交 4d20e18，整改 CI 尚待核验。其余字段、语义与服务责任继续按行登记。

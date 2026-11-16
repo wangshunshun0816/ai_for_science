@@ -33,3 +33,13 @@
 [运行 43797949960](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43797949960) 最终为 Success，实际 SHA 为 4d20e183dcbc476d9bf2d90d440fd6362bb3c5e0，早于 A 组交付 5b1f7f9ff8355c79796b260ac22561a79ea84c76。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43797949960/job/133070987675) 的 Checkout、固定工具和 Python 安装、Locked local checks and build 均显示 success。任务页显示 Checkout 的 Node.js 20 弃用警告。详细步骤日志端点返回 HTTP 404，未取得单项输出、远端测试计数或制品。运行 SHA 的 Git 树不包含 A 组测试，本运行不计为 A 组 CI。A 组交付 SHA 在 WSL 按默认 pytest 配置收集到 30 项，本轮定向复跑 30 项通过。工作流未启用 DANUS_P13_TEST，SQLite 专项按开关跳过，本轮无新增存储验收证据。
 
 两入口合成复核在保持证据定位、归属、期限与可见性不变时，均接受了同版本扩写模型配置的任务范围、将资格报告或许可依据换成另一个可读精确引用、以及配置与谱系同时把版本值改为 v-unbound。当前元数据没有独立的正文绑定。撤销、恰到期及不在委派目标内三项反例在计划和调用入口均拒绝，正文打开次数为零。详见未跟踪验收草稿，A 组对应 SHA 的远端 CI 仍待核验。
+
+## 同修订正文绑定整改
+
+授权、归属、精确引用以及当前期限和撤销先于版本快照及正文读取。独立受信端口 execution_version 按精确定位提供四种完整版本快照，逐个核对类型、定位、修订及归属后，才通过 execution_body 读取正文并比较全字段。版本快照须来自独立权威版本事实，端口不得从待检正文回填。缺快照、错版本或错归属阻断并保持正文读取为零。现有组件版本、用途及其他业务匹配继续单独复核。未新增科研投影、批准或授权条款。
+
+整改前保留的四种替换在计划和调用共八个用例均未被拒绝，导致新增回归失败。整改后，同修订扩写任务范围、替换为其他已授权评测报告或许可依据，以及成对改写配置与谱系版本均在两条入口收到 EXECUTION_QUALIFICATION_VERSION_BODY_MISMATCH。精确新准入修订匹配独立快照且许可定位合法时，两个入口均通过只读检查。撤销、恰到期及委派范围外仍零次读取版本快照和正文。真实快照来源认证、权限适用性、资格签发及资源使用授权留服务验收。
+
+Ubuntu CPython 3.12.16 专项 45 项、完整工程检查 489 项及 wheel／sdist 构建通过，18 项 SQLite 专项按开关跳过。Windows CPython 3.12.14 同锁专项 45 项通过。四组规范 UTF-8、完整 SHA-256、两份 Schema 与原交付一致；两端均逐字节核对现行生成物。[Ubuntu](evidence/p1-2-execution-qualification-remediation-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-remediation-windows.json) · [完整检查](evidence/p1-2-execution-qualification-remediation-verify.log)。原九个金样例、手算及设计基线保留原字节，本轮无新增存储验收证据。
+
+保留原发现及其证据提交 0789883f95a715c4e58940e20853bc8ab82609f9。CI 43797949960 只覆盖旧提交 4d20e183dcbc476d9bf2d90d440fd6362bb3c5e0，详细步骤日志返回 HTTP 404。整改 SHA 的新 CI 待核验。人工验收另行进行。
