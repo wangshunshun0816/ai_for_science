@@ -66,6 +66,7 @@ from .planning import (
 )
 from .projections import content_version, validate_candidate_version
 from .protocol_targets import FixedMissingPolicy, FixedProtocolTargets, FixedUnitSpec, SelectionRule
+from .qualification import ModelLineage, ModelProfile, ResourceAdmission, RoleQualification
 from .references import MethodConfig
 from .role_outputs import Handoff, HandoffDraft, RoleOutputEnvelope
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
@@ -161,6 +162,10 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    ModelProfile,
+    ModelLineage,
+    ResourceAdmission,
+    RoleQualification,
     ReserveFacts,
     QuoteBasisScope,
     DataPolicy,
@@ -400,6 +405,8 @@ def schema_capabilities() -> dict[str, object]:
             "scope": "fixed_four_confirmation",
         },
         "runtime_only_checks": [
+            "versioned execution evidence requires current same-project delegated references",
+            "plan and invocation evidence matching does not enable roles or resources",
             "data policy and permit constraints intersect; data_use terms remain unresolved",
             "quote requires an independent exact R00 version and a matching body",
             "reserve preflight requires current scoped R07 facts; budget_use unresolved",

@@ -10,6 +10,12 @@ from .base import AuthoritativeRecord, DraftContract, StrictContract
 from .canonicalization import normalize
 from .guards import ContractBlocked
 from .messages import TrustedRequestContext
+from .qualification import (
+    EvidenceRef,
+    ExecutionEvidence,
+    QualificationReader,
+    check_execution_evidence,
+)
 from .references import HistoricalRef, RecordLocator, Revision, ScientificRef, Text
 from .transitions import TaskSnapshot, TaskStatus
 
@@ -213,6 +219,7 @@ class PlanFacts(ProjectFact):
     max_nodes: Annotated[int, Field(gt=0)] | None
     checked_plan: TaskPlan
     eligible_node_ids: list[Text]
+    node_execution: dict[str, ExecutionEvidence] | None = None
 
 
 class PlanServiceAuthority(ProjectFact):
@@ -223,14 +230,21 @@ class PlanServiceAuthority(ProjectFact):
     activation_authorization_refs: list[RecordLocator]
 
 
-class PlanningReader(Protocol):
+class AccessReader(Protocol):
+    def access(self, context: TrustedRequestContext, operation: str) -> AccessFact | None: ...
+    def reference(self, context: TrustedRequestContext, ref: Ref) -> ReferenceFact | None: ...
+
+
+class ExecutionEvidenceReader(AccessReader, QualificationReader, Protocol):
+    """Read-only permission and evidence ports for the versioned subset."""
+
+
+class PlanningReader(AccessReader, Protocol):
     """Trusted service-supplied reads. Synthetic adapters are test fixtures."""
 
     def plan_service(
         self, context: TrustedRequestContext, root: RecordLocator, operation: str
     ) -> PlanServiceAuthority | None: ...
-    def access(self, context: TrustedRequestContext, operation: str) -> AccessFact | None: ...
-    def reference(self, context: TrustedRequestContext, ref: Ref) -> ReferenceFact | None: ...
     def plan(self, context: TrustedRequestContext, root: RecordLocator) -> PlanFacts | None: ...
     def task_kind(self, context: TrustedRequestContext, kind: str) -> TaskKindFact | None: ...
     def budget(self, context: TrustedRequestContext, ref: RecordLocator) -> BudgetFact | None: ...
@@ -244,7 +258,7 @@ def require_access(
     context: TrustedRequestContext,
     operation: str,
     refs: list[Ref],
-    reader: PlanningReader,
+    reader: AccessReader,
     *,
     now: datetime,
     expected_delegation: RecordLocator | None = None,
@@ -313,6 +327,7 @@ def validate_plan(
     now: datetime,
     operation: Literal["validate_plan", "activate_plan"] = "validate_plan",
     authorization_refs: tuple[RecordLocator, ...] = (),
+    execution: ExecutionEvidenceReader | None = None,
 ) -> None:
     plan = TaskPlan.model_validate(plan)
     authority = reader.plan_service(context, plan.root_task_ref, operation)
@@ -365,6 +380,25 @@ def validate_plan(
         raise ContractBlocked("PLAN_FACTS_STALE")
     if facts.max_nodes is None or len(plan.nodes) > facts.max_nodes:
         raise ContractBlocked("PLAN_NODE_LIMIT_UNAVAILABLE_OR_EXCEEDED")
+    selections = facts.node_execution
+    if (execution is None) != (selections is None) or (
+        selections is not None and set(selections) != {node.node_id for node in plan.nodes}
+    ):
+        raise ContractBlocked("PLAN_EXECUTION_EVIDENCE_REQUIRED")
+
+    delegation_ref = authority.delegation_ref
+
+    def authorize(refs: list[EvidenceRef]) -> None:
+        if execution is not None:
+            require_access(
+                context,
+                operation,
+                list(refs),
+                execution,
+                now=now,
+                expected_delegation=delegation_ref,
+            )
+
     total = 0
     for node in plan.nodes:
         kind = require_task_kind(context, node.contract.task_kind, operation, reader, now=now)
@@ -374,6 +408,22 @@ def validate_plan(
             raise ContractBlocked("PLAN_NODE_ELIGIBILITY_UNAVAILABLE")
         if node.budget_ref != facts.root_budget_ref or node.estimate_minor is None:
             raise ContractBlocked("ROOT_BUDGET_OR_ESTIMATE_UNAVAILABLE")
+        if execution is not None and selections is not None:
+            selected = ExecutionEvidence.model_validate(selections[node.node_id])
+            if (
+                selected.versions.contract_ref != node.contract_ref
+                or selected.qualification_ref != kind.qualification_ref
+            ):
+                raise ContractBlocked("PLAN_EXECUTION_EVIDENCE_MISMATCH")
+            check_execution_evidence(
+                selected,
+                context,
+                node.contract.role,
+                node.contract.task_kind,
+                now,
+                execution,
+                authorize,
+            )
         total += node.estimate_minor
     budget = reader.budget(context, facts.root_budget_ref)
     if budget is not None:

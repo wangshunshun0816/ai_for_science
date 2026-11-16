@@ -184,6 +184,7 @@ class Chain:
             max_nodes=3,
             checked_plan=self.plan,
             eligible_node_ids=["left", "right", "join"],
+            node_execution=None,
         )
         reader.current_budget = BudgetFact(
             **PROJECT,

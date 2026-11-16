@@ -1,11 +1,15 @@
 """R08 execution records and exact R07 references (design §§5.1, 6.10–6.11)."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Annotated, Literal, Protocol, Self
 
 from pydantic import Field, model_validator
 
 from .guards import ContractBlocked, ReadOnlyPort, RequestContext, require_reference
+from .messages import TrustedRequestContext
+from .planning import ExecutionEvidenceReader, require_access
+from .qualification import EvidenceRef, ExecutionEvidence, check_execution_evidence
 from .references import RecordLocator, ScientificRef, Text
 from .submission import ProjectRecord, RecordFact
 from .transitions import (
@@ -101,6 +105,9 @@ class ExecutionFact(RecordFact):
     model_profile_ref: ScientificRef | None = None
     request_digest: str | None = None
     response_version: str | None = None
+    execution_evidence: ExecutionEvidence | None = None
+    execution_context: TrustedRequestContext | None = None
+    execution_delegation_ref: RecordLocator | None = None
 
 
 class UsageReader(Protocol):
@@ -297,10 +304,20 @@ def check_run_record(
     return result
 
 
+@dataclass(frozen=True)
+class InvocationEvidenceAccess:
+    context: TrustedRequestContext
+    delegation_ref: RecordLocator
+    now: datetime
+    reader: ExecutionEvidenceReader
+
+
 def check_invocation_record(
     record: InvocationRecord,
     ctx: RequestContext,
     port: ExecutionReader,
+    *,
+    execution: InvocationEvidenceAccess | None = None,
 ) -> None:
     record = InvocationRecord.model_validate(record)
     if len({ref.record_id for ref in record.retry_refs}) != len(record.retry_refs):
@@ -316,6 +333,63 @@ def check_invocation_record(
     ):
         raise ContractBlocked("INVOCATION_EVIDENCE_MISMATCH")
     require_reference(ctx, record.model_profile_ref, port)
+    if any(
+        item is not None
+        for item in (
+            execution,
+            fact.execution_evidence,
+            fact.execution_context,
+            fact.execution_delegation_ref,
+        )
+    ):
+        if execution is None or fact.execution_evidence is None or fact.execution_context is None:
+            raise ContractBlocked("INVOCATION_EXECUTION_EVIDENCE_REQUIRED")
+        selected = ExecutionEvidence.model_validate(fact.execution_evidence)
+        context = execution.context
+        if (
+            context != fact.execution_context
+            or execution.delegation_ref != fact.execution_delegation_ref
+        ):
+            raise ContractBlocked("INVOCATION_EXECUTION_SCOPE_MISMATCH")
+        if selected.versions.model_profile_ref != record.model_profile_ref or (
+            context.tenant_id,
+            context.project_id,
+            context.principal_id,
+            context.role,
+            context.task_kind,
+            context.purpose,
+        ) != (
+            ctx.tenant_id,
+            ctx.project_id,
+            ctx.principal_id,
+            ctx.role,
+            ctx.task_kind,
+            record.purpose,
+        ):
+            raise ContractBlocked("INVOCATION_EXECUTION_SCOPE_MISMATCH")
+
+        evidence_access = execution
+
+        def authorize(refs: list[EvidenceRef]) -> None:
+            require_access(
+                context,
+                "model.invoke",
+                list(refs),
+                evidence_access.reader,
+                now=evidence_access.now,
+                expected_delegation=evidence_access.delegation_ref,
+                expected_purpose=record.purpose,
+            )
+
+        check_execution_evidence(
+            selected,
+            context,
+            ctx.role,
+            ctx.task_kind,
+            execution.now,
+            execution.reader,
+            authorize,
+        )
     for ref in record.retry_refs:
         retry = _fact(ctx, port, ref, "R08", record.locator)
         if (retry.purpose, retry.model_profile_ref, retry.request_digest) != (

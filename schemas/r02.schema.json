@@ -2920,6 +2920,47 @@
       "title": "ExecutionBinding",
       "type": "object"
     },
+    "ExecutionVersions": {
+      "additionalProperties": false,
+      "properties": {
+        "code_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "context_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "contract_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "environment_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "model_profile_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "prompt_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Tools",
+          "type": "array"
+        }
+      },
+      "required": [
+        "model_profile_ref",
+        "prompt_ref",
+        "tools",
+        "contract_ref",
+        "context_ref",
+        "code_ref",
+        "environment_ref"
+      ],
+      "title": "ExecutionVersions",
+      "type": "object"
+    },
     "ExplorationInputs": {
       "additionalProperties": false,
       "properties": {
@@ -4388,6 +4429,117 @@
         "implementation_ref"
       ],
       "title": "MetricSpec",
+      "type": "object"
+    },
+    "ModelLineage": {
+      "additionalProperties": false,
+      "properties": {
+        "base_model": {
+          "minLength": 1,
+          "title": "Base Model",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "model_profile_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "model_profile_ref",
+        "provider",
+        "base_model",
+        "version"
+      ],
+      "title": "ModelLineage",
+      "type": "object"
+    },
+    "ModelProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "base_model": {
+          "minLength": 1,
+          "title": "Base Model",
+          "type": "string"
+        },
+        "model_version": {
+          "minLength": 1,
+          "title": "Model Version",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "prompt_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "provider": {
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "task_kinds": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Task Kinds",
+          "type": "array"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "tools": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Tools",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ref",
+        "tenant_id",
+        "project_id",
+        "provider",
+        "base_model",
+        "model_version",
+        "prompt_ref",
+        "tools",
+        "task_kinds"
+      ],
+      "title": "ModelProfile",
       "type": "object"
     },
     "NotApplicable": {
@@ -6559,6 +6711,54 @@
       "title": "ReserveScope",
       "type": "object"
     },
+    "ResourceAdmission": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_uses": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Allowed Uses",
+          "type": "array"
+        },
+        "license_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "resource_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "resource_ref",
+        "source",
+        "license_ref",
+        "allowed_uses"
+      ],
+      "title": "ResourceAdmission",
+      "type": "object"
+    },
     "ResponseEnvelope": {
       "additionalProperties": false,
       "allOf": [
@@ -6893,6 +7093,63 @@
         "output"
       ],
       "title": "RoleOutputEnvelope",
+      "type": "object"
+    },
+    "RoleQualification": {
+      "additionalProperties": false,
+      "properties": {
+        "evaluation_set_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "report_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "role": {
+          "enum": [
+            "A1",
+            "A2",
+            "A3",
+            "A4",
+            "A5",
+            "A7",
+            "A12"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "task_kind": {
+          "minLength": 1,
+          "title": "Task Kind",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "versions": {
+          "$ref": "#/$defs/ExecutionVersions"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "role",
+        "task_kind",
+        "versions",
+        "evaluation_set_ref",
+        "report_ref"
+      ],
+      "title": "RoleQualification",
       "type": "object"
     },
     "RunRecord": {
@@ -9218,6 +9475,8 @@
       "InvocationRecord": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
+      "ModelLineage": "service_owned",
+      "ModelProfile": "service_owned",
       "OwnershipUnclaimed": "service_owned",
       "PersonalAccount": "service_owned",
       "PersonalTenant": "service_owned",
@@ -9241,9 +9500,11 @@
       "ReserveFacts": "service_owned",
       "ReservePreflightResult": "output_only",
       "ReserveRequest": "caller_input",
+      "ResourceAdmission": "service_owned",
       "ResponseEnvelope": "service_owned",
       "RetryCheck": "service_owned",
       "RoleOutputEnvelope": "caller_input",
+      "RoleQualification": "service_owned",
       "RunRecord": "service_owned",
       "RunRequestDraft": "caller_input",
       "RunRequestRecord": "service_owned",
@@ -9284,6 +9545,8 @@
       "references.resolve"
     ],
     "runtime_only_checks": [
+      "versioned execution evidence requires current same-project delegated references",
+      "plan and invocation evidence matching does not enable roles or resources",
       "data policy and permit constraints intersect; data_use terms remain unresolved",
       "quote requires an independent exact R00 version and a matching body",
       "reserve preflight requires current scoped R07 facts; budget_use unresolved",
@@ -9513,6 +9776,12 @@
     "MethodConfig": {
       "$ref": "#/$defs/MethodConfig"
     },
+    "ModelLineage": {
+      "$ref": "#/$defs/ModelLineage"
+    },
+    "ModelProfile": {
+      "$ref": "#/$defs/ModelProfile"
+    },
     "OwnershipUnclaimed": {
       "$ref": "#/$defs/OwnershipUnclaimed"
     },
@@ -9582,6 +9851,9 @@
     "ReserveRequest": {
       "$ref": "#/$defs/ReserveRequest"
     },
+    "ResourceAdmission": {
+      "$ref": "#/$defs/ResourceAdmission"
+    },
     "ResponseEnvelope": {
       "$ref": "#/$defs/ResponseEnvelope"
     },
@@ -9590,6 +9862,9 @@
     },
     "RoleOutputEnvelope": {
       "$ref": "#/$defs/RoleOutputEnvelope"
+    },
+    "RoleQualification": {
+      "$ref": "#/$defs/RoleQualification"
     },
     "RunRecord": {
       "$ref": "#/$defs/RunRecord"
