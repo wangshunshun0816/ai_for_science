@@ -24,7 +24,7 @@
 
 [I-SCHEMA 注册](../../danus_ai/contracts/api.py)区分 DataExposureQuery（调用方）、DataExposure（服务持有）、DataExposureResult（仅输出）。JSON Schema 和 OpenAPI 导出结构；跨端授权与权威事实核验由上述语义入口处理。[专项](../../tests/contracts/test_data_exposure.py)覆盖这三种入口、合法历史接触、错事件或数据版本、错主体／用途／归属、过期或撤销委派、缺权威依据、排队无接触、同修订换正文及发送撤销后历史仍可核验。发送撤销用已有约束核验端口验证，历史事实不会恢复发送资格；本用例不建立许可与暴露记录的通用映射。
 
-[独立向量](../../tests/fixtures/data_exposure/actual-contact.json)的三段规范 JSON 字符串按字段顺序手列，完整 SHA-256 由标准库直接对这些字面量计算。测试比较实际 UTF-8 和完整摘要。[Ubuntu 对照](evidence/p1-2-data-exposure-ubuntu.json)、[Windows 对照](evidence/p1-2-data-exposure-windows.json)同时记录两份生成物，每端各自重生成并逐字节比对仓库样本。[Ubuntu 完整工程检查](evidence/p1-2-data-exposure-verify.log)留存原始输出。远端 CI 使用现有手动工程工作流，待取得本交付 SHA 对应运行及最终结果。
+[独立向量](../../tests/fixtures/data_exposure/actual-contact.json)的三段规范 JSON 字符串按字段顺序手列，完整 SHA-256 由标准库直接对这些字面量计算。测试比较实际 UTF-8 和完整摘要。[Ubuntu 对照](evidence/p1-2-data-exposure-ubuntu.json)、[Windows 对照](evidence/p1-2-data-exposure-windows.json)同时记录两份生成物，每端各自重生成并逐字节比对仓库样本。[Ubuntu 完整工程检查](evidence/p1-2-data-exposure-verify.log)留存原始输出。远端 CI 结论和证据范围见下节。
 
 Ubuntu CPython 3.12.16 执行 env -u DANUS_P13_TEST bash scripts/verify.sh，锁定安装、Ruff、mypy、导入边界、生成物、518 项测试和 sdist／wheel 构建通过；18 项 SQLite 专项按开关跳过。Windows CPython 3.12.14 在既有隔离环境执行 uv sync --offline --locked --python 3.12.14 --no-install-project，再以 python -m pytest -q -p no:cacheprovider 运行 test_data_exposure.py 与 test_batch15.py，63 项通过。比较两端 JSON 的 lock_sha256、vectors、schemas 全部相等，覆盖三组合同的实际 UTF-8、完整摘要和两份生成物；运行环境的 Python 补丁版本如上。
 
@@ -38,4 +38,25 @@ Ubuntu CPython 3.12.16 执行 env -u DANUS_P13_TEST bash scripts/verify.sh，锁
 | data_use、分类和伦理等既有待决 | 保持[第十五批边界](p1-2-batch15-delivery.md)，历史核验不为其提供批准。 |
 | 独立 R08c 来源和调度时原子核验 | 真实发送、挂载、消耗计数、撤销执行、恢复回放与适配器预读保证均由服务阶段验收。 |
 
-本批关闭同项目、精确修订、独立权威快照支持的历史实际接触只读核验子集，待对应 CI 与 A0 限定验收。
+本批关闭同项目、精确修订、独立权威快照支持的历史实际接触只读核验子集，对应远端工程 CI 已核验，A0 限定验收待办。
+
+
+## 远端 CI 与独立复核
+
+[运行 43808973217](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43808973217) 为 main 手动运行，实际 SHA 为 a9a56e7d23e3be7beb5479dcaf66fa5eb411a119，状态 completed，结论 success。[foundation 任务](https://github.com/wangshunshun0816/ai_for_science/actions/runs/43808973217/job/133106137383) 的 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均为 success。该提交的工作流调用 scripts/verify.sh，覆盖锁检查与安装、Ruff、mypy、导入边界、生成物、默认 pytest 和构建。运行和任务的详细日志接口均返回 HTTP 403，证据限运行与任务步骤结论及实际 SHA 的脚本。远端单项结果、计数及构建输出未取得。
+
+在交付 SHA 的 WSL 工作区使用 env -u DANUS_P13_TEST uv run --no-sync pytest --collect-only -q，默认收集 536 项，其中 B 组 29 项、SQLite 专项 18 项。以相同环境运行 pytest -q -rs tests/contracts/test_data_exposure.py tests/storage/test_candidate_slice.py，29 项通过、18 项按开关跳过。工作流未设置该开关，SQLite 专项按测试条件跳过，本轮无新增存储验收证据。前述 518 项通过及双端向量均属原交付本地证据。
+
+### 独立复核发现与复验条件
+
+读取计数按受限快照、受限正文排列。以下用现有合成 R08c 和发送端口替身，在调用正式核验入口前只替换列出的输入。
+
+| 复现依据 | 观察结果与复验要求 |
+| --- | --- |
+| 保持查询和独立快照不变，分别替换正文事件修订、Dataset 科学版本、主体、用途。原专项另覆盖替换正文租户、项目及接触时间。 | 同修订正文全字段比较拒绝，DATA_EXPOSURE_BODY_MISMATCH，读取次数 (1,1)。把同样的四种变异放入独立快照内的接触记录时，DATA_EXPOSURE_VERSION_MISMATCH，(1,0)。真实 R08c 适配器仍需证明快照从独立台账取得，并证明精确修订不可变。 |
+| 快照仍匹配事件及归属，但接触记录为空，正文端仍准备返回已接触正文。 | DATA_EXPOSURE_CONTACT_NOT_ESTABLISHED，(1,0)。排队不能由正文补成实际接触。反馈释放等事件的可信映射继续待定。 |
+| 撤销相同数据／主体／用途的合成发送许可后保留合法历史委派，再分别移除当前事件读取授权、撤销当前委派、把查询时间移到委派恰到期。专项另测错归属和越权。 | 撤销后，发送约束入口拒绝且不读发送正文。有独立当前权限时历史查询仍通过；撤销当前委派、恰到期、越权或缺读取授权时均拒绝，(0,0)。真实服务须复验预授权顺序，特别是元数据端口不预读受限内容。 |
+| 把仅含 status 和 event_ref 的结果分别送给 DataConstraintQuery、SendPermit、DataExposureQuery 及 ReferenceRequest 解析器，再直接送入发送约束守卫。 | 均拒绝。当前工程中该结果只在历史入口生成并由 I-SCHEMA 作为仅输出合同注册。未来消费者须继续单独核验访问与发送权限。 |
+| 在查询根或 subject 添加 recipient_ref、permit_ref、event_kind，包括显式 null。 | 严格解析均拒绝。缺这些字段仅能查询已定的实际接触事实；用途按已有精确事实逐值比较，本批不给接收方、许可或其他事件推定映射。 |
+
+在已定子集内未发现需先修改产品代码的偏差。上述复验只证明入口能发现单侧替换和拒绝无权读取；权威来源认证、不可变性及适配器 I/O 次序属于服务验收。

@@ -70,7 +70,7 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 | Scope、TheoremRef | Scope | [test_batch5.py](../../tests/contracts/test_batch5.py) | [5 批平台证据](evidence/p1-2-batch5-remediation-cross-platform.json) |
 | DataPolicy／SendPermit 只读子集 | DataConstraintQuery、DataPolicy、SendPermit、DataConstraintResult | [专项](../../tests/contracts/test_batch15.py) | [Ubuntu](evidence/p1-2-batch15-ubuntu.json) · [Windows](evidence/p1-2-batch15-windows.json)，四个根合同及两份 Schema。 |
 | A 组执行证据已定子集 | ModelProfile、ModelLineage、RoleQualification、ResourceAdmission | [两入口专项](../../tests/contracts/test_execution_qualification.py) | [Ubuntu](evidence/p1-2-execution-qualification-ubuntu.json) · [Windows](evidence/p1-2-execution-qualification-windows.json)，四组规范字节和两份生成物；原运行早于 A 组交付；[整改工程 CI 已核验成功](p1-2-execution-qualification.md#整改-ci-与本轮定向复核)，详细步骤日志未取得，SQLite 专项跳过。 |
-| DataExposure 实际接触只读子集 | DataExposureQuery、DataExposure、DataExposureResult | [专项](../../tests/contracts/test_data_exposure.py) | [Ubuntu](evidence/p1-2-data-exposure-ubuntu.json) · [Windows](evidence/p1-2-data-exposure-windows.json)，三组独立向量及两份生成物；对应 CI 待核。 |
+| DataExposure 实际接触只读子集 | DataExposureQuery、DataExposure、DataExposureResult | [专项](../../tests/contracts/test_data_exposure.py) | [Ubuntu](evidence/p1-2-data-exposure-ubuntu.json) · [Windows](evidence/p1-2-data-exposure-windows.json)，三组独立向量及两份生成物；[对应工程 CI 成功](p1-2-data-exposure.md#远端-ci-与独立复核)，29 项默认收集及定向复验由 WSL 证实，远端详细日志未取得，SQLite 专项跳过。 |
 
 ## 收尾与 P1-3 准备
 
