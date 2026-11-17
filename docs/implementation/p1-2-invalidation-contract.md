@@ -24,3 +24,7 @@
 - Ubuntu CPython 3.12.16 执行 env -u DANUS_P13_TEST bash scripts/verify.sh。585 项通过、18 项 SQLite 专项跳过，静态检查、Schema 和发行构建通过。
 - Windows CPython 3.12.14 使用同一 uv.lock，定向运行 tests/contracts/test_invalidation.py 的 27 项并用 scripts/export_r02_schema.py --check 复核。四组科学预映像、两组判断结果的字节和完整 SHA-256 两端一致，两份 Schema 均与新生成物逐字节一致。[实际比对输出](evidence/p1-2-invalidation-cross-platform.json)
 - 本轮独立金样例见 tests/fixtures/invalidation/independent.json。原九件、手算、签收设计及依赖锁保留原字节。远端 CI 与人工验收按交付 SHA 另行登记。
+
+## 独立复核状态
+
+27 项本地默认收集及定向复跑通过。独立复核复现审计失败／未来时点仍接纳的缺陷，同科学版本不同精确修订的行为已记录且适用语义待明确。三类子场景有正向证据，样例出口待整改及复验。对应交付 SHA 的 GitHub Actions 查询为 0 次运行，不沿用旧 C 组结果。[复现、CI 范围与关闭条件](evidence/p1-2-invalidation-independent-review.md)

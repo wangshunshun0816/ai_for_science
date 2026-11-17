@@ -86,3 +86,5 @@ C 组交付的 SelectionSet、单族精确绑定、A4／A7 白名单、来源覆
 C 组整改在对应 SHA 已通过[远端 CI 作业与步骤核验](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44027827660)，远端详细日志未取得。本地默认路径收集和定向复跑均为 40 项，SQLite 专项跳过。[覆盖范围与证据](evidence/p1-2-c-selection-review.md#整改-ci-与定向复验)
 
 C 组已交付范围与四项整改已通过[A0 C 组限定验收](decisions/A0-P1-2-c-selection-lock-acceptance.md)（a3ab1ec77746055fb7199145b228db4fb5a155ea），CI 历史日志限制、SQLite 跳过及未关闭依赖维持原记录。
+
+明确失效三类子场景具备本地正向及反例证据。审计失败／未来时点仍接纳待整改，同科学版本异修订的影响须明确适用范围，金样例出口保持打开。尚无本交付对应远端 CI。[独立复核](evidence/p1-2-invalidation-independent-review.md)
