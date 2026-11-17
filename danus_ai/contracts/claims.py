@@ -175,7 +175,7 @@ class EvidenceEvent(AuthoritativeRecord):
     schema_version: Literal[1]
     event_id: Text
     revision: Revision
-    event_kind: Literal["accepted", "evidence_updated"]
+    event_kind: Literal["accepted", "evidence_updated", "invalidating_evidence"]
     claim_ref: ClaimEvidenceRef
     report_refs: Annotated[list[RecordLocator], Field(min_length=1)]
     attempt_refs: list[RecordLocator]
@@ -209,7 +209,16 @@ def verify_evidence_audit(claim: ClaimRecord, event: EvidenceEvent, entry: Audit
 def current_evidence(
     claim: ClaimRecord, events: list[EvidenceEvent], audit_entries: list[AuditEntry]
 ) -> EvidenceChange:
-    """Project full snapshots against an ordered, trusted audit view."""
+    """Project ordinary full snapshots against an ordered, trusted audit view."""
+    return _project_evidence(claim, events, audit_entries, frozenset())
+
+
+def _project_evidence(
+    claim: ClaimRecord,
+    events: list[EvidenceEvent],
+    audit_entries: list[AuditEntry],
+    verified_invalidations: frozenset[str],
+) -> EvidenceChange:
     if not events or events[0].event_kind != "accepted":
         raise ContractBlocked("INITIAL_EVIDENCE_REQUIRED")
     audit_by_position = {(entry.chain_id, entry.sequence): entry for entry in audit_entries}
@@ -222,7 +231,15 @@ def current_evidence(
             event.claim_ref.locator != claim.locator
             or event.claim_ref.content_version != claim.content_version
             or event.event_id in seen
-            or (previous is not None and event.event_kind != "evidence_updated")
+            or (
+                previous is not None
+                and event.event_kind != "evidence_updated"
+                and (
+                    event.event_kind != "invalidating_evidence"
+                    or event.digest not in verified_invalidations
+                    or event.change != previous.change
+                )
+            )
             or (claim.science.kind == "theorem_ref" and event.change.strength is not None)
             or event.previous_event_digest != (previous.digest if previous is not None else None)
         ):

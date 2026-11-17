@@ -47,6 +47,13 @@ from .fixed_four import (
     SanitySnapshot,
 )
 from .guards import ContractBlocked, ReadOnlyPort, RequestContext
+from .invalidation import (
+    DependencySnapshot,
+    InvalidationImpact,
+    InvalidationQuery,
+    InvalidationReport,
+    ReauditTaskLink,
+)
 from .messages import (
     Delegation,
     ErrorDetail,
@@ -159,6 +166,7 @@ class EngineeringCheck(StrictContract):
 
 
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    InvalidationQuery,
     ReserveRequest,
     QuoteRequest,
     DataConstraintQuery,
@@ -178,6 +186,9 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    InvalidationReport,
+    DependencySnapshot,
+    ReauditTaskLink,
     ModelProfile,
     ModelLineage,
     ResourceAdmission,
@@ -275,6 +286,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     EngineeringCheck,
 )
 _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
+    InvalidationImpact,
     ReservePreflightResult,
     QuoteEstimate,
     DataConstraintResult,
@@ -416,6 +428,12 @@ def schema_capabilities() -> dict[str, object]:
                 "protocol_use_and_family_confirmation_signed_terms",
                 "transactional_lock",
             ],
+        },
+        "invalidation_impact": {
+            "read_operation": "effective_status",
+            "entries": ["check_invalidation_impact", "require_unaffected_confirmation"],
+            "requires_current_authority_and_independent_audit": True,
+            "unrelated_implies_general_eligibility": False,
         },
         "unlisted_objects_and_operations": "unsupported",
         "runtime_validation_required": True,

@@ -10,12 +10,15 @@ from .canonicalization import (
     jcs_json,
     normalize,
 )
+from .invalidation import check_invalidation_impact, require_unaffected_confirmation
 from .parsing import ContractJSONError, parse_json
 from .scope import scope_comparable, scope_contains, scope_overlaps
 from .selection_review import SelectionReview
 
 __all__ = [
     "SelectionReview",
+    "check_invalidation_impact",
+    "require_unaffected_confirmation",
     "content_id",
     "validate_object",
     "validate_transition",

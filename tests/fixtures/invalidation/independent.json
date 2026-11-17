@@ -1,0 +1,58 @@
+{
+  "claims": {
+    "source": {
+      "ref": {
+        "locator": {
+          "record_type": "ClaimNode",
+          "record_id": "source",
+          "revision": 1
+        },
+        "content_version": "claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f"
+      },
+      "utf8": "{\"kind\":\"empirical\",\"logical_level\":\"L3\",\"origin\":\"internal_experiment\",\"origin_binding\":{\"origin\":\"internal_experiment\",\"premise_refs\":[],\"prereg_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Prereg\"},\"protocol_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Protocol\"},\"run_refs\":[{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"RunRequest\"}]},\"outcome\":\"improvement\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"statement\":\"source\"}"
+    },
+    "via": {
+      "ref": {
+        "locator": {
+          "record_type": "ClaimNode",
+          "record_id": "via",
+          "revision": 1
+        },
+        "content_version": "claim:v1:dc3b4d0f0cfc3dbcf4b9071532a593ac0558f844f3db0d873907d62c4626d744"
+      },
+      "utf8": "{\"kind\":\"empirical\",\"logical_level\":\"L3\",\"origin\":\"internal_experiment\",\"origin_binding\":{\"origin\":\"internal_experiment\",\"premise_refs\":[{\"content_version\":\"claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f\",\"object_type\":\"ClaimNode\"}],\"prereg_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Prereg\"},\"protocol_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Protocol\"},\"run_refs\":[{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"RunRequest\"}]},\"outcome\":\"improvement\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"statement\":\"via\"}"
+    },
+    "dependent": {
+      "ref": {
+        "locator": {
+          "record_type": "ClaimNode",
+          "record_id": "dependent",
+          "revision": 1
+        },
+        "content_version": "claim:v1:6e9ae27c74a6fadc126638a65df1cec91c7485df22050910c9ab68f67d15328c"
+      },
+      "utf8": "{\"kind\":\"empirical\",\"logical_level\":\"L3\",\"origin\":\"internal_experiment\",\"origin_binding\":{\"origin\":\"internal_experiment\",\"premise_refs\":[{\"content_version\":\"claim:v1:dc3b4d0f0cfc3dbcf4b9071532a593ac0558f844f3db0d873907d62c4626d744\",\"object_type\":\"ClaimNode\"}],\"prereg_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Prereg\"},\"protocol_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Protocol\"},\"run_refs\":[{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"RunRequest\"}]},\"outcome\":\"improvement\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"statement\":\"dependent\"}"
+    },
+    "comparison": {
+      "ref": {
+        "locator": {
+          "record_type": "ClaimNode",
+          "record_id": "comparison",
+          "revision": 1
+        },
+        "content_version": "claim:v1:bdbf0303c37b835e0b36c19968a423e352b743f3512411a57b95910a44d80f54"
+      },
+      "utf8": "{\"kind\":\"empirical\",\"logical_level\":\"L3\",\"origin\":\"internal_experiment\",\"origin_binding\":{\"origin\":\"internal_experiment\",\"premise_refs\":[],\"prereg_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Prereg\"},\"protocol_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Protocol\"},\"run_refs\":[{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"RunRequest\"}]},\"outcome\":\"improvement\",\"scope_ref\":{\"content_version\":\"test:v1:1111111111111111111111111111111111111111111111111111111111111111\",\"object_type\":\"Scope\"},\"statement\":\"comparison\"}"
+    }
+  },
+  "results": {
+    "dependent": {
+      "utf8": "{\"claim_ref\":{\"content_version\":\"claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f\",\"locator\":{\"record_id\":\"source\",\"record_type\":\"ClaimNode\",\"revision\":1}},\"dependent_ref\":{\"content_version\":\"claim:v1:6e9ae27c74a6fadc126638a65df1cec91c7485df22050910c9ab68f67d15328c\",\"locator\":{\"record_id\":\"dependent\",\"record_type\":\"ClaimNode\",\"revision\":1}},\"event_ref\":{\"record_id\":\"invalidation\",\"record_type\":\"EvidenceEvent\",\"revision\":1},\"reaudit_ref\":{\"record_id\":\"review\",\"record_type\":\"ReauditTask\",\"revision\":1},\"status\":\"needs_reaudit\"}",
+      "sha256": "34b177772188240ef3d67fdde8cd6dae447c9fca8becc0a562497bc831c98fa2"
+    },
+    "comparison": {
+      "utf8": "{\"claim_ref\":{\"content_version\":\"claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f\",\"locator\":{\"record_id\":\"source\",\"record_type\":\"ClaimNode\",\"revision\":1}},\"dependent_ref\":{\"content_version\":\"claim:v1:bdbf0303c37b835e0b36c19968a423e352b743f3512411a57b95910a44d80f54\",\"locator\":{\"record_id\":\"comparison\",\"record_type\":\"ClaimNode\",\"revision\":1}},\"event_ref\":{\"record_id\":\"invalidation\",\"record_type\":\"EvidenceEvent\",\"revision\":1},\"reaudit_ref\":null,\"status\":\"no_dependency_on_source\"}",
+      "sha256": "68f6b42367d6093690e61186513a8c68af5efd819036d6124436b7ebf6193678"
+    }
+  }
+}

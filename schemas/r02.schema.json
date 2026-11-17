@@ -2344,6 +2344,35 @@
       "title": "Delegation",
       "type": "object"
     },
+    "DependencyEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "dependent_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "premise_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "relation": {
+          "enum": [
+            "requires",
+            "replicates",
+            "contradicts",
+            "supersedes",
+            "generalizes"
+          ],
+          "title": "Relation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "premise_ref",
+        "dependent_ref",
+        "relation"
+      ],
+      "title": "DependencyEdge",
+      "type": "object"
+    },
     "DependencyEvidence": {
       "additionalProperties": false,
       "properties": {
@@ -2357,6 +2386,43 @@
         "lock_sha256"
       ],
       "title": "DependencyEvidence",
+      "type": "object"
+    },
+    "DependencySnapshot": {
+      "additionalProperties": false,
+      "properties": {
+        "dependent_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/DependencyEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "dependent_ref",
+        "edges"
+      ],
+      "title": "DependencySnapshot",
       "type": "object"
     },
     "DevelopmentInputs": {
@@ -2916,7 +2982,8 @@
         "event_kind": {
           "enum": [
             "accepted",
-            "evidence_updated"
+            "evidence_updated",
+            "invalidating_evidence"
           ],
           "title": "Event Kind",
           "type": "string"
@@ -4654,6 +4721,127 @@
         "premise_refs"
       ],
       "title": "InternalOrigin",
+      "type": "object"
+    },
+    "InvalidationImpact": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "dependent_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "event_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "reaudit_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "needs_reaudit",
+            "no_dependency_on_source"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim_ref",
+        "dependent_ref",
+        "event_ref",
+        "status",
+        "reaudit_ref"
+      ],
+      "title": "InvalidationImpact",
+      "type": "object"
+    },
+    "InvalidationQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "claim_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "dependent_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "event_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "report_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "claim_ref",
+        "dependent_ref",
+        "report_ref",
+        "event_ref"
+      ],
+      "title": "InvalidationQuery",
+      "type": "object"
+    },
+    "InvalidationReport": {
+      "additionalProperties": false,
+      "description": "Narrow projection of confirmed fault evidence, not a numerical replication report.",
+      "properties": {
+        "cause": {
+          "enum": [
+            "implementation_error",
+            "data_contamination",
+            "protocol_invalidity"
+          ],
+          "title": "Cause",
+          "type": "string"
+        },
+        "claim_ref": {
+          "$ref": "#/$defs/ClaimEvidenceRef"
+        },
+        "diagnostic_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "source_run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "claim_ref",
+        "source_run_ref",
+        "cause",
+        "diagnostic_ref"
+      ],
+      "title": "InvalidationReport",
       "type": "object"
     },
     "InvocationRecord": {
@@ -6550,6 +6738,44 @@
         "unit"
       ],
       "title": "QuoteRequest",
+      "type": "object"
+    },
+    "ReauditTaskLink": {
+      "additionalProperties": false,
+      "description": "R19 trigger and affected-version projection. No queue state or scheduling authority.",
+      "properties": {
+        "affected_refs": {
+          "items": {
+            "$ref": "#/$defs/ClaimEvidenceRef"
+          },
+          "title": "Affected Refs",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "trigger": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "locator",
+        "tenant_id",
+        "project_id",
+        "trigger",
+        "affected_refs"
+      ],
+      "title": "ReauditTaskLink",
       "type": "object"
     },
     "RecordLocator": {
@@ -10441,6 +10667,15 @@
       ],
       "side_effects": "none"
     },
+    "invalidation_impact": {
+      "entries": [
+        "check_invalidation_impact",
+        "require_unaffected_confirmation"
+      ],
+      "read_operation": "effective_status",
+      "requires_current_authority_and_independent_audit": true,
+      "unrelated_implies_general_eligibility": false
+    },
     "objects": {
       "A4HistoryView": "output_only",
       "A7HistoryView": "output_only",
@@ -10472,6 +10707,7 @@
       "DataPolicy": "service_owned",
       "Delegation": "service_owned",
       "DependencyEvidence": "service_owned",
+      "DependencySnapshot": "service_owned",
       "EngineeringCheck": "service_owned",
       "EngineeringStatus": "service_owned",
       "ErrorDetail": "service_owned",
@@ -10502,6 +10738,9 @@
       "IdeationChecklist": "service_owned",
       "IdeationReport": "service_owned",
       "ImageEvidence": "service_owned",
+      "InvalidationImpact": "output_only",
+      "InvalidationQuery": "caller_input",
+      "InvalidationReport": "service_owned",
       "InvocationRecord": "service_owned",
       "LegacyIncomplete": "service_owned",
       "MethodConfig": "service_owned",
@@ -10522,6 +10761,7 @@
       "QuoteBasisScope": "service_owned",
       "QuoteEstimate": "output_only",
       "QuoteRequest": "caller_input",
+      "ReauditTaskLink": "service_owned",
       "ReferenceRequest": "caller_input",
       "ReleaseManifestBody": "service_owned",
       "ReleaseReceipt": "service_owned",
@@ -10761,6 +11001,9 @@
     "DependencyEvidence": {
       "$ref": "#/$defs/DependencyEvidence"
     },
+    "DependencySnapshot": {
+      "$ref": "#/$defs/DependencySnapshot"
+    },
     "EngineeringCheck": {
       "$ref": "#/$defs/EngineeringCheck"
     },
@@ -10851,6 +11094,15 @@
     "ImageEvidence": {
       "$ref": "#/$defs/ImageEvidence"
     },
+    "InvalidationImpact": {
+      "$ref": "#/$defs/InvalidationImpact"
+    },
+    "InvalidationQuery": {
+      "$ref": "#/$defs/InvalidationQuery"
+    },
+    "InvalidationReport": {
+      "$ref": "#/$defs/InvalidationReport"
+    },
     "InvocationRecord": {
       "$ref": "#/$defs/InvocationRecord"
     },
@@ -10910,6 +11162,9 @@
     },
     "QuoteRequest": {
       "$ref": "#/$defs/QuoteRequest"
+    },
+    "ReauditTaskLink": {
+      "$ref": "#/$defs/ReauditTaskLink"
     },
     "ReferenceRequest": {
       "$ref": "#/$defs/ReferenceRequest"
