@@ -44,4 +44,8 @@
 
 已在已签收范围内收紧 A4 公共短码、筛选／干预事件权威绑定、阈值历史替代以及报告精确证据集合。保留旧提交反例，并验证支持合法短码、合法有序两类事件及已合法替代批准的历史记录。[整改、复验及兼容影响](evidence/p1-2-c-selection-review.md#c-r01c-r04-整改)
 
-Ubuntu 完整工程 558 项通过、18 项 SQLite 专项跳过，Windows 同锁 C 组 40 项通过。七组逐对象及两组贯通预映像的规范字节和完整摘要两端一致且无漂移。两份 Schema 因短码枚举更新，均已重新逐字节对照。CI 44015452505 保留为原提交证据，整改 SHA 单独核验。
+Ubuntu 完整工程 558 项通过、18 项 SQLite 专项跳过，Windows 同锁 C 组 40 项通过。七组逐对象及两组贯通预映像的规范字节和完整摘要两端一致且无漂移。两份 Schema 因短码枚举更新，均已重新逐字节对照。CI 44015452505 保留为原提交证据。
+
+[整改 CI 44027827660](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44027827660) 的公开运行页显示最终 Success，提交链接为 a3008c5c7dece9c3dc0bfac52244cf29d55e5232。[foundation 作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44027827660/job/133852331964)的公开步骤元数据确认 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均成功。REST 运行、作业和详细日志接口返回 HTTP 403，公开单步日志链接返回 HTTP 404。未取得明细日志，远端逐项 pytest 输出、计数及构建明细未单独核验。
+
+本地在同一提交用默认 pytest 入口确认收集 C 组 40 项，定向复跑 40 项通过。该工作流按默认入口执行，未启用 DANUS_P13_TEST。SQLite 专项跳过，本轮无新增存储验收证据。 [四项定向复验](evidence/p1-2-c-selection-review.md#整改-ci-与定向复验)
