@@ -25,3 +25,9 @@ Q04-A 和大方案 §5.2、§5.5、§8.6 区分科学投影、权威记录及事
 |备选：只按记录修订传播|事件只作用于精确修订。另一修订须有独立证据证明其前提重绑定有权且资格已重新核验，才能判断本事件不适用。若只比较定位，已实测可用换修订绕过，因此不建议省略独立重绑定。|
 
 I-R02 混合传播疑点仍未复现。完整 requires 图通过比较边连接失效源时不传播，反向比较不影响原真实依赖路径，已纳入回归。Ubuntu CPython 3.12.16 完整工程 593 项通过，18 项 SQLite 专项跳过。Windows 3.12.14 同锁专项 35 项通过。六组规范字节及完整摘要两端一致，两份 Schema 逐字节对照通过且保持原字节。原九件金样例、手算、设计基线未变。整改 CI 与人工验收按新提交分别登记。
+
+## 整改 CI 与定向复验
+
+[整改 CI 44127201891](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891) 首次手动触发，实际 SHA 为 775ca649d3b003c32d5b3751f8252bc2ecf1862f，最终成功。[foundation 作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891/job/134194135744)显示 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均成功。作业明细日志下载返回 HTTP 403，单步日志链接返回 HTTP 404，未取得详细日志或核验远端逐项输出和计数。
+
+同一 SHA 在 Ubuntu 默认 pytest 路径收集 35 项失效专项，定向复跑 35 项通过。由工作流和测试开关确认此 CI 未启用 DANUS_P13_TEST，SQLite 专项跳过，无新增存储证据。 失败、未来时点及两者同时发生的审计均阻断。恰在查询时点的合法对照通过。获授权的同科学版本异修订路径返回 INVALIDATION_REVISION_SCOPE_UNRESOLVED，既不自动传播也不授予确认资格。比较边截断复验通过，越权异修订的受限快照及正文读取均为零次。异修订权威适用映射仍待 A0 决定。

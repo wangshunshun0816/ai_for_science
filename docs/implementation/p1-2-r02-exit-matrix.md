@@ -90,3 +90,5 @@ C 组已交付范围与四项整改已通过[A0 C 组限定验收](decisions/A0-
 明确失效三类子场景具备本地正向及反例证据。审计失败／未来时点仍接纳待整改，同科学版本异修订的影响须明确适用范围，金样例出口保持打开。尚无本交付对应远端 CI。[独立复核](evidence/p1-2-invalidation-independent-review.md)
 
 明确失效 I-R01 审计结果及查询时点已完成整改并双端复验，I-R03 同科学版本异修订由明确阻断守卫保留，真正适用范围仍待 A0。CI 及人工验收待对应整改 SHA 证据。三个子场景以外的要求保持待办。[独立复核与整改](evidence/p1-2-invalidation-independent-review.md)
+
+I-R01 整改在[对应 SHA 的远端 CI](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891)成功，详细日志未取得。I-R03 的不明适用关系继续拒绝，权威映射仍待 A0。默认收集 35 项及定向结果为本地证据，SQLite 专项跳过。人工验收待登记。[定向复验](evidence/p1-2-invalidation-independent-review.md#整改-ci-与定向复验)

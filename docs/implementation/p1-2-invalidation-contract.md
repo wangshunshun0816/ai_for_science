@@ -30,3 +30,9 @@
 27 项本地默认收集及定向复跑通过。独立复核复现审计失败／未来时点仍接纳的缺陷，同科学版本不同精确修订的行为已记录且适用语义待明确。三类子场景有正向证据，样例出口待整改及复验。对应交付 SHA 的 GitHub Actions 查询为 0 次运行，不沿用旧 C 组结果。[复现、CI 范围与关闭条件](evidence/p1-2-invalidation-independent-review.md)
 
 审计结果及时点整改已完成本地复验。失败或未来审计记录阻断，合法对照通过。同科学版本异修订缺适用规则时阻断，推荐与备选待 A0 决定。Ubuntu 593 项通过、SQLite 专项跳过 18 项，Windows 同锁专项 35 项通过。六组规范字节及两份未改 Schema 两端一致。[整改、A0 选项及原复核证据](evidence/p1-2-invalidation-independent-review.md#i-r01-整改和-i-r03-适用边界)
+
+## 整改 CI 与定向复验
+
+[整改 CI 44127201891](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891) 首次手动触发，实际 SHA 为 775ca649d3b003c32d5b3751f8252bc2ecf1862f，最终成功。[foundation 作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891/job/134194135744)显示 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均成功。作业明细日志下载返回 HTTP 403，单步日志链接返回 HTTP 404，未取得详细日志或核验远端逐项输出和计数。
+
+同一 SHA 在 Ubuntu 默认 pytest 路径收集 35 项失效专项，定向复跑 35 项通过。由工作流和测试开关确认此 CI 未启用 DANUS_P13_TEST，SQLite 专项跳过，无新增存储证据。 失败、未来时点及两者同时发生的审计均阻断。恰在查询时点的合法对照通过。获授权的同科学版本异修订路径返回 INVALIDATION_REVISION_SCOPE_UNRESOLVED，既不自动传播也不授予确认资格。比较边截断复验通过，越权异修订的受限快照及正文读取均为零次。异修订权威适用映射仍待 A0 决定。
