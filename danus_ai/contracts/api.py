@@ -73,6 +73,20 @@ from .role_outputs import Handoff, HandoffDraft, RoleOutputEnvelope
 from .runs import ExecutionBinding, RunRequestDraft, RunRequestRecord
 from .sanity_artifacts import CheckSuite, ProtocolBundle, SanityJobRef, SanityReportView
 from .scope import Scope
+from .selection_records import (
+    A4HistoryView,
+    A7HistoryView,
+    HistoryCoverage,
+    IdeationChecklist,
+    IdeationReport,
+    SelectionBoundTerms,
+    SelectionDecision,
+    SelectionHistoryV2,
+    SelectionSet,
+    SelectionSignature,
+    SingleFamily,
+    ThresholdEvent,
+)
 from .signing import ApprovalSubject, ReleaseManifestBody, ReleaseReceipt, SignatureEnvelope
 from .submission import (
     ClaimSubmission,
@@ -226,6 +240,16 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     SelectionRule,
     FixedProtocolTargets,
     ApplicabilityBasis,
+    IdeationChecklist,
+    IdeationReport,
+    SelectionBoundTerms,
+    SelectionDecision,
+    SelectionSignature,
+    ThresholdEvent,
+    SelectionSet,
+    SingleFamily,
+    HistoryCoverage,
+    SelectionHistoryV2,
     FixedPopulation,
     FixedDataset,
     FixedFailurePolicy,
@@ -259,6 +283,8 @@ _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
     EvidenceReport,
     SanityJobRef,
     SanityReportView,
+    A4HistoryView,
+    A7HistoryView,
 )
 
 
@@ -368,6 +394,28 @@ def schema_capabilities() -> dict[str, object]:
             "requires_authoritative_target_source": True,
             "fixture_result_marked": True,
             "lock_and_admission": "blocked_pending_signed_terms_and_service_authority",
+        },
+        "selection_review": {
+            "service_api": "SelectionReview",
+            "read_checks": [
+                "check_report",
+                "check_selection",
+                "check_threshold",
+                "history_view",
+                "history_version",
+                "fixed_lock_preimage",
+                "check_lock",
+            ],
+            "requires_current_exact_delegation_and_independent_authority": True,
+            "fixed_four_history": "v1_empty_exposures",
+            "versioned_audit_history": "selection_history:v2",
+            "blocked": [
+                "unsupported_check_evidence",
+                "selection_issuance",
+                "new_question_projection",
+                "protocol_use_and_family_confirmation_signed_terms",
+                "transactional_lock",
+            ],
         },
         "unlisted_objects_and_operations": "unsupported",
         "runtime_validation_required": True,

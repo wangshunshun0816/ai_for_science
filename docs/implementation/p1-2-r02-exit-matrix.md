@@ -6,8 +6,8 @@
 |---|---|---|
 | ResearchTask | [planning](../../danus_ai/contracts/planning.py)、[任务转换](../../danus_ai/contracts/transitions.py)、[第七批](p1-2-batch7-delivery.md) | 已签收草稿、活动快照及权限拒绝子集；真实激活与持久化后续验收。 |
 | CandidateHypothesis | [first_objects](../../danus_ai/contracts/first_objects.py)、[projections](../../danus_ai/contracts/projections.py)、[第三批](p1-2-batch3-delivery.md) | 固定首包及内容版本已签收；候选改版后旧批准不适用的独立样例缺项已关闭，见[两端向量及默认工程 CI](p1-2-candidate-revision-golden.md)。 |
-| IdeationReport | [字段台账](r02-field-matrix.md) | 通用记录、入口和独立预期未交付；真实评估后续。 |
-| SelectionDecision | [SelectionTerms](../../danus_ai/contracts/first_objects.py)、[第三批](p1-2-batch3-delivery.md) | 已有批准条款子集；完整决定记录、权限和独立向量仍缺。 |
+| IdeationReport、IdeationChecklist | [C 组交付](p1-2-c-selection-lock-delivery.md)、[专项测试](../../tests/contracts/test_selection_review.py) | 六项固定检查及现行版本、逐项证据守卫已交付；正式 ready 缺权威检查依据时拒绝，真实评估后续。 |
+| SelectionDecision、ThresholdEvent | [C 组交付](p1-2-c-selection-lock-delivery.md)、[签收字段](p1-2-c-selection-lock-fields.md) | 精确报告／清单／预算范围签名及现行阈值事件已交付只读子集。预算权威、正式选择签发和新问题投影仍受阻。 |
 | Protocol、Arm | [first_objects](../../danus_ai/contracts/first_objects.py)、[fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定四题投影和跨对象守卫已签收；采样／描述型继续阻断。 |
 | Prereg | [fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定科学投影及锁定守卫已签收；通用目标、适用依据与真实审批后续。 |
 | RunRequest、ExecutionBinding | [runs](../../danus_ai/contracts/runs.py)、[fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定确定性 confirmation 路径已签收；其余模式逐项核对目标规范、正式投影及运行前置条件。 |
@@ -24,7 +24,7 @@
 | RandomnessPlan、DiscriminationPlan | [字段台账](r02-field-matrix.md)、[固定预注册](../../danus_ai/contracts/fixed_four.py) | 固定枚举和确定性守卫可复用；完整随机性计划、抽样及区分性设计依赖方法与启用决定。 |
 | OutcomeLearningRecord | [字段台账](r02-field-matrix.md) | 通用合同、引用、复用限制及拒绝测试未交付。 |
 | ParameterDecision、CalibrationTask、数字性质、ScientificStatistics | [字段台账](r02-field-matrix.md)、[第八批固定结果](p1-2-batch8-delivery.md) | 固定结果与性质已有子集；数值依据通用入口、参数批准和校准合同未齐。 |
-| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已限定签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。[DataExposure 已交付实际接触只读子集](p1-2-data-exposure.md)，待限定验收；接收方、许可及用途／事件映射继续待定，真实台账与执行留服务验收。 |
+| DataPolicy、SendPermit、DataExposure | [守卫与类型](../../danus_ai/contracts/data_policy.py)、[第十五批](p1-2-batch15-delivery.md) | 政策／许可只读约束核验已限定签收；data_use 条款与真实许可、扫描、发送、挂载仍受阻或留服务验收。[DataExposure 实际接触只读子集](p1-2-data-exposure.md)已[限定签收](decisions/A0-P1-2-data-exposure-acceptance.md)（b1d17152b0bb6857eff08b4442b18e61a1ed4cd6）；接收方、许可及用途／事件映射继续待定，真实台账与执行留服务验收。 |
 | ReauditTask、AuditProfile、AuditReport | [审计摘要](../../danus_ai/contracts/claims.py)、[角色输出](../../danus_ai/contracts/role_outputs.py)、[第七批](p1-2-batch7-delivery.md) | 已有审计链和 A7 输出子集；通用配置、报告及复审任务入口未齐。 |
 | ProductUseEvent、EvaluationCampaign | [字段台账](r02-field-matrix.md) | 冻结范围、独立性、采用事实和投入的通用合同未交付，实际评测后续。 |
 | PersonalAccount、PersonalTenant、Project | [ownership](../../danus_ai/contracts/ownership.py)、[第九批](p1-2-batch9-delivery.md) | 精确关系和待认领边界已签收；真实认证、创建、迁移与认领后续。 |
@@ -48,7 +48,7 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 |---|---|---|---|
 | ResearchTask | ResearchTask、ResearchTaskDraft | [test_batch7.py](../../tests/contracts/test_batch7.py) | [7 批平台证据](evidence/p1-2-batch7-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch7-remediation-windows.json) |
 | CandidateHypothesis | CandidateDraft、CandidateRecord | [test_first_batch.py](../../tests/contracts/test_first_batch.py) | 缺直接平台证据 |
-| SelectionDecision | 通用键缺 | [test_first_batch.py](../../tests/contracts/test_first_batch.py)、[test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
+| SelectionDecision、ThresholdEvent | [C 组交付](p1-2-c-selection-lock-delivery.md)、[签收字段](p1-2-c-selection-lock-fields.md) | 精确报告／清单／预算范围签名及现行阈值事件已交付只读子集。预算权威、正式选择签发和新问题投影仍受阻。 |
 | Protocol、Arm | ProtocolDraft、ProtocolRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
 | Prereg | PreregDraft、PreregRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
 | RunRequest、ExecutionBinding | RunRequestDraft、RunRequestRecord、ExecutionBinding | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
@@ -77,3 +77,5 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 [收尾计划](p1-2-closure-plan.md)按工作卡定义关闭条件，[最小切片计划](p1-3-minimum-slice-plan.md)记录可复用合同、实施条件和验收。P1-3 隔离切片专节已获限定授权，交付及整改已[限定验收](decisions/A0-P1-3-test-slice-acceptance.md)（454503c29065f99be170cacad4188376c9664583）。集中决策中的其他提案仍待审。原证据及工作卡出口范围继续有效。
 
 [A 组同修订正文整改](p1-2-execution-qualification.md#同修订正文绑定整改)覆盖四类合同的独立版本快照及两条入口的替换拒绝。CI 43797949960 只覆盖旧提交 4d20e18，整改 CI 43800243706 对应整改 SHA 且成功，详细日志未取得。其余字段、语义与服务责任继续按行登记。
+
+C 组交付的 SelectionSet、单族精确绑定、A4／A7 白名单、来源覆盖守卫及 SelectionHistory v2 证据见[逐项交付与未放行条件](p1-2-c-selection-lock-delivery.md)。既有固定四题预映像另行复算，固定四题 v1 仍要求空暴露，完整锁定前通过依赖协议、族签名和其他权威事实。

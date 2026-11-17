@@ -1,5 +1,137 @@
 {
   "$defs": {
+    "A4HistoryView": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_reason_codes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Blocking Reason Codes",
+          "type": "array"
+        },
+        "coverage_status": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ],
+          "title": "Coverage Status",
+          "type": "string"
+        },
+        "family_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "history_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "selection_set_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        }
+      },
+      "required": [
+        "question_ref",
+        "family_ref",
+        "selection_set_ref",
+        "history_ref",
+        "coverage_status",
+        "blocking_reason_codes"
+      ],
+      "title": "A4HistoryView",
+      "type": "object"
+    },
+    "A7HistoryView": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking_reason_codes": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Blocking Reason Codes",
+          "type": "array"
+        },
+        "completeness_basis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "considered_candidate_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Considered Candidate Refs",
+          "type": "array"
+        },
+        "coverage_status": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "unknown"
+          ],
+          "title": "Coverage Status",
+          "type": "string"
+        },
+        "exposure_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Exposure Event Refs",
+          "type": "array"
+        },
+        "family_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "filter_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Filter Event Refs",
+          "type": "array"
+        },
+        "history_cutoff_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "history_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "intervention_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Intervention Event Refs",
+          "type": "array"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "selection_rule_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_set_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        }
+      },
+      "required": [
+        "question_ref",
+        "family_ref",
+        "selection_set_ref",
+        "history_ref",
+        "coverage_status",
+        "blocking_reason_codes",
+        "considered_candidate_refs",
+        "selection_rule_ref",
+        "filter_event_refs",
+        "intervention_event_refs",
+        "exposure_event_refs",
+        "history_cutoff_ref",
+        "completeness_basis_ref"
+      ],
+      "title": "A7HistoryView",
+      "type": "object"
+    },
     "AnalysisInputs": {
       "additionalProperties": false,
       "properties": {
@@ -4071,6 +4203,320 @@
         "content_version"
       ],
       "title": "HistoricalRef",
+      "type": "object"
+    },
+    "HistoryCoverage": {
+      "additionalProperties": false,
+      "properties": {
+        "basis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "expected_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Expected Event Refs",
+          "type": "array"
+        },
+        "history_cutoff_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "source_ranges": {
+          "items": {
+            "$ref": "#/$defs/HistorySourceRange"
+          },
+          "title": "Source Ranges",
+          "type": "array"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "question_ref",
+        "history_cutoff_ref",
+        "source_ranges",
+        "expected_event_refs",
+        "basis_ref"
+      ],
+      "title": "HistoryCoverage",
+      "type": "object"
+    },
+    "HistoryExposure": {
+      "additionalProperties": false,
+      "properties": {
+        "data_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "event_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "history_basis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "event_ref",
+        "data_ref",
+        "history_basis_ref"
+      ],
+      "title": "HistoryExposure",
+      "type": "object"
+    },
+    "HistorySourceRange": {
+      "additionalProperties": false,
+      "properties": {
+        "first_cursor": {
+          "minLength": 1,
+          "title": "First Cursor",
+          "type": "string"
+        },
+        "last_cursor": {
+          "minLength": 1,
+          "title": "Last Cursor",
+          "type": "string"
+        },
+        "manifest_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Manifest Sha256",
+          "type": "string"
+        },
+        "source_id": {
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "first_cursor",
+        "last_cursor",
+        "manifest_sha256"
+      ],
+      "title": "HistorySourceRange",
+      "type": "object"
+    },
+    "IdeationCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "check_key": {
+          "enum": [
+            "source_difference",
+            "testability_control",
+            "data_permission",
+            "resource_budget",
+            "pilot_template",
+            "a7_review"
+          ],
+          "title": "Check Key",
+          "type": "string"
+        },
+        "evidence_kinds": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidence Kinds",
+          "type": "array"
+        },
+        "required_when": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "check_key",
+        "required_when",
+        "evidence_kinds"
+      ],
+      "title": "IdeationCheck",
+      "type": "object"
+    },
+    "IdeationChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "checks": {
+          "items": {
+            "$ref": "#/$defs/IdeationCheck"
+          },
+          "title": "Checks",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "locator",
+        "checks"
+      ],
+      "title": "IdeationChecklist",
+      "type": "object"
+    },
+    "IdeationReport": {
+      "additionalProperties": false,
+      "properties": {
+        "candidate_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "checklist_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "issued_at": {
+          "title": "Issued At",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/IdeationResult"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "ready",
+            "needs_revision",
+            "blocked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "locator",
+        "candidate_ref",
+        "checklist_ref",
+        "issued_at",
+        "status",
+        "results"
+      ],
+      "title": "IdeationReport",
+      "type": "object"
+    },
+    "IdeationResult": {
+      "additionalProperties": false,
+      "properties": {
+        "applicability_basis_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "check_key": {
+          "enum": [
+            "source_difference",
+            "testability_control",
+            "data_permission",
+            "resource_budget",
+            "pilot_template",
+            "a7_review"
+          ],
+          "title": "Check Key",
+          "type": "string"
+        },
+        "evidence_refs": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ScientificRef"
+              },
+              {
+                "$ref": "#/$defs/HistoricalRef"
+              },
+              {
+                "$ref": "#/$defs/RecordLocator"
+              },
+              {
+                "$ref": "#/$defs/ApprovalLocator"
+              }
+            ]
+          },
+          "title": "Evidence Refs",
+          "type": "array"
+        },
+        "outcome": {
+          "enum": [
+            "pass",
+            "needs_revision",
+            "blocked",
+            "not_applicable",
+            "error"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        }
+      },
+      "required": [
+        "check_key",
+        "outcome",
+        "evidence_refs",
+        "reason",
+        "applicability_basis_ref"
+      ],
+      "title": "IdeationResult",
       "type": "object"
     },
     "ImageEvidence": {
@@ -8247,6 +8693,167 @@
       "title": "Scope",
       "type": "object"
     },
+    "SelectionBoundTerms": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_scope": {
+          "$ref": "#/$defs/SelectionBudgetScope"
+        },
+        "checklist_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "ideation_report_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "selection_terms": {
+          "$ref": "#/$defs/SelectionTerms"
+        }
+      },
+      "required": [
+        "selection_terms",
+        "ideation_report_ref",
+        "checklist_ref",
+        "budget_scope"
+      ],
+      "title": "SelectionBoundTerms",
+      "type": "object"
+    },
+    "SelectionBudgetScope": {
+      "additionalProperties": false,
+      "properties": {
+        "amount_ceiling": {
+          "exclusiveMinimum": 0,
+          "title": "Amount Ceiling",
+          "type": "integer"
+        },
+        "authority_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            }
+          ],
+          "title": "Authority Ref"
+        },
+        "budget_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "currency": {
+          "pattern": "^[A-Z]{3}$",
+          "title": "Currency",
+          "type": "string"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "purpose": {
+          "minLength": 1,
+          "title": "Purpose",
+          "type": "string"
+        },
+        "root_task_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "unit": {
+          "const": "microcurrency",
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "budget_ref",
+        "root_task_ref",
+        "purpose",
+        "currency",
+        "unit",
+        "amount_ceiling",
+        "authority_ref"
+      ],
+      "title": "SelectionBudgetScope",
+      "type": "object"
+    },
+    "SelectionDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_ref": {
+          "$ref": "#/$defs/ApprovalLocator"
+        },
+        "checklist_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "report_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "locator",
+        "approval_ref",
+        "report_ref",
+        "checklist_ref",
+        "decided_at"
+      ],
+      "title": "SelectionDecision",
+      "type": "object"
+    },
+    "SelectionHistoryV2": {
+      "additionalProperties": false,
+      "properties": {
+        "exposure_events": {
+          "items": {
+            "$ref": "#/$defs/HistoryExposure"
+          },
+          "title": "Exposure Events",
+          "type": "array"
+        },
+        "history_basis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "selection_set_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        }
+      },
+      "required": [
+        "question_ref",
+        "selection_set_ref",
+        "exposure_events",
+        "history_basis_ref"
+      ],
+      "title": "SelectionHistoryV2",
+      "type": "object"
+    },
     "SelectionRule": {
       "additionalProperties": false,
       "properties": {
@@ -8295,6 +8902,162 @@
         "rule"
       ],
       "title": "SelectionRuleBinding",
+      "type": "object"
+    },
+    "SelectionSet": {
+      "additionalProperties": false,
+      "properties": {
+        "considered_candidates": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Considered Candidates",
+          "type": "array"
+        },
+        "excluded_candidates": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Excluded Candidates",
+          "type": "array"
+        },
+        "filter_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Filter Event Refs",
+          "type": "array"
+        },
+        "history_basis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "included_candidates": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "title": "Included Candidates",
+          "type": "array"
+        },
+        "intervention_event_refs": {
+          "items": {
+            "$ref": "#/$defs/RecordLocator"
+          },
+          "title": "Intervention Event Refs",
+          "type": "array"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "selection_rule_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "question_ref",
+        "considered_candidates",
+        "included_candidates",
+        "excluded_candidates",
+        "selection_rule_ref",
+        "filter_event_refs",
+        "intervention_event_refs",
+        "history_basis_ref"
+      ],
+      "title": "SelectionSet",
+      "type": "object"
+    },
+    "SelectionSignature": {
+      "additionalProperties": false,
+      "properties": {
+        "signature": {
+          "pattern": "^[0-9a-f]{128}$",
+          "title": "Signature",
+          "type": "string"
+        },
+        "signing_input": {
+          "$ref": "#/$defs/SelectionSigningInput"
+        }
+      },
+      "required": [
+        "signing_input",
+        "signature"
+      ],
+      "title": "SelectionSignature",
+      "type": "object"
+    },
+    "SelectionSigningInput": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "authorization_scope": {
+          "$ref": "#/$defs/ApprovalScope"
+        },
+        "domain": {
+          "const": "selection-approval:v2",
+          "title": "Domain",
+          "type": "string"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "issued_at": {
+          "title": "Issued At",
+          "type": "string"
+        },
+        "issuer_id": {
+          "minLength": 1,
+          "title": "Issuer Id",
+          "type": "string"
+        },
+        "key_id": {
+          "minLength": 1,
+          "title": "Key Id",
+          "type": "string"
+        },
+        "purpose": {
+          "const": "candidate_selection",
+          "title": "Purpose",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": 2,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "subject_digest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Subject Digest",
+          "type": "string"
+        },
+        "subject_ref": {
+          "$ref": "#/$defs/ApprovalLocator"
+        }
+      },
+      "required": [
+        "schema_version",
+        "domain",
+        "purpose",
+        "key_id",
+        "algorithm",
+        "issuer_id",
+        "subject_ref",
+        "subject_digest",
+        "authorization_scope",
+        "issued_at",
+        "expires_at"
+      ],
+      "title": "SelectionSigningInput",
       "type": "object"
     },
     "SelectionTerms": {
@@ -8587,6 +9350,31 @@
         "expires_at"
       ],
       "title": "SigningInput",
+      "type": "object"
+    },
+    "SingleFamily": {
+      "additionalProperties": false,
+      "properties": {
+        "history_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "selection_set_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        }
+      },
+      "required": [
+        "question_ref",
+        "scope_ref",
+        "selection_set_ref",
+        "history_ref"
+      ],
+      "title": "SingleFamily",
       "type": "object"
     },
     "SourceLocation": {
@@ -9175,6 +9963,137 @@
       "title": "TerminalFact",
       "type": "object"
     },
+    "ThresholdEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "proposed",
+            "approved",
+            "superseded"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "approval_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "previous_terms": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ThresholdTerms"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_event_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prior_question_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HistoricalRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "project_id": {
+          "minLength": 1,
+          "title": "Project Id",
+          "type": "string"
+        },
+        "proposed_terms": {
+          "$ref": "#/$defs/ThresholdTerms"
+        },
+        "reason_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScientificRef"
+            },
+            {
+              "$ref": "#/$defs/HistoricalRef"
+            },
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "$ref": "#/$defs/ApprovalLocator"
+            }
+          ],
+          "title": "Reason Ref"
+        },
+        "recorded_at": {
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "seen_evidence_refs": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ScientificRef"
+              },
+              {
+                "$ref": "#/$defs/HistoricalRef"
+              },
+              {
+                "$ref": "#/$defs/RecordLocator"
+              },
+              {
+                "$ref": "#/$defs/ApprovalLocator"
+              }
+            ]
+          },
+          "title": "Seen Evidence Refs",
+          "type": "array"
+        },
+        "target_question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "tenant_id": {
+          "minLength": 1,
+          "title": "Tenant Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "project_id",
+        "locator",
+        "action",
+        "prior_event_ref",
+        "prior_question_ref",
+        "target_question_ref",
+        "previous_terms",
+        "proposed_terms",
+        "reason_ref",
+        "seen_evidence_refs",
+        "approval_ref",
+        "recorded_at"
+      ],
+      "title": "ThresholdEvent",
+      "type": "object"
+    },
     "ThresholdTerms": {
       "additionalProperties": false,
       "properties": {
@@ -9511,6 +10430,8 @@
       "side_effects": "none"
     },
     "objects": {
+      "A4HistoryView": "output_only",
+      "A7HistoryView": "output_only",
       "ApplicabilityBasis": "service_owned",
       "ApprovalDisposition": "service_owned",
       "ApprovalEvidence": "service_owned",
@@ -9565,6 +10486,9 @@
       "GateExecution": "service_owned",
       "Handoff": "service_owned",
       "HandoffDraft": "caller_input",
+      "HistoryCoverage": "service_owned",
+      "IdeationChecklist": "service_owned",
+      "IdeationReport": "service_owned",
       "ImageEvidence": "service_owned",
       "InvocationRecord": "service_owned",
       "LegacyIncomplete": "service_owned",
@@ -9608,16 +10532,23 @@
       "SanityRequest": "caller_input",
       "SanitySnapshot": "service_owned",
       "Scope": "caller_input",
+      "SelectionBoundTerms": "service_owned",
+      "SelectionDecision": "service_owned",
+      "SelectionHistoryV2": "service_owned",
       "SelectionRule": "service_owned",
+      "SelectionSet": "service_owned",
+      "SelectionSignature": "service_owned",
       "SendPermit": "service_owned",
       "SettlementCheck": "service_owned",
       "SignatureEnvelope": "service_owned",
+      "SingleFamily": "service_owned",
       "TaskContract": "service_owned",
       "TaskPlan": "caller_input",
       "TaskSnapshot": "service_owned",
       "TaskTransitionCheck": "service_owned",
       "TerminalCorrection": "service_owned",
       "TerminalFact": "service_owned",
+      "ThresholdEvent": "service_owned",
       "TrustedObservation": "service_owned",
       "TrustedRequestContext": "service_owned",
       "Usage": "service_owned"
@@ -9669,6 +10600,28 @@
       "runtime_authority": "service_assembled_read_ports",
       "scope": "fixed_four_confirmation"
     },
+    "selection_review": {
+      "blocked": [
+        "unsupported_check_evidence",
+        "selection_issuance",
+        "new_question_projection",
+        "protocol_use_and_family_confirmation_signed_terms",
+        "transactional_lock"
+      ],
+      "fixed_four_history": "v1_empty_exposures",
+      "read_checks": [
+        "check_report",
+        "check_selection",
+        "check_threshold",
+        "history_view",
+        "history_version",
+        "fixed_lock_preimage",
+        "check_lock"
+      ],
+      "requires_current_exact_delegation_and_independent_authority": true,
+      "service_api": "SelectionReview",
+      "versioned_audit_history": "selection_history:v2"
+    },
     "task_and_handoff": {
       "activation_performs_write": false,
       "handoff_requires_exact_receiver_review": true,
@@ -9706,6 +10659,12 @@
     }
   },
   "x-r02-contracts": {
+    "A4HistoryView": {
+      "$ref": "#/$defs/A4HistoryView"
+    },
+    "A7HistoryView": {
+      "$ref": "#/$defs/A7HistoryView"
+    },
     "ApplicabilityBasis": {
       "$ref": "#/$defs/ApplicabilityBasis"
     },
@@ -9868,6 +10827,15 @@
     "HandoffDraft": {
       "$ref": "#/$defs/HandoffDraft"
     },
+    "HistoryCoverage": {
+      "$ref": "#/$defs/HistoryCoverage"
+    },
+    "IdeationChecklist": {
+      "$ref": "#/$defs/IdeationChecklist"
+    },
+    "IdeationReport": {
+      "$ref": "#/$defs/IdeationReport"
+    },
     "ImageEvidence": {
       "$ref": "#/$defs/ImageEvidence"
     },
@@ -9997,8 +10965,23 @@
     "Scope": {
       "$ref": "#/$defs/Scope"
     },
+    "SelectionBoundTerms": {
+      "$ref": "#/$defs/SelectionBoundTerms"
+    },
+    "SelectionDecision": {
+      "$ref": "#/$defs/SelectionDecision"
+    },
+    "SelectionHistoryV2": {
+      "$ref": "#/$defs/SelectionHistoryV2"
+    },
     "SelectionRule": {
       "$ref": "#/$defs/SelectionRule"
+    },
+    "SelectionSet": {
+      "$ref": "#/$defs/SelectionSet"
+    },
+    "SelectionSignature": {
+      "$ref": "#/$defs/SelectionSignature"
     },
     "SendPermit": {
       "$ref": "#/$defs/SendPermit"
@@ -10008,6 +10991,9 @@
     },
     "SignatureEnvelope": {
       "$ref": "#/$defs/SignatureEnvelope"
+    },
+    "SingleFamily": {
+      "$ref": "#/$defs/SingleFamily"
     },
     "TaskContract": {
       "$ref": "#/$defs/TaskContract"
@@ -10026,6 +11012,9 @@
     },
     "TerminalFact": {
       "$ref": "#/$defs/TerminalFact"
+    },
+    "ThresholdEvent": {
+      "$ref": "#/$defs/ThresholdEvent"
     },
     "TrustedObservation": {
       "$ref": "#/$defs/TrustedObservation"

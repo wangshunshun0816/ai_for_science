@@ -12,8 +12,10 @@ from .canonicalization import (
 )
 from .parsing import ContractJSONError, parse_json
 from .scope import scope_comparable, scope_contains, scope_overlaps
+from .selection_review import SelectionReview
 
 __all__ = [
+    "SelectionReview",
     "content_id",
     "validate_object",
     "validate_transition",

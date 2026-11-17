@@ -4,3 +4,4 @@ recursive-include fixtures *.py
 recursive-include tests *.py
 recursive-include tests/fixtures *.json *.md
 recursive-include schemas *.json
+include docs/implementation/p1-2-c-selection-lock-vectors.md

@@ -188,7 +188,7 @@ class SignatureEnvelope(StrictContract):
 class TrustedSigningKey:
     key_id: str
     issuer_id: str
-    domain: Domain
+    domain: Domain | Literal["selection-approval:v2"]
     purposes: frozenset[str]
     public_key: bytes
     active: bool

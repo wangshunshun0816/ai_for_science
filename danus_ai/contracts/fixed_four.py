@@ -30,6 +30,7 @@ from .first_objects import (
     arm_projection,
 )
 from .guards import (
+    ApprovalState,
     ContractBlocked,
     ReadOnlyPort,
     Ref,
@@ -858,25 +859,29 @@ class FixedFour:
             (value.selection_ref, value.candidate_ref, value.selection_terms),
             (value.threshold_decision_ref, value.question_ref, value.threshold_terms),
         ):
-            evidence, decisions = self.port.approval_history(self.context, target)
-            try:
-                approval = require_unambiguous_approval(
-                    self.context,
-                    evidence,
-                    decisions,
-                    self.port.disposition_authorized,
-                    locator,
-                    target,
-                    locator.purpose,
-                    self.port,
-                )
-            except ContractBlocked as exc:
-                raise ContractBlocked(f"APPROVAL_NOT_READY: {locator.purpose}: {exc}") from exc
+            approval = self.check_approval(target, locator)
             if approval.terms != terms:
                 raise ContractBlocked(f"APPROVAL_NOT_READY: {locator.purpose}: terms mismatch")
         raise ContractBlocked(
             "APPROVAL_NOT_READY: protocol_use and family_confirmation signed terms"
         )
+
+    def check_approval(self, target: Ref, locator: ApprovalLocator) -> ApprovalState:
+        """Verify the selected revision and refuse unresolved active conflicts."""
+        evidence, decisions = self.port.approval_history(self.context, target)
+        try:
+            return require_unambiguous_approval(
+                self.context,
+                evidence,
+                decisions,
+                self.port.disposition_authorized,
+                locator,
+                target,
+                locator.purpose,
+                self.port,
+            )
+        except ContractBlocked as exc:
+            raise ContractBlocked(f"APPROVAL_NOT_READY: {locator.purpose}: {exc}") from exc
 
     def check_admission(
         self, value: RunRequestRecord, *, protocol_basis: ScientificRef | None = None
