@@ -5,7 +5,13 @@
       "properties": {
         "blocking_reason_codes": {
           "items": {
-            "minLength": 1,
+            "enum": [
+              "C_HISTORY_COVERAGE_SCOPE_MISMATCH",
+              "C_HISTORY_COVERAGE_INCOMPLETE",
+              "C_HISTORY_REQUIRED_SOURCE_MISSING",
+              "C_HISTORY_SOURCE_PROOF_UNRESOLVED",
+              "C_HISTORY_EVENT_ORDER_MISMATCH"
+            ],
             "type": "string"
           },
           "title": "Blocking Reason Codes",
@@ -49,7 +55,13 @@
       "properties": {
         "blocking_reason_codes": {
           "items": {
-            "minLength": 1,
+            "enum": [
+              "C_HISTORY_COVERAGE_SCOPE_MISMATCH",
+              "C_HISTORY_COVERAGE_INCOMPLETE",
+              "C_HISTORY_REQUIRED_SOURCE_MISSING",
+              "C_HISTORY_SOURCE_PROOF_UNRESOLVED",
+              "C_HISTORY_EVENT_ORDER_MISMATCH"
+            ],
             "type": "string"
           },
           "title": "Blocking Reason Codes",

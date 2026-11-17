@@ -277,13 +277,23 @@ class SingleFamily(AuthoritativeRecord):
         return self
 
 
+HistoryBlockingReason = Literal[
+    "C_HISTORY_COVERAGE_SCOPE_MISMATCH",
+    "C_HISTORY_COVERAGE_INCOMPLETE",
+    "C_HISTORY_REQUIRED_SOURCE_MISSING",
+    "C_HISTORY_SOURCE_PROOF_UNRESOLVED",
+    "C_HISTORY_EVENT_ORDER_MISMATCH",
+]
+HISTORY_BLOCKING_REASONS = frozenset(get_args(HistoryBlockingReason))
+
+
 class A4HistoryView(AuthoritativeRecord):
     question_ref: HistoricalRef
     family_ref: HistoricalRef
     selection_set_ref: HistoricalRef
     history_ref: HistoricalRef
     coverage_status: Literal["complete", "incomplete", "unknown"]
-    blocking_reason_codes: list[Text]
+    blocking_reason_codes: list[HistoryBlockingReason]
 
 
 class A7HistoryView(A4HistoryView):

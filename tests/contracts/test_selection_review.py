@@ -9,12 +9,12 @@ from dataclasses import replace
 from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import pytest
 
 from danus_ai.contracts import SelectionReview, canonicalize, validate_object
-from danus_ai.contracts.approval_conflicts import ApprovalEvidence
+from danus_ai.contracts.approval_conflicts import ApprovalDisposition, ApprovalEvidence
 from danus_ai.contracts.base import StrictContract
 from danus_ai.contracts.claims import record_digest
 from danus_ai.contracts.data_exposure import (
@@ -60,9 +60,11 @@ from danus_ai.contracts.selection_review import (
     CurrentReport,
     ExposureRead,
     FamilyHistorySummary,
+    HistoricalThresholdApproval,
     HistorySourceProof,
     QuestionFields,
     SelectionApproval,
+    SelectionEventFact,
     SelectionReadAccess,
     SelectionVersion,
     ThresholdBasis,
@@ -150,6 +152,18 @@ class FixedFixture(SyntheticReader, TrustedFixedTargetPort):
         self.states = deepcopy(chain.reader.states)
         self.targets = deepcopy(chain.reader.targets)
         self.snapshots = deepcopy(chain.reader.targets)
+        self.authorized_dispositions: list[ApprovalDisposition] = []
+        self.recorded_dispositions: list[ApprovalDisposition] = []
+
+    def approval_history(
+        self, context: RequestContext, target: Ref
+    ) -> tuple[list[ApprovalEvidence], list[ApprovalDisposition]]:
+        return self.approvals, self.recorded_dispositions
+
+    def disposition_authorized(
+        self, context: RequestContext, disposition: ApprovalDisposition, /
+    ) -> bool:
+        return disposition in self.authorized_dispositions
 
     def verify_source(self, context: RequestContext, target: ResolvedTarget) -> bool:
         return self.snapshots.get(self.key(target.ref)) == target
@@ -172,6 +186,8 @@ class Reader(Port):
         self.report_state: CurrentReport | None = None
         self.c_approval: SelectionApproval | None = None
         self.threshold_fact: ThresholdBasis | None = None
+        self.historical_approvals: dict[bytes, HistoricalThresholdApproval] = {}
+        self.selection_events: dict[bytes, SelectionEventFact] = {}
         self.family_summary: FamilyHistorySummary | None = None
         self.budget_scope: SelectionBudgetScope | None = None
         self.exposure_binding: ExposureRead | None = None
@@ -284,6 +300,16 @@ class Reader(Port):
 
     def threshold_basis(self, ctx: RequestContext, ref: RecordLocator, /) -> ThresholdBasis | None:
         return self.threshold_fact
+
+    def historical_threshold_approval(
+        self, ctx: RequestContext, event: RecordLocator, approval: ApprovalLocator, /
+    ) -> HistoricalThresholdApproval | None:
+        return self.historical_approvals.get(exact(event))
+
+    def selection_event(
+        self, ctx: RequestContext, locator: RecordLocator, /
+    ) -> SelectionEventFact | None:
+        return self.selection_events.get(exact(locator))
 
     def synthetic_budget_scope(
         self, ctx: RequestContext, ref: RecordLocator | ApprovalLocator, /
@@ -666,6 +692,22 @@ def history_fixture(reader: Reader) -> tuple[HistoricalRef, HistoricalRef, Recor
         "selection_set:v1",
         science | {"history_basis_ref": basis.model_dump()},
         science,
+    )
+    reader.put(
+        filter_ref,
+        reader.bodies[exact(filter_ref)]
+        | {
+            "question_ref": question.model_dump(),
+            "selection_set_ref": selection.model_dump(),
+        },
+    )
+    reader.selection_events[exact(filter_ref)] = SelectionEventFact(
+        filter_ref,
+        "filter",
+        question,
+        selection,
+        basis,
+        reader.owner,
     )
     projected_event = {"event_ref": event.model_dump(), "data_ref": data.model_dump()}
     science = dict(
@@ -1108,3 +1150,412 @@ def verification_results() -> dict[str, object]:
 SIGNATURE_VECTOR = json.loads(
     (ROOT / "tests/fixtures/c-selection/ed25519.json").read_text(encoding="utf-8")
 )
+
+
+def test_report_evidence_set_checks_then_deduplicates_exact_refs() -> None:
+    reader = Reader()
+    report, _ = report_fixture(reader)
+    body = deepcopy(reader.bodies[exact(report)])
+    first = RecordLocator.model_validate(body["results"][0]["evidence_refs"][0])
+    other = first.model_copy(update={"revision": first.revision + 1})
+    reader.put(other, {"locator": other.model_dump(), **reader.owned(), "finding": "new"})
+    body["results"][0]["evidence_refs"] += [first.model_dump(), other.model_dump()]
+    reader.put(report, body)
+    evidence = reader.evidence["source_difference"]
+    reader.evidence["source_difference"] = replace(evidence, evidence_refs=(first, other))
+    review = reader.review("ideation.check", reader.chain.candidate)
+    result = review.check_report(reader.chain.candidate, report)
+    assert result.results[0].evidence_refs == [first, other]
+    assert reader.snapshot_reads.count(exact(first)) == 2
+    assert reader.body_reads.count(exact(first)) == 2
+    assert reader.body_reads.count(exact(other)) == 1
+
+
+@pytest.mark.parametrize("bad_code", ["subject private text / permit ref-17", "UNKNOWN_TOKEN"])
+def test_a4_rejects_unapproved_reason_codes_without_echo(bad_code: str) -> None:
+    reader = Reader()
+    family, history, _ = history_fixture(reader)
+    assert reader.family_summary is not None
+    reader.family_summary = replace(
+        reader.family_summary,
+        coverage_status="incomplete",
+        blocking_reason_codes=("C_HISTORY_COVERAGE_INCOMPLETE", bad_code),
+    )
+    review = reader.review("prereg.validate_family", reader.chain.question, "A4")
+    with pytest.raises(ContractBlocked, match="^C_FAMILY_SUMMARY_UNRESOLVED$") as error:
+        review.history_view(reader.chain.question, family, reader)
+    assert bad_code not in str(error.value)
+    assert exact(history) not in reader.snapshot_reads + reader.body_reads
+    assert reader.exposure_reads == 0
+
+
+def test_a4_allows_known_reason_codes_only_once() -> None:
+    reader = Reader()
+    family, _, _ = history_fixture(reader)
+    assert reader.family_summary is not None
+    reason = "C_HISTORY_COVERAGE_INCOMPLETE"
+    reader.family_summary = replace(
+        reader.family_summary,
+        coverage_status="incomplete",
+        blocking_reason_codes=(reason, reason),
+    )
+    review = reader.review("prereg.validate_family", reader.chain.question, "A4")
+    result = review.history_view(reader.chain.question, family, reader)
+    assert result.coverage_status == "incomplete"
+    assert result.blocking_reason_codes == [reason]
+
+
+def test_other_question_filter_cannot_complete_history() -> None:
+    reader = Reader()
+    family, _, _ = history_fixture(reader)
+    event = loc("FilterEvent", "filter")
+    other = reader.chain.question.model_copy(update={"entity_id": "other-question"})
+    reader.put(event, reader.bodies[exact(event)] | {"question_ref": other.model_dump()})
+    review = reader.review("prereg.validate_family", reader.chain.question)
+    with pytest.raises(ContractBlocked, match="C_SELECTION_EVENT_BINDING_MISMATCH"):
+        review.history_view(reader.chain.question, family, reader)
+
+
+def test_filter_cannot_also_count_as_intervention() -> None:
+    reader = Reader()
+    family, history, _ = history_fixture(reader)
+    body = deepcopy(reader.bodies[exact(history)])
+    original = HistoricalRef.model_validate(body["selection_set_ref"])
+    selection = deepcopy(reader.bodies[exact(original)])
+    selection["intervention_event_refs"] = selection["filter_event_refs"]
+    new_set = reader.historical(
+        "SelectionSet",
+        original.entity_id,
+        "selection_set:v1",
+        selection,
+        {field: value for field, value in selection.items() if field != "history_basis_ref"},
+    )
+    body["selection_set_ref"] = new_set.model_dump()
+    projection = {
+        "question_ref": body["question_ref"],
+        "selection_set_ref": body["selection_set_ref"],
+        "exposure_events": [
+            {"event_ref": event["event_ref"], "data_ref": event["data_ref"]}
+            for event in body["exposure_events"]
+        ],
+    }
+    new_history = reader.historical(
+        "SelectionHistory",
+        history.entity_id,
+        "selection_history:v2",
+        body,
+        projection,
+    )
+    reader.put(
+        family,
+        reader.bodies[exact(family)]
+        | {
+            "selection_set_ref": new_set.model_dump(),
+            "history_ref": new_history.model_dump(),
+        },
+    )
+    review = reader.review("prereg.validate_family", reader.chain.question)
+    with pytest.raises(ContractBlocked, match="C_SELECTION_EVENT_ROLE_CONFLICT"):
+        review.history_view(reader.chain.question, family, reader)
+
+
+def superseded_threshold_predecessor(
+    reader: Reader,
+) -> tuple[RecordLocator, RecordLocator, ApprovalLocator]:
+    event, body = threshold_fixture(reader)
+    prior = loc("ThresholdEvent", "superseded-history")
+    old_approval = ApprovalLocator(
+        purpose="meaningful_threshold",
+        record_id="threshold-old",
+        revision=1,
+    )
+    reader.put(
+        prior,
+        body
+        | {
+            "locator": prior.model_dump(),
+            "action": "superseded",
+            "approval_ref": old_approval.model_dump(),
+            "recorded_at": "2026-11-12T21:30:00Z",
+        },
+    )
+    reader.put(
+        event,
+        body
+        | {
+            "prior_event_ref": prior.model_dump(),
+            "prior_question_ref": body["target_question_ref"],
+            "previous_terms": body["proposed_terms"],
+        },
+    )
+    return event, prior, old_approval
+
+
+def test_threshold_superseded_predecessor_cannot_invent_approval() -> None:
+    reader = Reader()
+    event, _, _ = superseded_threshold_predecessor(reader)
+    review = reader.review("prereg.validate_family", reader.chain.question, "A4")
+    fixed = FixedFour(review.context, reader.fixed_reader)
+    with pytest.raises(ContractBlocked, match="C_THRESHOLD_HISTORICAL_APPROVAL_UNRESOLVED"):
+        review.check_threshold(reader.chain.question, event, fixed)
+
+
+def test_duplicate_evidence_is_denied_if_second_original_read_fails() -> None:
+    class DenyRepeatedRead(Reader):
+        repeated: RecordLocator
+
+        def selection_access(
+            self, ctx: RequestContext, ref: ExactRef, at: datetime, /
+        ) -> SelectionReadAccess | None:
+            if ref == self.repeated and exact(ref) in self.body_reads:
+                return None
+            return super().selection_access(ctx, ref, at)
+
+    reader = DenyRepeatedRead()
+    report, _ = report_fixture(reader)
+    body = deepcopy(reader.bodies[exact(report)])
+    first = body["results"][0]["evidence_refs"][0]
+    reader.repeated = RecordLocator.model_validate(first)
+    body["results"][0]["evidence_refs"].append(first)
+    reader.put(report, body)
+    review = reader.review("ideation.check", reader.chain.candidate)
+    with pytest.raises(ContractBlocked, match="C_REFERENCE_UNAVAILABLE"):
+        review.check_report(reader.chain.candidate, report)
+    assert reader.body_reads.count(exact(reader.repeated)) == 1
+
+
+def test_report_distinct_evidence_locations_remain_distinct() -> None:
+    reader = Reader()
+    report, _ = report_fixture(reader)
+    body = deepcopy(reader.bodies[exact(report)])
+    first = RecordLocator.model_validate(body["results"][0]["evidence_refs"][0])
+    second = loc("CheckFinding", "source_difference/section-2")
+    reader.put(second, {"locator": second.model_dump(), **reader.owned(), "location": "section-2"})
+    body["results"][0]["evidence_refs"] += [first.model_dump(), second.model_dump()]
+    reader.put(report, body)
+    reader.evidence["source_difference"] = replace(
+        reader.evidence["source_difference"],
+        evidence_refs=(first, second),
+    )
+    review = reader.review("ideation.check", reader.chain.candidate)
+    assert review.check_report(reader.chain.candidate, report).results[0].evidence_refs == [
+        first,
+        second,
+    ]
+
+
+@pytest.mark.parametrize(
+    ("fault", "code"),
+    [
+        ("none", ""),
+        ("missing_replacement", "C_THRESHOLD_REPLACEMENT_UNRESOLVED"),
+        ("wrong_replacement", "C_THRESHOLD_REPLACEMENT_MISMATCH"),
+        ("wrong_subject", "C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH"),
+        ("wrong_terms", "C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH"),
+        ("outside_history", "C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH"),
+        ("untrusted_disposition", "APPROVAL_DISPOSITION_INVALID"),
+        ("unrecorded_disposition", "C_THRESHOLD_REPLACEMENT_UNRESOLVED"),
+        ("unrecorded_evidence", "C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH"),
+    ],
+)
+def test_threshold_historical_approval_and_its_actual_replacement(fault: str, code: str) -> None:
+    reader = Reader()
+    event, prior, old_approval = superseded_threshold_predecessor(reader)
+    current = reader.fixed_reader.approvals[0]
+    subject = current.subject.model_copy(update={"locator": old_approval})
+    if fault == "wrong_subject":
+        subject = subject.model_copy(
+            update={
+                "target": reader.chain.question.model_copy(
+                    update={"entity_id": "unrelated-question"},
+                )
+            }
+        )
+    if fault == "wrong_terms":
+        subject = subject.model_copy(
+            update={
+                "terms_digest": digest("approval-terms:v1", {"fixture": "different-threshold"}),
+            }
+        )
+    old = ApprovalEvidence(
+        subject=subject,
+        source_ref=loc("AuditEntry", "historical-threshold"),
+        envelope_digest=digest("fixture-historical-envelope", subject.model_dump()),
+    )
+    if fault != "unrecorded_evidence":
+        reader.fixed_reader.approvals.append(old)
+    decision = ApprovalDisposition(
+        locator=loc("ApprovalDisposition", "threshold-replacement"),
+        **reader.owned(),
+        actor="synthetic-authority",
+        decided_at="2026-11-12T21:45:00Z",
+        reason="verified synthetic replacement",
+        affected_evidence_digests=[old.evidence_digest],
+        action="replace",
+        replacement=old_approval if fault == "wrong_replacement" else current.subject.locator,
+    )
+    if fault != "untrusted_disposition":
+        reader.fixed_reader.authorized_dispositions.append(decision)
+    if fault in {"none", "untrusted_disposition", "outside_history", "wrong_terms"}:
+        reader.fixed_reader.recorded_dispositions.append(decision)
+    if fault == "wrong_replacement":
+        alternative = ApprovalEvidence(
+            subject=current.subject.model_copy(
+                update={
+                    "locator": ApprovalLocator(
+                        purpose="meaningful_threshold",
+                        record_id="alternative",
+                        revision=1,
+                    ),
+                }
+            ),
+            source_ref=loc("AuditEntry", "alternative-threshold"),
+            envelope_digest=digest("fixture-historical-envelope", "alternative"),
+        )
+        reader.fixed_reader.approvals.append(alternative)
+        decision = decision.model_copy(update={"replacement": alternative.subject.locator})
+        reader.fixed_reader.authorized_dispositions.append(decision)
+        reader.fixed_reader.recorded_dispositions.append(decision)
+    effective_at = datetime.fromisoformat(
+        "2026-11-12T22:00:00Z" if fault == "outside_history" else "2026-11-12T21:15:00Z",
+    )
+    reader.historical_approvals[exact(prior)] = HistoricalThresholdApproval(
+        prior,
+        old,
+        effective_at,
+        None if fault == "missing_replacement" else decision,
+    )
+    # The predecessor has historical validity and is absent from the current approval view.
+    assert old_approval.record_id not in reader.fixed_reader.active
+    review = reader.review("prereg.validate_family", reader.chain.question, "A4")
+    fixed = FixedFour(review.context, reader.fixed_reader)
+    if code:
+        with pytest.raises(ContractBlocked, match=code):
+            review.check_threshold(reader.chain.question, event, fixed)
+    else:
+        assert review.check_threshold(reader.chain.question, event, fixed).prior_event_ref == prior
+
+
+@pytest.mark.parametrize("fault", ["missing", "category", "revision", "selection", "coverage"])
+def test_selection_event_requires_independent_bound_authority(fault: str) -> None:
+    reader = Reader()
+    family, _, _ = history_fixture(reader)
+    event = loc("FilterEvent", "filter")
+    fact = reader.selection_events[exact(event)]
+    if fault == "missing":
+        del reader.selection_events[exact(event)]
+    elif fault == "category":
+        reader.selection_events[exact(event)] = replace(fact, kind="intervention")
+    elif fault == "revision":
+        reader.selection_events[exact(event)] = replace(
+            fact,
+            locator=loc("FilterEvent", "filter", 2),
+        )
+    elif fault == "selection":
+        reader.selection_events[exact(event)] = replace(
+            fact,
+            selection_set_ref=fact.selection_set_ref.model_copy(update={"entity_id": "other"}),
+        )
+    else:
+        reader.selection_events[exact(event)] = replace(
+            fact,
+            history_basis_ref=loc("HistoryCoverage", "other"),
+        )
+    review = reader.review("prereg.validate_family", reader.chain.question)
+    with pytest.raises(ContractBlocked, match="C_SELECTION_EVENT_BINDING_MISMATCH"):
+        review.history_view(reader.chain.question, family, reader)
+    assert exact(event) not in reader.snapshot_reads + reader.body_reads
+
+
+def test_history_can_complete_with_distinct_bound_filter_and_intervention() -> None:
+    reader = Reader()
+    family, history, _ = history_fixture(reader)
+    question = reader.chain.question
+    filter_ref = loc("FilterEvent", "filter")
+    intervention_ref = loc("InterventionEvent", "intervention")
+    history_body = deepcopy(reader.bodies[exact(history)])
+    old_set = HistoricalRef.model_validate(history_body["selection_set_ref"])
+    selection = deepcopy(reader.bodies[exact(old_set)])
+    selection["intervention_event_refs"] = [intervention_ref.model_dump()]
+    selection_set = reader.historical(
+        "SelectionSet",
+        old_set.entity_id,
+        "selection_set:v1",
+        selection,
+        {field: value for field, value in selection.items() if field != "history_basis_ref"},
+    )
+    basis = RecordLocator.model_validate(selection["history_basis_ref"])
+    roles: tuple[tuple[RecordLocator, Literal["filter", "intervention"]], ...] = (
+        (filter_ref, "filter"),
+        (intervention_ref, "intervention"),
+    )
+    for event, kind in roles:
+        reader.put(
+            event,
+            {
+                "locator": event.model_dump(),
+                **reader.owned(),
+                "question_ref": question.model_dump(),
+                "selection_set_ref": selection_set.model_dump(),
+            },
+        )
+        reader.selection_events[exact(event)] = SelectionEventFact(
+            event,
+            kind,
+            question,
+            selection_set,
+            basis,
+            reader.owner,
+        )
+    r05 = reader.proofs["R05"]
+    refs = (filter_ref, intervention_ref)
+    span = r05.source_range.model_copy(
+        update={
+            "last_cursor": "R05/2",
+            "manifest_sha256": sha256(
+                reference_bytes([ref.model_dump() for ref in refs])
+            ).hexdigest(),
+        }
+    )
+    reader.proofs["R05"] = replace(r05, source_range=span, event_refs=refs)
+    coverage = reader.bodies[exact(basis)]
+    reader.put(
+        basis,
+        coverage
+        | {
+            "source_ranges": [span.model_dump(), *coverage["source_ranges"][1:]],
+            "expected_event_refs": [
+                ref.model_dump() for ref in (*refs, *reader.proofs["R08c"].event_refs)
+            ],
+        },
+    )
+    history_body["selection_set_ref"] = selection_set.model_dump()
+    projection = {
+        "question_ref": history_body["question_ref"],
+        "selection_set_ref": history_body["selection_set_ref"],
+        "exposure_events": [
+            {"event_ref": event["event_ref"], "data_ref": event["data_ref"]}
+            for event in history_body["exposure_events"]
+        ],
+    }
+    new_history = reader.historical(
+        "SelectionHistory",
+        history.entity_id,
+        "selection_history:v2",
+        history_body,
+        projection,
+    )
+    reader.put(
+        family,
+        reader.bodies[exact(family)]
+        | {
+            "selection_set_ref": selection_set.model_dump(),
+            "history_ref": new_history.model_dump(),
+        },
+    )
+    review = reader.review("prereg.validate_family", question)
+    view = review.history_view(question, family, reader)
+    assert type(view) is A7HistoryView
+    assert view.coverage_status == "complete"
+    assert view.filter_event_refs == [filter_ref]
+    assert view.intervention_event_refs == [intervention_ref]

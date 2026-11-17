@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Protocol, TypeVar
 
+from .approval_conflicts import ApprovalDisposition, ApprovalEvidence, review_approvals
 from .base import StrictContract
 from .canonicalization import canonicalize
 from .claims import record_digest
@@ -31,6 +32,7 @@ from .protocol_targets import SelectionRule
 from .references import ApprovalLocator, HistoricalRef, RecordLocator, ScientificRef, canonical_set
 from .scope import Scope
 from .selection_records import (
+    HISTORY_BLOCKING_REASONS,
     A4HistoryView,
     A7HistoryView,
     CheckKey,
@@ -109,6 +111,28 @@ class ThresholdBasis:
 
 
 @dataclass(frozen=True)
+class HistoricalThresholdApproval:
+    """R09 attestation of verified signed evidence when the approval was effective."""
+
+    event_ref: RecordLocator
+    evidence: ApprovalEvidence
+    effective_at: datetime
+    replacement: ApprovalDisposition | None
+
+
+@dataclass(frozen=True)
+class SelectionEventFact:
+    """R05 authority for the role and exact scope of an event revision."""
+
+    locator: RecordLocator
+    kind: Literal["filter", "intervention"]
+    question_ref: HistoricalRef
+    selection_set_ref: HistoricalRef
+    history_basis_ref: RecordLocator
+    owner: tuple[str, str]
+
+
+@dataclass(frozen=True)
 class HistorySourceProof:
     owner: tuple[str, str]
     question_ref: HistoricalRef
@@ -163,6 +187,18 @@ class SelectionReader(ReferenceQueryPort, Protocol):
     def threshold_basis(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> ThresholdBasis | None: ...
+    def historical_threshold_approval(
+        self, ctx: RequestContext, event: RecordLocator, approval: ApprovalLocator, /
+    ) -> HistoricalThresholdApproval | None:
+        """Return independent R09 evidence, including validity at the historical instant."""
+        ...
+
+    def selection_event(
+        self, ctx: RequestContext, locator: RecordLocator, /
+    ) -> SelectionEventFact | None:
+        """Return independent R05 metadata after the exact reference was authorized."""
+        ...
+
     def history_source(
         self, ctx: RequestContext, ref: RecordLocator, source: str, /
     ) -> HistorySourceProof | None: ...
@@ -351,6 +387,7 @@ class SelectionReview:
             raise ContractBlocked("C_REPORT_NOT_CURRENT")
         checklist = self._record(report.checklist_ref, IdeationChecklist)
         checks = {item.check_key: item for item in checklist.checks}
+        verified_results: list[IdeationResult] = []
         for item in report.results:
             check = checks[item.check_key]
             if item.applicability_basis_ref is not None:
@@ -363,6 +400,12 @@ class SelectionReview:
                 if ref_kind(evidence) not in check.evidence_kinds:
                     raise ContractBlocked("C_CHECK_EVIDENCE_TYPE_MISMATCH")
                 self._read(evidence)
+            # Preserve first occurrence for display. Authorization and exact-version
+            # reads above run for every original reference, including duplicates.
+            refs: dict[bytes, ExactRef] = {}
+            for evidence in item.evidence_refs:
+                refs.setdefault(ref_key(evidence), evidence)
+            verified_results.append(item.model_copy(update={"evidence_refs": list(refs.values())}))
             if item.outcome not in ("pass", "not_applicable"):
                 continue
             if item.outcome == "not_applicable" and (
@@ -387,7 +430,7 @@ class SelectionReview:
                 raise ContractBlocked("C_CHECK_EVIDENCE_UNRESOLVED")
         if report.status != check_result_status(report.results):
             raise ContractBlocked("C_REPORT_STATUS_MISMATCH")
-        return report
+        return report.model_copy(update={"results": verified_results})
 
     def check_selection(
         self,
@@ -495,7 +538,7 @@ class SelectionReview:
         event = self._record(event_ref, ThresholdEvent)
         if event.target_question_ref != question_ref:
             raise ContractBlocked("C_THRESHOLD_TARGET_MISMATCH")
-        self._threshold_history(event)
+        predecessors = self._threshold_history(event)
         if event.action != "approved":
             raise ContractBlocked("C_THRESHOLD_NOT_EFFECTIVE")
         basis = self.reader.threshold_basis(self.context, event_ref)
@@ -515,7 +558,80 @@ class SelectionReview:
             != event.proposed_terms
         ):
             raise ContractBlocked("C_THRESHOLD_APPROVAL_TERMS_MISMATCH")
+        self._check_threshold_predecessors(event, predecessors, fixed)
         return event
+
+    def _check_threshold_predecessors(
+        self, successor: ThresholdEvent, predecessors: list[ThresholdEvent], fixed: FixedFour
+    ) -> None:
+        for prior in predecessors:
+            if prior.action == "proposed":
+                continue
+            assert prior.approval_ref is not None
+            self._access(prior.approval_ref)
+            fact = self.reader.historical_threshold_approval(
+                self.context,
+                prior.locator,
+                prior.approval_ref,
+            )
+            if fact is None:
+                raise ContractBlocked("C_THRESHOLD_HISTORICAL_APPROVAL_UNRESOLVED")
+            subject = fact.evidence.subject
+            if (
+                fact.event_ref != prior.locator
+                or subject.locator != prior.approval_ref
+                or subject.target != prior.target_question_ref
+                or (subject.tenant_id, subject.project_id) != self.owner
+                or subject.terms_digest != record_digest("approval-terms:v1", prior.proposed_terms)
+                or fact.effective_at.utcoffset() is None
+                or fact.effective_at > datetime.fromisoformat(prior.recorded_at)
+            ):
+                raise ContractBlocked("C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH")
+            self._access(fact.evidence.source_ref)
+            evidence, decisions = fixed.port.approval_history(
+                self.context, prior.target_question_ref
+            )
+            if fact.evidence not in evidence or any(
+                item.subject.locator == prior.approval_ref and item.subject != subject
+                for item in evidence
+            ):
+                raise ContractBlocked("C_THRESHOLD_HISTORICAL_APPROVAL_MISMATCH")
+            if prior.action == "superseded" or fact.replacement is not None:
+                self._check_threshold_replacement(fact, successor, evidence, decisions, fixed)
+            successor = prior
+
+    def _check_threshold_replacement(
+        self,
+        fact: HistoricalThresholdApproval,
+        successor: ThresholdEvent,
+        evidence: list[ApprovalEvidence],
+        decisions: list[ApprovalDisposition],
+        fixed: FixedFour,
+    ) -> None:
+        decision = fact.replacement
+        if decision is None or decision not in decisions:
+            raise ContractBlocked("C_THRESHOLD_REPLACEMENT_UNRESOLVED")
+        self._access(decision.locator)
+        if (
+            decision.action != "replace"
+            or decision.replacement != successor.approval_ref
+            or fact.evidence.evidence_digest not in decision.affected_evidence_digests
+            or not fact.effective_at
+            <= datetime.fromisoformat(decision.decided_at)
+            <= datetime.fromisoformat(successor.recorded_at)
+            or not any(
+                item.subject.locator == successor.approval_ref
+                and item.subject.target == successor.target_question_ref
+                and item.subject.terms_digest
+                == record_digest(
+                    "approval-terms:v1",
+                    successor.proposed_terms,
+                )
+                for item in evidence
+            )
+        ):
+            raise ContractBlocked("C_THRESHOLD_REPLACEMENT_MISMATCH")
+        review_approvals(self.context, evidence, [decision], fixed.port.disposition_authorized)
 
     def _question(self, ref: HistoricalRef) -> FixedQuestion:
         if ref.object_type != "ResearchQuestion":
@@ -524,7 +640,8 @@ class SelectionReview:
             raise ContractBlocked("C_QUESTION_NEW_PROJECTION_UNRESOLVED")
         return self._fixed(ref, FixedQuestion, "research_question:v1")
 
-    def _threshold_history(self, event: ThresholdEvent) -> None:
+    def _threshold_history(self, event: ThresholdEvent) -> list[ThresholdEvent]:
+        predecessors: list[ThresholdEvent] = []
         visited: set[bytes] = set()
         while True:
             key = ref_key(event.locator)
@@ -559,7 +676,7 @@ class SelectionReview:
             if event.prior_event_ref is None:
                 if event.prior_question_ref is not None:
                     raise ContractBlocked("C_THRESHOLD_HISTORY_PREDECESSOR_REQUIRED")
-                return
+                return predecessors
             prior = self._record(event.prior_event_ref, ThresholdEvent)
             if datetime.fromisoformat(prior.recorded_at) > datetime.fromisoformat(
                 event.recorded_at
@@ -581,6 +698,7 @@ class SelectionReview:
                 or prior.proposed_terms != event.previous_terms
             ):
                 raise ContractBlocked("C_THRESHOLD_HISTORY_PREDECESSOR_MISMATCH")
+            predecessors.append(prior)
             event = prior
 
     def _selection_set(self, ref: HistoricalRef, question: HistoricalRef) -> SelectionSet:
@@ -604,8 +722,37 @@ class SelectionReview:
             rule.independent_reference_ref,
         ):
             self._read(target)
-        for event in (*selection.filter_event_refs, *selection.intervention_event_refs):
-            self._read(event)
+        if {ref_key(event) for event in selection.filter_event_refs} & {
+            ref_key(event) for event in selection.intervention_event_refs
+        }:
+            raise ContractBlocked("C_SELECTION_EVENT_ROLE_CONFLICT")
+        for kind, events in (
+            ("filter", selection.filter_event_refs),
+            ("intervention", selection.intervention_event_refs),
+        ):
+            for event in events:
+                self._access(event)
+                fact = self.reader.selection_event(self.context, event)
+                if (
+                    event.record_type == "DataExposure"
+                    or fact is None
+                    or (
+                        fact.locator,
+                        fact.kind,
+                        fact.question_ref,
+                        fact.selection_set_ref,
+                        fact.history_basis_ref,
+                        fact.owner,
+                    )
+                    != (event, kind, question, ref, selection.history_basis_ref, self.owner)
+                ):
+                    raise ContractBlocked("C_SELECTION_EVENT_BINDING_MISMATCH")
+                body = self._read(event)
+                if (
+                    body.get("question_ref") != question.model_dump()
+                    or body.get("selection_set_ref") != ref.model_dump()
+                ):
+                    raise ContractBlocked("C_SELECTION_EVENT_BINDING_MISMATCH")
         if ref.content_version != science_version("selection_set:v1", selection.science_bytes()):
             raise ContractBlocked("C_SELECTION_SET_VERSION_MISMATCH")
         return selection
@@ -743,13 +890,17 @@ class SelectionReview:
                 self.owner,
             ):
                 raise ContractBlocked("C_FAMILY_SUMMARY_UNRESOLVED")
-            return A4HistoryView(
-                question_ref=question_ref,
-                family_ref=family_ref,
-                selection_set_ref=family.selection_set_ref,
-                history_ref=family.history_ref,
-                coverage_status=summary.coverage_status,
-                blocking_reason_codes=sorted(set(summary.blocking_reason_codes)),
+            if not set(summary.blocking_reason_codes) <= HISTORY_BLOCKING_REASONS:
+                raise ContractBlocked("C_FAMILY_SUMMARY_UNRESOLVED")
+            return A4HistoryView.model_validate(
+                dict(
+                    question_ref=question_ref,
+                    family_ref=family_ref,
+                    selection_set_ref=family.selection_set_ref,
+                    history_ref=family.history_ref,
+                    coverage_status=summary.coverage_status,
+                    blocking_reason_codes=sorted(set(summary.blocking_reason_codes)),
+                )
             )
         _, history, selection, coverage = self._history(question_ref, family.history_ref, exposure)
         if history.selection_set_ref != family.selection_set_ref:
