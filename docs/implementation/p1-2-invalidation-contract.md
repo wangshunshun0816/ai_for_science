@@ -28,3 +28,5 @@
 ## 独立复核状态
 
 27 项本地默认收集及定向复跑通过。独立复核复现审计失败／未来时点仍接纳的缺陷，同科学版本不同精确修订的行为已记录且适用语义待明确。三类子场景有正向证据，样例出口待整改及复验。对应交付 SHA 的 GitHub Actions 查询为 0 次运行，不沿用旧 C 组结果。[复现、CI 范围与关闭条件](evidence/p1-2-invalidation-independent-review.md)
+
+审计结果及时点整改已完成本地复验。失败或未来审计记录阻断，合法对照通过。同科学版本异修订缺适用规则时阻断，推荐与备选待 A0 决定。Ubuntu 593 项通过、SQLite 专项跳过 18 项，Windows 同锁专项 35 项通过。六组规范字节及两份未改 Schema 两端一致。[整改、A0 选项及原复核证据](evidence/p1-2-invalidation-independent-review.md#i-r01-整改和-i-r03-适用边界)

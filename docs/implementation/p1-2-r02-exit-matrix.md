@@ -88,3 +88,5 @@ C 组整改在对应 SHA 已通过[远端 CI 作业与步骤核验](https://gith
 C 组已交付范围与四项整改已通过[A0 C 组限定验收](decisions/A0-P1-2-c-selection-lock-acceptance.md)（a3ab1ec77746055fb7199145b228db4fb5a155ea），CI 历史日志限制、SQLite 跳过及未关闭依赖维持原记录。
 
 明确失效三类子场景具备本地正向及反例证据。审计失败／未来时点仍接纳待整改，同科学版本异修订的影响须明确适用范围，金样例出口保持打开。尚无本交付对应远端 CI。[独立复核](evidence/p1-2-invalidation-independent-review.md)
+
+明确失效 I-R01 审计结果及查询时点已完成整改并双端复验，I-R03 同科学版本异修订由明确阻断守卫保留，真正适用范围仍待 A0。CI 及人工验收待对应整改 SHA 证据。三个子场景以外的要求保持待办。[独立复核与整改](evidence/p1-2-invalidation-independent-review.md)

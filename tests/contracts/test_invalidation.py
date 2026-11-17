@@ -535,3 +535,118 @@ def test_two_record_revisions_cannot_impersonate_one_scientific_premise() -> Non
     source.put(source.graph, graph | {"edges": [*graph["edges"], edge]})
     with pytest.raises(ContractBlocked, match="INVALIDATION_GRAPH_PREMISES_MISMATCH"):
         execute(source)
+
+
+@pytest.mark.parametrize(
+    ("result", "timestamp", "error"),
+    [
+        ("ok", "2026-11-13T02:00:00Z", None),
+        ("error", "2026-11-13T01:00:00Z", "INVALIDATION_AUDIT_RESULT_INVALID"),
+        ("ok", "2099-01-01T00:00:00Z", "INVALIDATION_AUDIT_TIME_INVALID"),
+        ("error", "2099-01-01T00:00:00Z", "INVALIDATION_AUDIT_RESULT_INVALID"),
+    ],
+)
+def test_audit_result_and_query_time_survive_independent_reanchoring(
+    result: str,
+    timestamp: str,
+    error: str | None,
+) -> None:
+    source = Source()
+    ref = source.audits[-1]
+    entry = source.bodies[source.key(ref)] | {"result": result, "timestamp": timestamp}
+    source.put(ref, entry)
+    source.put(
+        source.checkpoint,
+        source.bodies[source.key(source.checkpoint)]
+        | {"head_digest": digest({"domain": "audit-chain:v1", "body": entry})},
+    )
+    if error is None:
+        assert execute(source)["status"] == "needs_reaudit"
+        return
+    with pytest.raises(ContractBlocked, match=error):
+        execute(source)
+    with pytest.raises(ContractBlocked, match=error):
+        require_unaffected_confirmation(
+            source.query(),
+            source.authorized,
+            NOW,
+            source,
+            read_purpose="read",
+        )
+
+
+@pytest.mark.parametrize("deny", [False, True])
+def test_single_alternate_record_revision_cannot_clear_pending_dependency(deny: bool) -> None:
+    source = Source()
+    original = source.source_ref.locator
+    alternate = original.model_copy(update={"revision": original.revision + 1})
+    source.put(
+        alternate,
+        source.bodies[source.key(original)] | {"locator": alternate.model_dump()},
+    )
+    graph = deepcopy(source.bodies[source.key(source.graph)])
+    graph["edges"][-1]["premise_ref"]["locator"]["revision"] = alternate.revision
+    source.put(source.graph, graph)
+    if deny:
+        source.denied.add(source.key(alternate))
+    code = (
+        "INVALIDATION_REFERENCE_UNAVAILABLE" if deny else "INVALIDATION_REVISION_SCOPE_UNRESOLVED"
+    )
+    with pytest.raises(ContractBlocked, match=code):
+        require_unaffected_confirmation(
+            source.query(),
+            source.authorized,
+            NOW,
+            source,
+            read_purpose="read",
+        )
+    if deny:
+        assert alternate not in source.anchor_reads
+        assert alternate not in source.body_reads
+
+
+def test_comparison_stops_propagation_in_a_complete_requires_graph() -> None:
+    source = Source()
+    source.source_ref = source.refs["comparison"]
+    ref = source.source_ref.model_dump()
+    graph = source.bodies[source.key(source.graph)]
+    source.put(
+        source.graph,
+        graph | {"edges": [*graph["edges"], source.edge("via", "comparison", "contradicts")]},
+    )
+    report = source.bodies[source.key(source.report)] | {"claim_ref": ref}
+    source.put(source.report, report)
+    source.finding = InvalidationReport.model_validate(report)
+    first = source.bodies[source.key(source.first)] | {"claim_ref": ref}
+    source.put(source.first, first)
+    source.put(
+        source.event,
+        source.bodies[source.key(source.event)]
+        | {
+            "claim_ref": ref,
+            "previous_event_digest": digest({"domain": "evidence-event:v1", "body": first}),
+        },
+    )
+    source.rebuild_audit()
+    assert source.basis is not None
+    source.basis = replace(source.basis, source=source.source_ref, reaudit_ref=None)
+    grant = source.authorized.grant
+    compare = ScientificRef.model_validate(
+        sci("ClaimNode", "comparison", source.source_ref.content_version),
+    )
+    updated_grant = grant.model_copy(update={"target_refs": [compare, grant.target_refs[-1]]})
+    source.grant = updated_grant
+    source.authorized = replace(source.authorized, grant=updated_grant)
+    result = execute(source)
+    assert result["status"] == "no_dependency_on_source"
+    assert result["reaudit_ref"] is None
+
+
+def test_reverse_comparison_does_not_affect_real_requires_path() -> None:
+    source = Source()
+    graph = source.bodies[source.key(source.graph)]
+    source.put(
+        source.graph,
+        graph | {"edges": [*graph["edges"], source.edge("source", "dependent", "replicates")]},
+    )
+    assert execute(source)["status"] == "needs_reaudit"

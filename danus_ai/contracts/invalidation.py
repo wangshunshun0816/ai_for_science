@@ -276,6 +276,10 @@ class _ImpactReader:
                 raise ContractBlocked("INVALIDATION_EVENT_ORDER_MISMATCH")
             entry = entries[seq - 1]
             verify_evidence_audit(source, event, entry)
+            if entry.result != "ok":
+                raise ContractBlocked("INVALIDATION_AUDIT_RESULT_INVALID")
+            if datetime.fromisoformat(entry.timestamp) > self.at:
+                raise ContractBlocked("INVALIDATION_AUDIT_TIME_INVALID")
             position = seq
             if event.event_kind != "invalidating_evidence":
                 if loc == query.event_ref:
@@ -343,7 +347,16 @@ class _ImpactReader:
                     ready.append(child)
         if any(remaining.values()):
             raise ContractBlocked("INVALIDATION_GRAPH_CYCLE")
-        return _key(query.claim_ref) in visited
+        source_key = _key(query.claim_ref)
+        if source_key in visited:
+            return True
+        # Scientific identity does not establish the event's record-revision scope.
+        if any(
+            record_id == source_key[0] and version == source_key[2]
+            for record_id, _, version in visited
+        ):
+            raise ContractBlocked("INVALIDATION_REVISION_SCOPE_UNRESOLVED")
+        return False
 
     def check_task(
         self, query: InvalidationQuery, basis: InvalidationBasis
