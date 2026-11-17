@@ -30,4 +30,12 @@
 |[JSON Schema](../../schemas/r02.schema.json)|df03209bc0c1b6a88ff0b57e393f5047ffcdaa8a14f09969e781fc8ac89baccd|
 |[OpenAPI](../../schemas/r02.openapi.json)|14a2d7c3b43615f8bba985a4ef1c1a4f30a0a835ae7a0074ea24726309b2d542|
 
-对应提交的 GitHub 工程检查为手动触发。本记录只列本地实际结果，远端 CI 按实际提交 SHA 另行核验，人工验收待 A0 记录。
+## 远端 CI
+
+[GitHub Actions 运行 44015452505](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44015452505) 首次手动触发，实际提交为 1e90d61fe560eebf8fb612953603425b9c0c0973。运行与 foundation 作业均成功，Checkout、Install pinned tooling、Install pinned Python 及 Locked local checks and build 步骤均报告成功。公开 API 提供运行、作业和步骤结论，详细作业日志端点返回 HTTP 403，未核对远端逐项 pytest 输出。
+
+该提交的工作流调用 scripts/verify.sh，其 pytest 命令使用默认收集。在对应提交上本地确认默认路径收集 16 项 C 组专项。工作流没有启用 DANUS_P13_TEST，18 项 SQLite 专项按测试开关跳过。本次 CI 证据限于 Ubuntu 工程检查，Windows 双端对照见上文的本地证据。人工验收待 A0 记录。
+
+## 独立验收复核
+
+在交付 SHA 上定向复跑 16 项通过。独立反例复现 A4 短码透出自由文本、筛选事件问题或类别错配仍报完整、阈值前驱缺有效批准仍通过，以及报告集合输出重复四项偏差。另用 OpenSSL 复核三份签名，并验证具有独立权威正文的新预注册仍无法把 v2 暴露历史送入固定四题 v1。各复现、关闭条件与服务验收边界见[独立复核证据](evidence/p1-2-c-selection-review.md)。工程人工验收待 A0 记录。

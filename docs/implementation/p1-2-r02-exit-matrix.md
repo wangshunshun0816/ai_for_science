@@ -6,8 +6,8 @@
 |---|---|---|
 | ResearchTask | [planning](../../danus_ai/contracts/planning.py)、[任务转换](../../danus_ai/contracts/transitions.py)、[第七批](p1-2-batch7-delivery.md) | 已签收草稿、活动快照及权限拒绝子集；真实激活与持久化后续验收。 |
 | CandidateHypothesis | [first_objects](../../danus_ai/contracts/first_objects.py)、[projections](../../danus_ai/contracts/projections.py)、[第三批](p1-2-batch3-delivery.md) | 固定首包及内容版本已签收；候选改版后旧批准不适用的独立样例缺项已关闭，见[两端向量及默认工程 CI](p1-2-candidate-revision-golden.md)。 |
-| IdeationReport、IdeationChecklist | [C 组交付](p1-2-c-selection-lock-delivery.md)、[专项测试](../../tests/contracts/test_selection_review.py) | 六项固定检查及现行版本、逐项证据守卫已交付；正式 ready 缺权威检查依据时拒绝，真实评估后续。 |
-| SelectionDecision、ThresholdEvent | [C 组交付](p1-2-c-selection-lock-delivery.md)、[签收字段](p1-2-c-selection-lock-fields.md) | 精确报告／清单／预算范围签名及现行阈值事件已交付只读子集。预算权威、正式选择签发和新问题投影仍受阻。 |
+| IdeationReport、IdeationChecklist | [C 组交付](p1-2-c-selection-lock-delivery.md)、[专项测试](../../tests/contracts/test_selection_review.py) | 六项固定检查及现行版本、逐项证据守卫已交付；正式 ready 缺权威检查依据时拒绝，真实评估后续。报告证据集合重复待整改 C-R04，见[独立复核](evidence/p1-2-c-selection-review.md)。 |
+| SelectionDecision、ThresholdEvent | [C 组交付](p1-2-c-selection-lock-delivery.md)、[签收字段](p1-2-c-selection-lock-fields.md) | 精确报告／清单／预算范围签名及现行阈值事件已交付只读子集。预算权威、正式选择签发和新问题投影仍受阻，历史前驱缺批准待整改 C-R03，见[独立复核](evidence/p1-2-c-selection-review.md)。 |
 | Protocol、Arm | [first_objects](../../danus_ai/contracts/first_objects.py)、[fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定四题投影和跨对象守卫已签收；采样／描述型继续阻断。 |
 | Prereg | [fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定科学投影及锁定守卫已签收；通用目标、适用依据与真实审批后续。 |
 | RunRequest、ExecutionBinding | [runs](../../danus_ai/contracts/runs.py)、[fixed_four](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定确定性 confirmation 路径已签收；其余模式逐项核对目标规范、正式投影及运行前置条件。 |
@@ -20,7 +20,7 @@
 | Usage | [R07 读取守卫](../../danus_ai/contracts/execution_records.py)、[第十二批](p1-2-batch12-delivery.md) | 精确读取、金额及来源边界已签收；负金额、调整关系、计量及汇总待决，真实账务后续。 |
 | Approval | [signing](../../danus_ai/contracts/signing.py)、[approval_conflicts](../../danus_ai/contracts/approval_conflicts.py)、[第四批](p1-2-batch4-delivery.md) | 精确目标、用途、签名和歧义阻断已签收；缺已审定条款的用途继续阻断。 |
 | ReleaseManifest | [信封、载荷与回执](../../danus_ai/contracts/signing.py)、[第四批](p1-2-batch4-delivery.md) | 签名子集已签收；发布清单目标覆盖与真实发布、撤回待验收。 |
-| ResearchQuestion、FamilyDeclaration、SelectionHistory／Set | [固定目标](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 已有固定版；通用父问题、阈值记录、族与暴露沿革及独立向量未齐。 |
+| ResearchQuestion、FamilyDeclaration、SelectionHistory／Set | [固定目标](../../danus_ai/contracts/fixed_four.py)、[第六批](p1-2-batch6-delivery.md) | 固定版及 C 组限定子集均有测试证据。A4 阻断码和事件归类待整改 C-R01、C-R02，见[独立复核](evidence/p1-2-c-selection-review.md)。通用父问题、新族签名及暴露映射依赖保留。 |
 | RandomnessPlan、DiscriminationPlan | [字段台账](r02-field-matrix.md)、[固定预注册](../../danus_ai/contracts/fixed_four.py) | 固定枚举和确定性守卫可复用；完整随机性计划、抽样及区分性设计依赖方法与启用决定。 |
 | OutcomeLearningRecord | [字段台账](r02-field-matrix.md) | 通用合同、引用、复用限制及拒绝测试未交付。 |
 | ParameterDecision、CalibrationTask、数字性质、ScientificStatistics | [字段台账](r02-field-matrix.md)、[第八批固定结果](p1-2-batch8-delivery.md) | 固定结果与性质已有子集；数值依据通用入口、参数批准和校准合同未齐。 |
@@ -48,7 +48,9 @@ Schema 名称定位 JSON Schema 的 $defs 与 OpenAPI 的 components.schemas。�
 |---|---|---|---|
 | ResearchTask | ResearchTask、ResearchTaskDraft | [test_batch7.py](../../tests/contracts/test_batch7.py) | [7 批平台证据](evidence/p1-2-batch7-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch7-remediation-windows.json) |
 | CandidateHypothesis | CandidateDraft、CandidateRecord | [test_first_batch.py](../../tests/contracts/test_first_batch.py) | 缺直接平台证据 |
-| SelectionDecision、ThresholdEvent | [C 组交付](p1-2-c-selection-lock-delivery.md)、[签收字段](p1-2-c-selection-lock-fields.md) | 精确报告／清单／预算范围签名及现行阈值事件已交付只读子集。预算权威、正式选择签发和新问题投影仍受阻。 |
+| C 组报告与清单 | IdeationReport、IdeationChecklist | [test_selection_review.py](../../tests/contracts/test_selection_review.py) | [七组逐对象向量](p1-2-c-selection-lock-vectors.md)、[两端摘要和范围](p1-2-c-selection-lock-delivery.md#验证)、[独立复核](evidence/p1-2-c-selection-review.md)。无报告或清单单独的平台字节向量。 |
+| C 组选题与阈值历史 | SelectionDecision、SelectionBoundTerms、SelectionSignature、ThresholdEvent | [test_selection_review.py](../../tests/contracts/test_selection_review.py) | 贯通签名前载荷和独立条款有证据。无决定或阈值历史整对象字节向量。[独立复核](evidence/p1-2-c-selection-review.md) |
+| C 组单族、历史和授权视图 | SelectionSet、SingleFamily、HistoryCoverage、SelectionHistoryV2、A4HistoryView、A7HistoryView | [test_selection_review.py](../../tests/contracts/test_selection_review.py) | v2 历史投影有两端贯通字节，固定 v1 另有逐对象预期。未列其他模型的逐对象字节。[独立复核](evidence/p1-2-c-selection-review.md) |
 | Protocol、Arm | ProtocolDraft、ProtocolRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
 | Prereg | PreregDraft、PreregRecord | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |
 | RunRequest、ExecutionBinding | RunRequestDraft、RunRequestRecord、ExecutionBinding | [test_batch6.py](../../tests/contracts/test_batch6.py) | [6 批平台证据](evidence/p1-2-batch6-remediation-ubuntu.json)、[Windows](evidence/p1-2-batch6-remediation-windows.json) |

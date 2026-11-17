@@ -1,0 +1,22 @@
+# C 组限定纯契约独立复核证据
+
+复核提交 1e90d61fe560eebf8fb612953603425b9c0c0973。C-01～C-05 依据签收 164ed9ce41b70f06c7afe5ff5dceee2da4031763 及其绑定方案 a837a549b61cfc177756a6560e19d9fbf9d9f98c。C-S01～C-S07 依据签收 4ae073622a360949d84e651b9b17d31f821f6f1b 及其绑定字段表和向量 1c23327a2e95fd18ef308aa4958c21706fa03094。[签收决定](../decisions/A0-P1-2-consolidated-decisions.md) · [字段表及补充签收](../p1-2-c-selection-lock-fields.md) · [交付和 CI](../p1-2-c-selection-lock-delivery.md#远端-ci)
+
+在 Ubuntu CPython 3.12.16 用该提交的原专项及临时内存夹具复验，默认收集 16 项，定向运行 16 项通过。下面的反例使用独立构造的权威快照、完整正文、租户及项目权限，除各项列出的替换外保留原始夹具。它们在验收提交上运行时未改产品文件。[测试夹具](../../../tests/contracts/test_selection_review.py)
+
+|编号与签收项|可复现输入及实际结果|关闭条件|
+|---|---|---|
+|C-R01 · C-05／C-S05|用 history_fixture 装配受权 A4 视图，保持精确定位和状态，只将 family_summary.blocking_reason_codes 换为含空格、分隔符的主体私有文本和许可定位。调用 history_view，整段文字原样回到 blocking_reason_codes。字段白名单存在，但允许受限信息借短码字段输出。[返回路径](../../../danus_ai/contracts/selection_review.py#L745) · [字段形状](../../../danus_ai/contracts/selection_records.py#L280)|在返回边界只接收受控短码，拒绝正文、可识别主体或许可定位。用同一反例断言敏感值不出现在响应，合法短码去重、A4 零受限正文读、A7 原有正例继续通过。|
+|C-R02 · C-04／C-05／C-S04～C-S06|用 history_fixture 装配同项目 R05/R08c 覆盖。第一步给 FilterEvent 的配套正文和独立快照写入另一问题的 question_ref，保持精确定位可读、来源清单仍引用原事件定位，A7 仍报 complete。第二步把同一 FilterEvent 定位放入 intervention_event_refs，独立重算 SelectionSet 与 v2 历史版本，R05 清单仍只含一次事件。两份列表同时返回该事件，仍报 complete。通用正文比较未核事件语义，覆盖按定位去重掩盖了角色错配。[集合读取](../../../danus_ai/contracts/selection_review.py#L586) · [来源归类](../../../danus_ai/contracts/selection_review.py#L613)|以获准的事件契约或受信事实核验问题、归属、类别与列表角色，范围不明就阻断。补跨问题、错类、同事件冒充另一角色、来源证明错配及合法有序多事件正反例。|
+|C-R03 · C-03／C-S03|从 threshold_fixture 取得已有真实合成签名事实的当前 approved 事件。增加独立快照及正文匹配的 superseded 前驱，把它的 approval_ref 指向不存在的 meaningful_threshold 批准。当前事件指向此前驱，问题、阈值及时间保持一致。check_threshold 返回 approved，前驱批准无版本依据或正文读计数，且端口根本没有该批准事实。[生效检查](../../../danus_ai/contracts/selection_review.py#L489) · [前驱遍历](../../../danus_ai/contracts/selection_review.py#L527)|对链内 approved／superseded 节点按其精确问题、条款、事件和当时的权威批准事实核验，缺历史事实阻断。补不存在、错目标、错条款与跳接反例，以及当前不可用但历史时点有适用签名的合法链，避免用当前状态代替历史证据。|
+|C-R04 · C-01／C-S01|用 report_fixture 构造六项检查均通过的当前报告。第一项 evidence_refs 加入完全相同的第二条定位，报告正文与独立版本保持一致，权限和独立证据均有效。check_report 返回 ready 且原样返回两条引用。集合比较会折叠重复，输出仍带重复项。[结果处理](../../../danus_ai/contracts/selection_review.py#L350) · [字段形状](../../../danus_ai/contracts/selection_records.py#L78)|按已签收集合语义处理输出，在去重前逐条授权和验证。补重复输入、次序差异、不同精确修订与越权副本用例。|
+
+签名复验直接使用 OpenSSL Ed25519 对公开夹具的 v2 选择及两个 v1 选题／阈值签名前载荷验签。用 OpenSSL 回调走现有 check_selection_fixture 得到 fixture 标记。只改签名首个十六进制字符，并使替换后的信封与模拟独立快照一致，仍得到 SIGNATURE_INVALID。正式入口在合法签名之后以 C_SELECTION_BUDGET_AUTHORITY_SPEC_UNRESOLVED 拒绝。此证据覆盖签名内容及运行时调用，真实签发主体、密钥治理、撤销及预算合同留服务和权威决定验收。[签名核验](../../../danus_ai/contracts/selection_review.py#L392) · [签名测试材料](../../../tests/fixtures/c-selection/ed25519.json)
+
+另以独立标准库 JSON 和 SHA-256 重算引用 v2 历史的新 Prereg v1 版本，为它单独登记配套权威完整正文，并提供现行旧格式选题及阈值批准。fixed_lock_preimage 明确以 TARGET_VERSION_MISMATCH: SelectionHistory 拒绝，复现到历史版本域门槛。原固定四题测试继续对照现有 Prereg 独立预映像、空暴露、test=null 和 family_alpha=null。完整锁定前通过仍需协议及族签名、适用完整历史、校准及预算事实。[现有预注册路径](../../../danus_ai/contracts/selection_review.py#L778)
+
+七组签收向量逐字节、长度和完整 SHA-256 均相符。其中固定问题、族、历史、选择条款、阈值条款、旧批准主题、DataExposure 是各自的字面预映像，材料公开标明 Scope、Dataset、候选及 Rationale 占位引用，仅作为逐对象对照使用。贯通夹具另行提供这类目标正文，使用标准库 JSON 与 SHA-256 装配引用、独立版本、当前授权、源覆盖与适用签名。重算得到 v2 选择签名前载荷 SHA-256 8eab64e5fab638c986ebf90abd4a346f13d27adced4d2091695ac68b309c2984，新版历史投影 SHA-256 a3a6aba602962168f400d82c910e80b3a12b42d6d9ed19e882c44856205bede6，与交付记录一致。历史族关联的夹具使用原 FixedFamily 投影作权威锚点，关联正文另行提供，完整新族签名和正式确认仍需单独证明。[签收向量](../p1-2-c-selection-lock-vectors.md) · [独立装配和比较](../../../tests/contracts/test_selection_review.py#L1067)
+
+仍待补测的纯契约场景包括六项检查中有权且适用的 not_applicable 正例与缺试点依据反例，逐字段置换报告及清单修订、预算币种、用途、预算及根任务定位，签名到期和撤销；阈值跳接与历史时点证据；双事件同数据定位的正确集合去重与冲突，及多事件、不同来源游标、截断和次序、多项目拒绝。已有历史截断、签名变更、旧批准失效、错事件或数据版本、越权零次受限读取和 v1/v2 拒绝证据继续保留。生产 R05/R08c 的游标、冻结截面、真实来源与不可变性以及适配器读取顺序需分别验收。
+
+[CI 44015452505](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44015452505) 在交付 SHA 上成功，foundation 的检出、固定工具和 Python、锁定检查与构建步骤均成功。详细日志 HTTP 403，远端单项 pytest 输出及计数未核验。本地收集 16 项。该工作流和本轮复核均未执行 SQLite 专项。
