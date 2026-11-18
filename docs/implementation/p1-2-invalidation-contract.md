@@ -36,3 +36,5 @@
 [整改 CI 44127201891](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891) 首次手动触发，实际 SHA 为 775ca649d3b003c32d5b3751f8252bc2ecf1862f，最终成功。[foundation 作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891/job/134194135744)显示 Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build 均成功。作业明细日志下载返回 HTTP 403，单步日志链接返回 HTTP 404，未取得详细日志或核验远端逐项输出和计数。
 
 同一 SHA 在 Ubuntu 默认 pytest 路径收集 35 项失效专项，定向复跑 35 项通过。由工作流和测试开关确认此 CI 未启用 DANUS_P13_TEST，SQLite 专项跳过，无新增存储证据。 失败、未来时点及两者同时发生的审计均阻断。恰在查询时点的合法对照通过。获授权的同科学版本异修订路径返回 INVALIDATION_REVISION_SCOPE_UNRESOLVED，既不自动传播也不授予确认资格。比较边截断复验通过，越权异修订的受限快照及正文读取均为零次。异修订权威适用映射仍待 A0 决定。
+
+失效证据子集及 I-R01 审计整改已由 A0 于 2026.11.18 限定签收（aad0fe493090a2840e1ce6f799b7510fbf342467）。I-R03 权威适用映射仍待决定。原发现、原始及整改 CI 的日志限制和 SQLite 跳过证据保留。 [限定签收](decisions/A0-P1-2-invalidation-acceptance.md)

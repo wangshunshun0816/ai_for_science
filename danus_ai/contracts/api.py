@@ -62,6 +62,14 @@ from .messages import (
     ResponseEnvelope,
     TrustedRequestContext,
 )
+from .numeric_results import (
+    FixedObservationInput,
+    FixedResult,
+    FixedResultRequest,
+    NumericEvidence,
+    NumericRequest,
+    NumericResult,
+)
 from .observations import EvaluationView, FixedFourPolicy, TrustedObservation
 from .ownership import OwnershipUnclaimed, PersonalAccount, PersonalTenant, Project
 from .planning import (
@@ -166,6 +174,8 @@ class EngineeringCheck(StrictContract):
 
 
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    NumericRequest,
+    FixedResultRequest,
     InvalidationQuery,
     ReserveRequest,
     QuoteRequest,
@@ -186,6 +196,8 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    NumericEvidence,
+    FixedObservationInput,
     InvalidationReport,
     DependencySnapshot,
     ReauditTaskLink,
@@ -286,6 +298,8 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     EngineeringCheck,
 )
 _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
+    NumericResult,
+    FixedResult,
     InvalidationImpact,
     ReservePreflightResult,
     QuoteEstimate,

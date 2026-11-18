@@ -92,3 +92,7 @@ C 组已交付范围与四项整改已通过[A0 C 组限定验收](decisions/A0-
 明确失效 I-R01 审计结果及查询时点已完成整改并双端复验，I-R03 同科学版本异修订由明确阻断守卫保留，真正适用范围仍待 A0。CI 及人工验收待对应整改 SHA 证据。三个子场景以外的要求保持待办。[独立复核与整改](evidence/p1-2-invalidation-independent-review.md)
 
 I-R01 整改在[对应 SHA 的远端 CI](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44127201891)成功，详细日志未取得。I-R03 的不明适用关系继续拒绝，权威映射仍待 A0。默认收集 35 项及定向结果为本地证据，SQLite 专项跳过。人工验收待登记。[定向复验](evidence/p1-2-invalidation-independent-review.md#整改-ci-与定向复验)
+
+失效证据子集及 I-R01 审计整改已由 A0 于 2026.11.18 限定签收（aad0fe493090a2840e1ce6f799b7510fbf342467）。I-R03 权威适用映射仍待决定。原发现、原始及整改 CI 的日志限制和 SQLite 跳过证据保留。 [限定签收](decisions/A0-P1-2-invalidation-acceptance.md)
+
+[数字性质与固定枚举结果](p1-2-numeric-contract.md)补 NumericEvidence、NumericRequest、NumericResult、FixedObservationInput、FixedResultRequest、FixedResult，复用 QuoteRequest/QuoteEstimate。固定合格、有限否定、缺题和冲突已补正式入口与调用双方测试。通用数字权威目标、计量、统计方法和未定分支尚开放，实测与授权仍需独立证据。[23 组双端证据](evidence/p1-2-numeric-cross-platform.json)

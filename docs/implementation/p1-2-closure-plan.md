@@ -37,3 +37,5 @@ A 组同项目版本化证据的计划与调用只读核验子集已[限定签�
 C 组 C-S01～C-S07 补充字段已[限定签收](p1-2-c-selection-lock-fields.md#c-s01-报告与清单版本)（4ae073622a360949d84e651b9b17d31f821f6f1b）。[限定纯契约交付](p1-2-c-selection-lock-delivery.md)已完成本地双端和对应 CI 验证，C 组已交付子集及四项整改通过[A0 C 组限定验收](decisions/A0-P1-2-c-selection-lock-acceptance.md)（a3ab1ec77746055fb7199145b228db4fb5a155ea）。正式 ready 依赖独立检查证据，选择签发与完整锁定前通过保留各自阻断。
 
 [D 组复现降级金样例](p1-2-invalidation-contract.md)已交付明确实现错误、污染和协议失效子场景及 C 组所需的部分前提／复审计合同。数值复现、范围变更、资格恢复和整体出口仍按工作卡跟踪。
+
+失效证据子集及 I-R01 审计整改已由 A0 于 2026.11.18 限定签收（aad0fe493090a2840e1ce6f799b7510fbf342467）。I-R03 权威适用映射仍待决定。原发现、原始及整改 CI 的日志限制和 SQLite 跳过证据保留。 见[限定签收](decisions/A0-P1-2-invalidation-acceptance.md)。[数字性质与固定枚举结果](p1-2-numeric-contract.md)已交付已定入口，数值推断、通用统计、计量等出口继续开放。

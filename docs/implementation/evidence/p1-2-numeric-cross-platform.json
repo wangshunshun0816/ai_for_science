@@ -1,0 +1,104 @@
+{
+  "platforms": [
+    "Ubuntu CPython 3.12.16",
+    "Windows CPython 3.12.14"
+  ],
+  "vectors": {
+    "FixedObservationInput/bounded-negative": {
+      "sha256": "583a3f50816e6c87d9904b6d7bea3ad716f7ea439196668ce59421e4e8752cbe",
+      "byte_count": 7140
+    },
+    "FixedObservationInput/positive": {
+      "sha256": "7203274379458a09df3a117727d76530b9d3eed04e830d1b41bfe413309b0802",
+      "byte_count": 7140
+    },
+    "FixedResult/bounded-negative": {
+      "sha256": "a4e62ceb83c5efd317a9e93d1263f5636b51e5599c55c1c5f38268ef8390c8b1",
+      "byte_count": 510
+    },
+    "FixedResult/positive": {
+      "sha256": "3b0d491ecf2cf5b253eff8083626e82f26155cc8259f4cf2a06245da5d14f800",
+      "byte_count": 499
+    },
+    "FixedResultRequest/bounded-negative": {
+      "sha256": "a1300fa875b04fbe45bab56f2e432f7bb0c870451ad0fa3807c478f483aef386",
+      "byte_count": 89
+    },
+    "FixedResultRequest/positive": {
+      "sha256": "a1300fa875b04fbe45bab56f2e432f7bb0c870451ad0fa3807c478f483aef386",
+      "byte_count": 89
+    },
+    "NumericEvidence/design_default": {
+      "sha256": "e9eba1e1f74b7e220d7b7978a463726ee2941939939940c7da56835a7f47451b",
+      "byte_count": 218
+    },
+    "NumericEvidence/external_reported": {
+      "sha256": "210fe068164f33dd0a09897baf2191a721cdd26460b10767689a60b36f07e656",
+      "byte_count": 368
+    },
+    "NumericEvidence/measured": {
+      "sha256": "f0cf46bf351c8ae092d7038e52b22bd4dc27031dd814d80d0a21019e0b9cdb44",
+      "byte_count": 444
+    },
+    "NumericEvidence/reference_derived": {
+      "sha256": "46af76d7efc53e6830f4366677723a27cb85263d71de647465c58ee9b4f8a3f6",
+      "byte_count": 379
+    },
+    "NumericEvidence/requirement": {
+      "sha256": "2aee28af566e609e75bac454da45cb3e85e8855a8ce47454b48fbe9235900e7f",
+      "byte_count": 215
+    },
+    "NumericRequest/design_default": {
+      "sha256": "f69bc6d1ec70721ae8c540e72cbddb8e211d6759fc348f001cec0a344c287bc4",
+      "byte_count": 98
+    },
+    "NumericRequest/external_reported": {
+      "sha256": "f69bc6d1ec70721ae8c540e72cbddb8e211d6759fc348f001cec0a344c287bc4",
+      "byte_count": 98
+    },
+    "NumericRequest/measured": {
+      "sha256": "f69bc6d1ec70721ae8c540e72cbddb8e211d6759fc348f001cec0a344c287bc4",
+      "byte_count": 98
+    },
+    "NumericRequest/reference_derived": {
+      "sha256": "f69bc6d1ec70721ae8c540e72cbddb8e211d6759fc348f001cec0a344c287bc4",
+      "byte_count": 98
+    },
+    "NumericRequest/requirement": {
+      "sha256": "f69bc6d1ec70721ae8c540e72cbddb8e211d6759fc348f001cec0a344c287bc4",
+      "byte_count": 98
+    },
+    "NumericResult/design_default": {
+      "sha256": "705d42fee13d4b9ef191a0977a5895024787c00cf892935ee7c992c9a7c8c4b6",
+      "byte_count": 258
+    },
+    "NumericResult/external_reported": {
+      "sha256": "38459245c8967b373d7c3df67594e24e7722696bd561c5d4d01a487a7351501a",
+      "byte_count": 408
+    },
+    "NumericResult/measured": {
+      "sha256": "c2c6575afba916532503cd69615d6b4fe40a5f3de00309fc508a16a5f23b5db0",
+      "byte_count": 484
+    },
+    "NumericResult/reference_derived": {
+      "sha256": "d8e462b4c9678ab2a6e1f1d85c5991c638c93665858ea1e3981bd63bbdda9dfb",
+      "byte_count": 419
+    },
+    "NumericResult/requirement": {
+      "sha256": "603d0232b4622bdc6c0cadbdf8ad1d1d9a4b649d5ff4942a0408ad506c27f8bc",
+      "byte_count": 255
+    },
+    "QuoteEstimate": {
+      "sha256": "fd73f7884da7466d6e8781a173b25dba3e01959204d9c6ddd026f8ab443bc53f",
+      "byte_count": 309
+    },
+    "QuoteRequest": {
+      "sha256": "6af2829f1d0c03c3a41a4e8fbc263d25d8194ebd7702e26b29dc7e7e5edac56e",
+      "byte_count": 208
+    }
+  },
+  "schemas": {
+    "json-schema": "b5460054a43fbb22f5555b0171b362e076a483e9b7a181dde1fd40e4403bcd58",
+    "openapi": "87d539c5701cae912e93fec53b9ced66a46b033586a4242e68d4c241ea152ef6"
+  }
+}

@@ -1,6 +1,6 @@
 # 提交日志与审核记录
 
-本表最后更新于：`775ca649d3b003c32d5b3751f8252bc2ecf1862f`
+本表最后更新于：`aad0fe493090a2840e1ce6f799b7510fbf342467`
 
 审核状态初始填「未登记」，人工审核由审核人另行记录。作者栏使用 Git 提交的作者名。
 
@@ -128,3 +128,5 @@
 | `24e99a51e6078c306328f6facbdce7a04e8e24eb` | Codex | Verify explicit invalidating evidence and downstream use contracts | 未登记 |
 | `7c8074b41605acac9e6a3f7e21372b45bd3547be` | Codex | Record independent invalidation contract review and CI limits | 未登记 |
 | `775ca649d3b003c32d5b3751f8252bc2ecf1862f` | Codex | Require effective audit evidence for invalidation | 未登记 |
+| `be2268355a1355356370896b1cc6f82e06a680e2` | Codex | Record invalidation remediation CI and targeted retest | 未登记 |
+| `aad0fe493090a2840e1ce6f799b7510fbf342467` | Danus_Wang | A0 验收通过明确失效证据纯契约子集及审计整改 | 未登记 |

@@ -549,6 +549,27 @@
       "title": "ApprovalSubject",
       "type": "object"
     },
+    "ApprovedThresholdBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "approval_ref": {
+          "$ref": "#/$defs/ApprovalLocator"
+        },
+        "question_ref": {
+          "$ref": "#/$defs/HistoricalRef"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "approval_ref",
+        "question_ref",
+        "scope_ref"
+      ],
+      "title": "ApprovedThresholdBasis",
+      "type": "object"
+    },
     "Arm": {
       "additionalProperties": false,
       "properties": {
@@ -2300,6 +2321,25 @@
       "title": "DataUseScope",
       "type": "object"
     },
+    "DefaultBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "nature": {
+          "const": "design_default",
+          "title": "Nature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "nature",
+        "decision_ref"
+      ],
+      "title": "DefaultBasis",
+      "type": "object"
+    },
     "Delegation": {
       "additionalProperties": false,
       "properties": {
@@ -2423,6 +2463,34 @@
         "edges"
       ],
       "title": "DependencySnapshot",
+      "type": "object"
+    },
+    "DerivedBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "derivation_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "input_refs": {
+          "items": {
+            "$ref": "#/$defs/ScientificRef"
+          },
+          "minItems": 1,
+          "title": "Input Refs",
+          "type": "array"
+        },
+        "nature": {
+          "const": "reference_derived",
+          "title": "Nature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "nature",
+        "input_refs",
+        "derivation_ref"
+      ],
+      "title": "DerivedBasis",
       "type": "object"
     },
     "DevelopmentInputs": {
@@ -3337,6 +3405,25 @@
       "title": "ExposureSubject",
       "type": "object"
     },
+    "ExternalBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "nature": {
+          "const": "external_reported",
+          "title": "Nature",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourceRef"
+        }
+      },
+      "required": [
+        "nature",
+        "source"
+      ],
+      "title": "ExternalBasis",
+      "type": "object"
+    },
     "ExternalOrigin": {
       "additionalProperties": false,
       "properties": {
@@ -3620,6 +3707,43 @@
       "title": "FixedMissingPolicy",
       "type": "object"
     },
+    "FixedObservationInput": {
+      "additionalProperties": false,
+      "properties": {
+        "baseline": {
+          "$ref": "#/$defs/ObservationBinding"
+        },
+        "baseline_rows": {
+          "items": {
+            "$ref": "#/$defs/TrustedObservation"
+          },
+          "title": "Baseline Rows",
+          "type": "array"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "method": {
+          "$ref": "#/$defs/ObservationBinding"
+        },
+        "method_rows": {
+          "items": {
+            "$ref": "#/$defs/TrustedObservation"
+          },
+          "title": "Method Rows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "locator",
+        "baseline",
+        "method",
+        "baseline_rows",
+        "method_rows"
+      ],
+      "title": "FixedObservationInput",
+      "type": "object"
+    },
     "FixedPopulation": {
       "additionalProperties": false,
       "properties": {
@@ -3767,6 +3891,126 @@
         "reason"
       ],
       "title": "FixedRandomness",
+      "type": "object"
+    },
+    "FixedResult": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "baseline_accuracy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Baseline Accuracy"
+        },
+        "denominator": {
+          "const": 4,
+          "title": "Denominator",
+          "type": "integer"
+        },
+        "effect": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Effect"
+        },
+        "interval": {
+          "title": "Interval",
+          "type": "null"
+        },
+        "method_accuracy": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Method Accuracy"
+        },
+        "not_applicable_reason": {
+          "const": "complete_enumeration_of_declared_finite_population",
+          "title": "Not Applicable Reason",
+          "type": "string"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "enum": [
+                "improvement",
+                "bounded_no_meaningful_gain"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome"
+        },
+        "p_value": {
+          "title": "P Value",
+          "type": "null"
+        },
+        "provenance": {
+          "const": "gate_computed",
+          "title": "Provenance",
+          "type": "string"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "status": {
+          "enum": [
+            "valid",
+            "invalid",
+            "incomplete"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "analysis_ref",
+        "scope_ref",
+        "denominator",
+        "status",
+        "baseline_accuracy",
+        "method_accuracy",
+        "effect",
+        "interval",
+        "p_value",
+        "not_applicable_reason",
+        "outcome",
+        "provenance"
+      ],
+      "title": "FixedResult",
+      "type": "object"
+    },
+    "FixedResultRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        }
+      },
+      "required": [
+        "analysis_ref"
+      ],
+      "title": "FixedResultRequest",
       "type": "object"
     },
     "FixedRetryPolicy": {
@@ -5092,6 +5336,29 @@
       "title": "MathOrigin",
       "type": "object"
     },
+    "MeasuredBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        },
+        "nature": {
+          "const": "measured",
+          "title": "Nature",
+          "type": "string"
+        },
+        "run_ref": {
+          "$ref": "#/$defs/ScientificRef"
+        }
+      },
+      "required": [
+        "nature",
+        "run_ref",
+        "analysis_ref"
+      ],
+      "title": "MeasuredBasis",
+      "type": "object"
+    },
     "MethodConfig": {
       "additionalProperties": false,
       "properties": {
@@ -5298,6 +5565,99 @@
         "reason"
       ],
       "title": "NotApplicable",
+      "type": "object"
+    },
+    "NumericEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "discriminator": {
+            "mapping": {
+              "design_default": "#/$defs/DefaultBasis",
+              "external_reported": "#/$defs/ExternalBasis",
+              "measured": "#/$defs/MeasuredBasis",
+              "reference_derived": "#/$defs/DerivedBasis",
+              "requirement": "#/$defs/RequirementBasis"
+            },
+            "propertyName": "nature"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RequirementBasis"
+            },
+            {
+              "$ref": "#/$defs/DefaultBasis"
+            },
+            {
+              "$ref": "#/$defs/MeasuredBasis"
+            },
+            {
+              "$ref": "#/$defs/ExternalBasis"
+            },
+            {
+              "$ref": "#/$defs/DerivedBasis"
+            }
+          ],
+          "title": "Basis"
+        },
+        "locator": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "locator",
+        "value",
+        "unit",
+        "basis"
+      ],
+      "title": "NumericEvidence",
+      "type": "object"
+    },
+    "NumericRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_ref": {
+          "$ref": "#/$defs/RecordLocator"
+        },
+        "unit": {
+          "minLength": 1,
+          "title": "Unit",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_ref",
+        "unit"
+      ],
+      "title": "NumericRequest",
+      "type": "object"
+    },
+    "NumericResult": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {
+          "$ref": "#/$defs/NumericEvidence"
+        },
+        "status": {
+          "const": "source_verified",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence",
+        "status"
+      ],
+      "title": "NumericResult",
       "type": "object"
     },
     "ObjectCommitment": {
@@ -7100,6 +7460,33 @@
         "replication_plan_ref"
       ],
       "title": "ReplicationInputs",
+      "type": "object"
+    },
+    "RequirementBasis": {
+      "additionalProperties": false,
+      "properties": {
+        "decision_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecordLocator"
+            },
+            {
+              "$ref": "#/$defs/ApprovedThresholdBasis"
+            }
+          ],
+          "title": "Decision Ref"
+        },
+        "nature": {
+          "const": "requirement",
+          "title": "Nature",
+          "type": "string"
+        }
+      },
+      "required": [
+        "nature",
+        "decision_ref"
+      ],
+      "title": "RequirementBasis",
       "type": "object"
     },
     "ResearchTask": {
@@ -10723,9 +11110,12 @@
       "FixedFourPolicy": "service_owned",
       "FixedMethod": "service_owned",
       "FixedMissingPolicy": "service_owned",
+      "FixedObservationInput": "service_owned",
       "FixedPopulation": "service_owned",
       "FixedProtocolTargets": "service_owned",
       "FixedQuestion": "service_owned",
+      "FixedResult": "output_only",
+      "FixedResultRequest": "caller_input",
       "FixedRetryPolicy": "service_owned",
       "FixedSanitySuite": "service_owned",
       "FixedSelectionHistory": "service_owned",
@@ -10746,6 +11136,9 @@
       "MethodConfig": "service_owned",
       "ModelLineage": "service_owned",
       "ModelProfile": "service_owned",
+      "NumericEvidence": "service_owned",
+      "NumericRequest": "caller_input",
+      "NumericResult": "output_only",
       "OwnershipUnclaimed": "service_owned",
       "PersonalAccount": "service_owned",
       "PersonalTenant": "service_owned",
@@ -11049,6 +11442,9 @@
     "FixedMissingPolicy": {
       "$ref": "#/$defs/FixedMissingPolicy"
     },
+    "FixedObservationInput": {
+      "$ref": "#/$defs/FixedObservationInput"
+    },
     "FixedPopulation": {
       "$ref": "#/$defs/FixedPopulation"
     },
@@ -11057,6 +11453,12 @@
     },
     "FixedQuestion": {
       "$ref": "#/$defs/FixedQuestion"
+    },
+    "FixedResult": {
+      "$ref": "#/$defs/FixedResult"
+    },
+    "FixedResultRequest": {
+      "$ref": "#/$defs/FixedResultRequest"
     },
     "FixedRetryPolicy": {
       "$ref": "#/$defs/FixedRetryPolicy"
@@ -11117,6 +11519,15 @@
     },
     "ModelProfile": {
       "$ref": "#/$defs/ModelProfile"
+    },
+    "NumericEvidence": {
+      "$ref": "#/$defs/NumericEvidence"
+    },
+    "NumericRequest": {
+      "$ref": "#/$defs/NumericRequest"
+    },
+    "NumericResult": {
+      "$ref": "#/$defs/NumericResult"
     },
     "OwnershipUnclaimed": {
       "$ref": "#/$defs/OwnershipUnclaimed"

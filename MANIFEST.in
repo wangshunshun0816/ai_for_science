@@ -5,3 +5,5 @@ recursive-include tests *.py
 recursive-include tests/fixtures *.json *.md
 recursive-include schemas *.json
 include docs/implementation/p1-2-c-selection-lock-vectors.md
+include docs/implementation/p0-2/golden/positive.json
+include docs/implementation/p0-2/golden/bounded-negative.json

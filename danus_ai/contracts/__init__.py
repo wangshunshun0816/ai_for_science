@@ -11,11 +11,21 @@ from .canonicalization import (
     normalize,
 )
 from .invalidation import check_invalidation_impact, require_unaffected_confirmation
+from .numeric_results import (
+    calculate_fixed_result,
+    require_fixed_result,
+    verify_numeric,
+    verify_numeric_estimate,
+)
 from .parsing import ContractJSONError, parse_json
 from .scope import scope_comparable, scope_contains, scope_overlaps
 from .selection_review import SelectionReview
 
 __all__ = [
+    "calculate_fixed_result",
+    "require_fixed_result",
+    "verify_numeric",
+    "verify_numeric_estimate",
     "SelectionReview",
     "check_invalidation_impact",
     "require_unaffected_confirmation",
