@@ -26,3 +26,7 @@
 Ubuntu CPython 3.12.16 完整工程 608 项通过、18 项 SQLite 专项跳过，发行构建完成。Windows CPython 3.12.14 使用同锁隔离环境，15 项数字专项通过。23 组逐对象规范字节及完整 SHA-256 两端一致，两份生成物均逐字节校验。预期来自原手算、固定输入和第十四批独立报价向量，经标准库序列化后对照。原九件、手算及设计基线字节保持原样。[专项](../../tests/contracts/test_numeric_results.py) · [跨平台证据](evidence/p1-2-numeric-cross-platform.json)
 
 交付 SHA 对应远端 CI 和限定人工验收分别登记。
+
+## 独立复核状态
+
+Ubuntu 默认收集本包 15 项且专项通过。默认复跑 608 通过、18 项 SQLite 专项跳过。低精度边界、改写性质、来源位置、推导输入和接收复算另有独立对照。N-R01 聚合正文早于方法尝试授权读取，以及 N-R02 普通运行引用可被接受为外部原文，均已复现，待整改。数字交付与 GitHub main 已对齐，其对应远端运行及详细日志待核验。[详细证据](evidence/p1-2-numeric-independent-review.md)
