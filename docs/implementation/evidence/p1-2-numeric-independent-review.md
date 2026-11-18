@@ -23,3 +23,9 @@ Ubuntu 在既有锁定环境中使用 .venv/bin/python -m pytest --collect-only 
 - 原手算四题的合格比较在 Decimal 全局精度局部设为 1 时仍得基线 0.5、方法 0.75、效应 0.25；有限否定仍得 0.5、0.5、0。接收方篡改 effect 为 0.2 返回 FIXED_REPORTED_RESULT_MISMATCH。另用独立标准库重算批准条款及签名主体摘要，锁定阈值分别取 0.24999999999999999999999、0.25、0.25000000000000000000001。第一例通过为 improvement，等于和高于效应的非零分支均明确拒绝 FIXED_OUTCOME_SPEC_UNRESOLVED。重复行按原策略计一次，冲突为 invalid，缺题为 incomplete 且无分数。分母恒为四，区间和 p 值均为空且有不适用理由。结果有效及来源核验不授予科研接受资格。
 - 23 组预期包含五类性质各三组、固定四题两类各三组、既有报价两组。输入与输出预期由固定输入、原手算字段和第十四批已固定报价文本组成。受测规范化输出与标准库排序 JSON 对照，摘要以标准库对预期 UTF-8 计算。固定结果预期的 analysis_ref 取自已解析查询定位，其他比较覆盖固定原始输入及输出数值。此引用字段可在后续把期望取自手列定位，增强该字段的独立性。两份 Schema 的摘要是生成物对照证据，未作为 23 组手算向量计数。
 - 待补的覆盖包括逐类错权威依据的综合反例、外部原文类型／位置策略和完整推导契约。当前结果只覆盖固定四题已有两个结论及拒绝分支。通用统计、抽样、负效应、非零阈值未达到分支的结论规则、真实适配器及 G0/G1/G2 保持原边界。
+
+## 远端 CI 补充核验
+
+收到本次运行链接后，公开运行摘要确认手动触发的 44236133594 绑定 `835263bdae9a7d42962fd42f8d9faa0f41885104`，最终为 Success。公开作业 134572594081 的七个步骤都显示成功，包括 Set up job、Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build、Post Checkout 与 Complete job。摘要有 checkout 目标 Node.js 20 已弃用、实际强制在 Node.js 24 运行的警告。[运行摘要](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44236133594) · [作业及步骤](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44236133594/job/134572594081)
+
+未取得详细日志。作业页面给出的检查构建步骤日志返回 HTTP 404，公开日志 API 返回 HTTP 403（限流）。由对应 SHA 的 verify.sh 可验证该成功步骤配置运行默认 pytest 及构建；远端未逐项核验数字专项名称、测试数量、SQLite 跳过数或构建输出。SQLite 专项未启用，本轮无新增存储证据。本地收集 15 项数字专项以及 608 通过、18 跳过的实测证据见上文。N-R01、N-R02 仍待整改。

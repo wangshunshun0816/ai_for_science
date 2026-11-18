@@ -98,3 +98,5 @@ I-R01 整改在[对应 SHA 的远端 CI](https://github.com/wangshunshun0816/ai_
 [数字性质与固定枚举结果](p1-2-numeric-contract.md)补 NumericEvidence、NumericRequest、NumericResult、FixedObservationInput、FixedResultRequest、FixedResult，复用 QuoteRequest/QuoteEstimate。固定合格、有限否定、缺题和冲突已补正式入口与调用双方测试。通用数字权威目标、计量、统计方法和未定分支尚开放，实测与授权仍需独立证据。[23 组双端证据](evidence/p1-2-numeric-cross-platform.json)
 
 数字性质与固定枚举结果的独立复核确认固定四题的分母、去重、冲突与缺题、精确复算及两个已有结论的本地证据。观察聚合的读取顺序 N-R01 与外部原文目标核验 N-R02 仍待整改，数字来源与固定结果出口保留为限定覆盖。该提交的远端 CI 待核验，SQLite 专项跳过。通用数字权威目标、统计／计量规则及 I-R03 待决状态如前。[独立复核](evidence/p1-2-numeric-independent-review.md)
+
+数字合同对应 [CI 44236133594](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44236133594) 已成功，公开作业确认检查构建步骤成功，详细日志未取得。N-R01、N-R02 继续阻断对应子集的验收关闭，无新增存储证据。[远端证据范围](evidence/p1-2-numeric-independent-review.md#远端-ci-补充核验)
