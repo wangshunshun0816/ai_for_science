@@ -3,6 +3,7 @@
 import json
 from copy import deepcopy
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,13 @@ from danus_ai.contracts.approval_conflicts import ApprovalDisposition, ApprovalE
 from danus_ai.contracts.budget_quote import QuoteRequest
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.first_objects import ThresholdTerms
-from danus_ai.contracts.guards import ApprovalState, ContractBlocked, Ref, RequestContext
+from danus_ai.contracts.guards import (
+    ApprovalState,
+    ContractBlocked,
+    Ref,
+    ReferenceState,
+    RequestContext,
+)
 from danus_ai.contracts.numeric_results import (
     FactRef,
     FixedComparisonLock,
@@ -34,7 +41,12 @@ from danus_ai.contracts.numeric_results import (
     ProvenanceFact,
 )
 from danus_ai.contracts.observations import FixedFourPolicy, ObservationBinding
-from danus_ai.contracts.references import ApprovalLocator, RecordLocator
+from danus_ai.contracts.references import (
+    ApprovalLocator,
+    RecordLocator,
+    ScientificRef,
+    SourceRef,
+)
 from tests.contracts.test_batch14 import CTX as QUOTE_CTX
 from tests.contracts.test_batch14 import ESTIMATE as QUOTE_ESTIMATE
 from tests.contracts.test_batch14 import REQUEST as QUOTE_REQUEST
@@ -71,9 +83,39 @@ class Reader(Port):
         self.evidence: list[ApprovalEvidence] = []
         self.denied: FactRef | None = None
         self.reads: list[str] = []
+        self.lock_reads = 0
+        self.lock_readable = True
+        self.source_location_reads = 0
+        self.now = datetime(2026, 11, 18, tzinfo=UTC)
+        self.grants: list[tuple[FactRef, bool, datetime]] = []
+        self.source_snapshot = SourceRef.model_validate(
+            {
+                "snapshot_ref": sci("SourceSnapshot"),
+                "location": {"kind": "section", "locator": "Table 2"},
+            }
+        )
+        self.source_locations: tuple[SourceRef, ...] = (self.source_snapshot,)
+        self.resolved_source: ScientificRef | None = None
+
+    def resolve(self, ctx: RequestContext, ref: Ref) -> ReferenceState:
+        state = super().resolve(ctx, ref)
+        if ref == self.source_snapshot.snapshot_ref and self.resolved_source is not None:
+            return replace(state, ref=self.resolved_source)
+        return state
+
+    def external_source_locations(
+        self, ctx: RequestContext, snapshot: ScientificRef, /
+    ) -> tuple[SourceRef, ...]:
+        self.source_location_reads += 1
+        return self.source_locations
 
     def numeric_access(self, ctx: RequestContext, ref: FactRef, /) -> NumericReadAuthority | None:
-        return None if self.denied == ref else NumericReadAuthority(ref, ctx)
+        if self.denied == ref:
+            return None
+        for granted_ref, revoked, expires_at in self.grants:
+            if granted_ref == ref and (revoked or self.now >= expires_at):
+                return None
+        return NumericReadAuthority(ref, ctx)
 
     def numeric_anchor(self, ctx: RequestContext, ref: RecordLocator, /) -> NumericAnchor | None:
         self.reads.append("version")
@@ -89,9 +131,15 @@ class Reader(Port):
         self.reads.append("provenance")
         return self.fact
 
+    def fixed_comparison_lock_access(
+        self, ctx: RequestContext, ref: RecordLocator, /
+    ) -> NumericReadAuthority | None:
+        return NumericReadAuthority(ref, ctx) if self.lock_readable else None
+
     def fixed_comparison_lock(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> FixedComparisonLock | None:
+        self.lock_reads += 1
         return self.lock
 
     def approval_history(
@@ -469,3 +517,99 @@ def test_observation_lock_cannot_move_selected_attempt() -> None:
     )
     with pytest.raises(ContractBlocked, match="FIXED_COMPARISON_LOCK_UNRESOLVED"):
         calculate_fixed_result(req, CTX, r)
+
+
+@pytest.mark.parametrize("entry", ["calculate", "receive"])
+@pytest.mark.parametrize(
+    ("case", "error"),
+    [
+        ("analysis", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("lock_access", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("baseline.attempt_ref", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("method.attempt_ref", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("baseline.run_ref", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("method.run_ref", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("revoked", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("expired", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("lock_version", "FIXED_COMPARISON_LOCK_UNRESOLVED"),
+        ("lock_owner", "FIXED_COMPARISON_LOCK_UNRESOLVED"),
+        ("missing_lock", "FIXED_COMPARISON_LOCK_UNRESOLVED"),
+    ],
+)
+def test_fixed_authority_precedes_observation_reads(entry: str, case: str, error: str) -> None:
+    reader = Reader()
+    request, _ = fixed("positive", reader)
+    report = calculate_fixed_result(request, CTX, reader)
+    assert report.effect == "0.25"
+    require_fixed_result(request, report, CTX, reader)
+    reader.reads.clear()
+    reader.lock_reads = 0
+    lock = reader.lock
+    assert lock is not None
+    if case == "analysis":
+        reader.denied = request.analysis_ref
+    elif case == "lock_access":
+        reader.lock_readable = False
+    elif "." in case:
+        arm, field = case.split(".")
+        reader.denied = getattr(getattr(lock, arm), field)
+    elif case == "revoked":
+        reader.grants.append((lock.baseline.attempt_ref, True, reader.now + timedelta(seconds=1)))
+    elif case == "expired":
+        reader.grants.append((lock.method.run_ref, False, reader.now))
+    elif case == "lock_version":
+        reader.lock = replace(
+            lock, analysis_ref=lock.analysis_ref.model_copy(update={"revision": 2})
+        )
+    elif case == "lock_owner":
+        reader.lock = replace(lock, owner=(CTX.tenant_id, "other-project"))
+    else:
+        reader.lock = None
+
+    with pytest.raises(ContractBlocked, match=error):
+        if entry == "calculate":
+            calculate_fixed_result(request, CTX, reader)
+        else:
+            require_fixed_result(request, report, CTX, reader)
+    assert reader.reads == []
+    assert reader.lock_reads == (0 if case in {"analysis", "lock_access"} else 1)
+
+
+@pytest.mark.parametrize(
+    ("case", "error"),
+    [
+        ("non_source", "NUMERIC_SOURCE_TYPE_MISMATCH"),
+        ("wrong_version", "VERSION_MISMATCH"),
+        ("source_denied", "NUMERIC_REFERENCE_UNAVAILABLE"),
+        ("location_not_applicable", "NUMERIC_PROVENANCE_UNRESOLVED"),
+        ("no_location_evidence", "NUMERIC_PROVENANCE_UNRESOLVED"),
+        ("location_evidence_other_version", "NUMERIC_PROVENANCE_UNRESOLVED"),
+    ],
+)
+def test_external_report_requires_exact_applicable_source(case: str, error: str) -> None:
+    reader = Reader()
+    request, _ = numeric(*CASES[3], reader)
+    assert verify_numeric(request, CTX, reader).status == "source_verified"
+    nature, writer, fields = deepcopy(CASES[3])
+    old_snapshot = reader.source_snapshot.snapshot_ref
+    other_version = old_snapshot.model_copy(update={"content_version": "test:v1:" + "b" * 64})
+    if case == "non_source":
+        fields["source"]["snapshot_ref"] = sci("RunRequest")
+    elif case == "wrong_version":
+        reader.resolved_source = other_version
+    elif case == "source_denied":
+        reader.denied = old_snapshot
+    elif case == "location_not_applicable":
+        fields["source"]["location"]["locator"] = "Table 3"
+    elif case == "no_location_evidence":
+        reader.source_locations = ()
+    else:
+        reader.source_locations = (
+            reader.source_snapshot.model_copy(update={"snapshot_ref": other_version}),
+        )
+    request, _ = numeric(nature, writer, fields, reader)
+    with pytest.raises(ContractBlocked, match=error):
+        verify_numeric(request, CTX, reader)
+    assert reader.source_location_reads == (
+        1 if case in {"non_source", "wrong_version", "source_denied"} else 2
+    )

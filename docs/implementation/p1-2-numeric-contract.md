@@ -32,3 +32,7 @@ Ubuntu CPython 3.12.16 完整工程 608 项通过、18 项 SQLite 专项跳过�
 Ubuntu 默认收集本包 15 项且专项通过。默认复跑 608 通过、18 项 SQLite 专项跳过。低精度边界、改写性质、来源位置、推导输入和接收复算另有独立对照。N-R01 聚合正文早于方法尝试授权读取，以及 N-R02 普通运行引用可被接受为外部原文，均已复现，待整改。数字交付与 GitHub main 已对齐，其对应远端运行及详细日志待核验。[详细证据](evidence/p1-2-numeric-independent-review.md)
 
 后续核实 [CI 44236133594](https://github.com/wangshunshun0816/ai_for_science/actions/runs/44236133594) 运行 `835263bdae9a7d42962fd42f8d9faa0f41885104` 并成功，公开作业确认检查构建步骤成功。详细日志未取得，数字专项收集及 SQLite 跳过计数沿用本地证据。N-R01、N-R02 保持待整改。[证据范围](evidence/p1-2-numeric-independent-review.md#远端-ci-补充核验)
+
+## N-R01、N-R02 整改验证
+
+独立锁定元数据授权和两臂读取权限均先于聚合锚点及正文读取。external_reported 增加强制的原文目标、精确版本及独立位置事实。计算／接收拒绝路径零次读取受限聚合，合法原文及固定四题对照通过。Ubuntu 完整检查 636 通过、18 项 SQLite 专项跳过，Windows 同锁数字专项 43 通过，23 组向量与两份 Schema 无漂移。真实适配器认证及其他合同边界保持待验收。原 CI 44236133594 仅覆盖原交付 SHA，整改 CI 待核验。[复现与复验](evidence/p1-2-numeric-independent-review.md#n-r01n-r02-整改与复验)

@@ -182,9 +182,20 @@ class NumericReader(ReadOnlyPort, Protocol):
     def numeric_provenance(
         self, ctx: RequestContext, ref: RecordLocator, /
     ) -> ProvenanceFact | None: ...
+    def external_source_locations(
+        self, ctx: RequestContext, snapshot: ScientificRef, /
+    ) -> tuple[SourceRef, ...]:
+        """Return independent original locations for this exact authorized snapshot."""
+
+    def fixed_comparison_lock_access(
+        self, ctx: RequestContext, ref: RecordLocator, /
+    ) -> NumericReadAuthority | None:
+        """Check current lock-metadata access without loading the lock fact."""
+
     def fixed_comparison_lock(
         self, ctx: RequestContext, ref: RecordLocator, /
-    ) -> FixedComparisonLock | None: ...
+    ) -> FixedComparisonLock | None:
+        """Return independently sourced lock metadata only with current lock read authority."""
 
 
 def _access(ctx: RequestContext, ref: FactRef, reader: NumericReader) -> None:
@@ -194,12 +205,11 @@ def _access(ctx: RequestContext, ref: FactRef, reader: NumericReader) -> None:
         require_reference(ctx, ref, reader)
 
 
-def _body(
+def _read_authorized_body(
     ctx: RequestContext,
     ref: RecordLocator,
     reader: NumericReader,
 ) -> tuple[dict[str, object], str]:
-    _access(ctx, ref, reader)
     anchor = reader.numeric_anchor(ctx, ref)
     if anchor is None or (anchor.ref, anchor.owner) != (ref, (ctx.tenant_id, ctx.project_id)):
         raise ContractBlocked("NUMERIC_VERSION_UNRESOLVED")
@@ -261,13 +271,20 @@ def verify_numeric(
     request = NumericRequest.model_validate(request)
     if request.evidence_ref.record_type != "NumericEvidence":
         raise ContractBlocked("NUMERIC_SOURCE_TYPE_MISMATCH")
-    body, writer = _body(ctx, request.evidence_ref, reader)
+    _access(ctx, request.evidence_ref, reader)
+    body, writer = _read_authorized_body(ctx, request.evidence_ref, reader)
     evidence = NumericEvidence.model_validate(body)
     if request.unit != evidence.unit:
         raise ContractBlocked("NUMERIC_UNIT_MISMATCH")
-    if isinstance(evidence.basis, MeasuredBasis) and writer != "R11":
+    basis = evidence.basis
+    if isinstance(basis, MeasuredBasis) and writer != "R11":
         raise ContractBlocked("NUMERIC_SOURCE_WRITER_MISMATCH")
-    for ref in _references(evidence.basis):
+    if (
+        isinstance(basis, ExternalBasis)
+        and basis.source.snapshot_ref.object_type != "SourceSnapshot"
+    ):
+        raise ContractBlocked("NUMERIC_SOURCE_TYPE_MISMATCH")
+    for ref in _references(basis):
         _access(ctx, ref, reader)
     if reader.numeric_provenance(ctx, evidence.locator) != ProvenanceFact(
         evidence.locator,
@@ -278,7 +295,10 @@ def verify_numeric(
         writer,
     ):
         raise ContractBlocked("NUMERIC_PROVENANCE_UNRESOLVED")
-    basis = evidence.basis
+    if isinstance(basis, ExternalBasis) and basis.source not in reader.external_source_locations(
+        ctx, basis.source.snapshot_ref
+    ):
+        raise ContractBlocked("NUMERIC_PROVENANCE_UNRESOLVED")
     if isinstance(basis, RequirementBasis) and isinstance(
         basis.decision_ref, ApprovedThresholdBasis
     ):
@@ -310,25 +330,24 @@ def calculate_fixed_result(
     request = FixedResultRequest.model_validate(request)
     if request.analysis_ref.record_type != "FixedObservationInput":
         raise ContractBlocked("NUMERIC_SOURCE_TYPE_MISMATCH")
-    body, writer = _body(ctx, request.analysis_ref, reader)
-    if writer != "R08":
-        raise ContractBlocked("NUMERIC_SOURCE_WRITER_MISMATCH")
-    data = FixedObservationInput.model_validate(body)
+    _access(ctx, request.analysis_ref, reader)
+    if reader.fixed_comparison_lock_access(ctx, request.analysis_ref) != NumericReadAuthority(
+        request.analysis_ref, ctx
+    ):
+        raise ContractBlocked("NUMERIC_REFERENCE_UNAVAILABLE")
     lock = reader.fixed_comparison_lock(ctx, request.analysis_ref)
-    if lock is None or (lock.analysis_ref, lock.owner, lock.baseline, lock.method) != (
+    if lock is None or (lock.analysis_ref, lock.owner) != (
         request.analysis_ref,
         (ctx.tenant_id, ctx.project_id),
-        data.baseline,
-        data.method,
     ):
         raise ContractBlocked("FIXED_COMPARISON_LOCK_UNRESOLVED")
     policy = FixedFourPolicy.model_validate(lock.policy)
     terms = ThresholdTerms.model_validate(lock.terms)
     if (
         lock.prereg_ref.object_type != "Prereg"
-        or data.baseline.arm_id == data.method.arm_id
-        or data.baseline.run_ref == data.method.run_ref
-        or data.baseline.attempt_ref == data.method.attempt_ref
+        or lock.baseline.arm_id == lock.method.arm_id
+        or lock.baseline.run_ref == lock.method.run_ref
+        or lock.baseline.attempt_ref == lock.method.attempt_ref
         or terms.scope_ref.object_type != "Scope"
         or terms.unit != "ratio"
         or terms.direction != "greater"
@@ -343,15 +362,22 @@ def calculate_fixed_result(
         policy.policy_ref,
         terms.scope_ref,
         terms.rationale_ref,
-        data.baseline.run_ref,
-        data.method.run_ref,
-        data.baseline.attempt_ref,
-        data.method.attempt_ref,
+        lock.baseline.run_ref,
+        lock.method.run_ref,
+        lock.baseline.attempt_ref,
+        lock.method.attempt_ref,
         lock.approval_ref,
     ):
         _access(ctx, ref, reader)
     if _threshold(ctx, lock.approval_ref, terms.question_ref, reader) != terms:
         raise ContractBlocked("FIXED_THRESHOLD_MISMATCH")
+
+    body, writer = _read_authorized_body(ctx, request.analysis_ref, reader)
+    if writer != "R08":
+        raise ContractBlocked("NUMERIC_SOURCE_WRITER_MISMATCH")
+    data = FixedObservationInput.model_validate(body)
+    if (data.baseline, data.method) != (lock.baseline, lock.method):
+        raise ContractBlocked("FIXED_COMPARISON_LOCK_UNRESOLVED")
 
     baseline = evaluate_fixed_four(data.baseline, policy, data.baseline_rows)
     method = evaluate_fixed_four(data.method, policy, data.method_rows)
