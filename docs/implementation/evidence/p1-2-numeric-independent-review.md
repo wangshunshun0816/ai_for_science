@@ -40,3 +40,11 @@ Ubuntu 在既有锁定环境中使用 .venv/bin/python -m pytest --collect-only 
 Ubuntu CPython 3.12.16 的 scripts/verify.sh 完整通过，包含锁定安装、静态检查、导入边界、两份生成物、默认测试 636 通过和 18 项 SQLite 专项跳过，以及源码包和 wheel 构建。Windows CPython 3.12.14 使用同一 uv.lock 离线同步的隔离环境，数字专项 43 项通过，Schema 检查通过。两边均运行 independent_vectors，并对 23 组结果逐项核验独立 UTF-8 预期和完整 SHA-256，与既有跨平台记录逐项比对长度及摘要。两端完整输出（含两份 Schema 摘要）排序 JSON 的 SHA-256 同为 c2f86f18023c6d24b48dc83291281101fe3cb175b4533345f12eb6ec67765a8a。两份 Schema 分别通过本地逐字节生成物检查，文件及 uv.lock 无差异。原九个金样例、手算和设计基线字节无差异。
 
 兼容边界：请求或输出结构与 Schema 字节沿用现有版本；数字读取端口新增锁定元数据授权和独立原文位置查验，接入方需要提供对应的受信事实。缺事实的分支显式拒绝。真实适配器的认证、当前权限与原文事实来源仍属服务验收。CI 44236133594 仅覆盖原交付 SHA 835263bdae9a7d42962fd42f8d9faa0f41885104，整改 CI 待新运行核验。本轮没有新增存储验证。
+
+## 整改提交定向复验与 CI 待补证据
+
+2026-11-20 恢复核验，Ubuntu 本地 HEAD 与实时查询的 GitHub main 均为 `997b262c5724f715bd40f620eb100bf3ed0cd280`。公开工作流列表最新可见运行仍为原交付的 44236133594；按整改 SHA 查询运行、提交 Checks 与最新运行 API 均遇到 HTTP 403 限流。尚未取得整改运行链接，无法确认整改 CI 的实际运行 SHA、最终结论、关键步骤或详细日志。此次请求的两次 CI 覆盖继续分开记录，原 CI 只覆盖 835263bdae9a7d42962fd42f8d9faa0f41885104。[公开工作流](https://github.com/wangshunshun0816/ai_for_science/actions/workflows/ci.yml?branch=main)
+
+2026-11-20 在同一整改提交上，以 .venv/bin/python -m pytest -q -p no:cacheprovider tests/contracts/test_numeric_results.py -k 'authority_precedes_observation_reads or exact_applicable_source or observation_lock_cannot_move_selected_attempt' 再次定向复跑，29 项通过、14 项未选中。计算及接收入口的 N-R01 回归 22 项、N-R02 回归 6 项和原两臂绑定不一致 1 项共同覆盖合法对照、逐条拒绝、零次聚合锚点及正文读取、非原文拒绝和位置适用性。
+
+暂停前的同一提交本地默认收集 654 项，其中数字专项 43 项，包括新增 N-R01 的 22 项及 N-R02 的 6 项；Ubuntu 默认复跑 636 项通过、18 项 SQLite 专项跳过。18 项跳过均位于 tests/storage/test_candidate_slice.py，未设置 DANUS_P13_TEST。2026-11-20 未重复完整测试或 Windows 对照，沿用上述同一提交的实际记录。真实适配器认证、锁定授权及独立原文事实来源仍按服务阶段验收，无新增存储证据。
