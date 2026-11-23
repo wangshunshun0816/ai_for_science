@@ -1,0 +1,305 @@
+{
+  "AuditProfile": {
+    "locator": {
+      "record_type": "AuditProfile",
+      "record_id": "profile",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "task_kind": "candidate_review",
+    "model_profile_ref": {
+      "record_type": "ModelProfile",
+      "record_id": "model",
+      "revision": 1
+    },
+    "lineage_ref": {
+      "record_type": "ModelLineage",
+      "record_id": "lineage",
+      "revision": 1
+    },
+    "required_materials": [
+      {
+        "object_type": "CandidateHypothesis",
+        "object_id": "gold-candidate",
+        "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a"
+      }
+    ]
+  },
+  "AuditQuery": {
+    "report_ref": {
+      "record_type": "AuditReport",
+      "record_id": "report",
+      "revision": 1
+    },
+    "profile_ref": {
+      "record_type": "AuditProfile",
+      "record_id": "profile",
+      "revision": 1
+    },
+    "target_ref": {
+      "object_type": "CandidateHypothesis",
+      "object_id": "gold-candidate",
+      "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a"
+    },
+    "task_kind": "candidate_review"
+  },
+  "AuditReportRecord": {
+    "locator": {
+      "record_type": "AuditReport",
+      "record_id": "report",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "task_kind": "candidate_review",
+    "target_ref": {
+      "object_type": "CandidateHypothesis",
+      "object_id": "gold-candidate",
+      "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a"
+    },
+    "profile_ref": {
+      "record_type": "AuditProfile",
+      "record_id": "profile",
+      "revision": 1
+    },
+    "result": "no_blocking_issue_found",
+    "draft": {
+      "role": "A7",
+      "outcome": "no_blocking_issue_found",
+      "issues": [],
+      "reviewed_refs": [
+        {
+          "object_type": "CandidateHypothesis",
+          "object_id": "gold-candidate",
+          "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a"
+        }
+      ]
+    },
+    "error_ref": null
+  },
+  "ReauditTask": {
+    "locator": {
+      "record_type": "ReauditTask",
+      "record_id": "review",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "trigger": {
+      "record_type": "EvidenceEvent",
+      "record_id": "invalidation",
+      "revision": 1
+    },
+    "affected_refs": [
+      {
+        "locator": {
+          "record_type": "ClaimNode",
+          "record_id": "dependent",
+          "revision": 1
+        },
+        "content_version": "claim:v1:2222222222222222222222222222222222222222222222222222222222222222"
+      }
+    ]
+  },
+  "AuditReadResult": {
+    "report_ref": {
+      "record_type": "AuditReport",
+      "record_id": "report",
+      "revision": 1
+    },
+    "result": "no_blocking_issue_found",
+    "qualification": "evidence_checked_only"
+  },
+  "CandidateRecord": {
+    "background": "四题固定枚举",
+    "draft": {
+      "body": "比较两种方法",
+      "format": "plain_text"
+    },
+    "new_inference": "比较限于固定四题",
+    "original_source": null,
+    "prediction": "新方法答对三题",
+    "scope_ref": {
+      "object_type": "Scope",
+      "object_id": "gold-scope",
+      "content_version": "scope:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "source_kind": "original",
+    "sources": [],
+    "synthetic_origin": null,
+    "object_id": "gold-candidate",
+    "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a",
+    "ownership_scope": "project",
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "created_at": "2026-11-16T00:00:00Z",
+    "created_by": "fixture-service",
+    "status": "draft",
+    "approval_bindings": [],
+    "comment": null,
+    "display_name": null,
+    "cache_location": null
+  },
+  "ClaimRecord": {
+    "locator": {
+      "record_type": "ClaimNode",
+      "record_id": "source",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "science": {
+      "statement": "source",
+      "scope_ref": {
+        "object_type": "Scope",
+        "object_id": "scope",
+        "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "kind": "empirical",
+      "outcome": "improvement",
+      "logical_level": "L3",
+      "origin_binding": {
+        "origin": "internal_experiment",
+        "run_refs": [
+          {
+            "object_type": "RunRequest",
+            "object_id": "runrequest",
+            "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+          }
+        ],
+        "protocol_ref": {
+          "object_type": "Protocol",
+          "object_id": "protocol",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "prereg_ref": {
+          "object_type": "Prereg",
+          "object_id": "prereg",
+          "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+        },
+        "premise_refs": []
+      }
+    },
+    "content_version": "claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f"
+  },
+  "EvidenceEvent": {
+    "schema_version": 1,
+    "event_id": "initial",
+    "revision": 1,
+    "event_kind": "accepted",
+    "claim_ref": {
+      "locator": {
+        "record_type": "ClaimNode",
+        "record_id": "source",
+        "revision": 1
+      },
+      "content_version": "claim:v1:c55c34e8b01a4632fae7fc381a943e7707df6abc9455e704c9c65f1bc52fba4f"
+    },
+    "report_refs": [
+      {
+        "record_type": "EvidenceReport",
+        "record_id": "report",
+        "revision": 1
+      }
+    ],
+    "attempt_refs": [
+      {
+        "record_type": "Attempt",
+        "record_id": "attempt",
+        "revision": 1
+      }
+    ],
+    "artifact_digests": [
+      "1111111111111111111111111111111111111111111111111111111111111111"
+    ],
+    "audit_ref": {
+      "chain_id": "chain",
+      "sequence": 1
+    },
+    "previous_event_digest": null,
+    "change": {
+      "strength": "supported",
+      "status_flags": []
+    },
+    "reason": "fixture accepted"
+  },
+  "ApprovalSubject": {
+    "locator": {
+      "purpose": "candidate_selection",
+      "record_id": "approval",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "target": {
+      "object_type": "CandidateHypothesis",
+      "object_id": "gold-candidate",
+      "content_version": "candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a"
+    },
+    "terms_digest": "3333333333333333333333333333333333333333333333333333333333333333"
+  },
+  "ReleaseManifestBody": {
+    "schema_version": 1,
+    "release_ref": {
+      "record_type": "ReleaseManifest",
+      "record_id": "release",
+      "revision": 1
+    },
+    "scope": {
+      "object_type": "Scope",
+      "object_id": "scope",
+      "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "evidence_snapshot_ref": {
+      "record_type": "EvidenceSnapshot",
+      "record_id": "snapshot",
+      "revision": 1
+    },
+    "artifact_manifest": [
+      {
+        "path": "result.txt",
+        "size": 6,
+        "digest": "f6a214f7a5fcda0c2cee9660b7fc29f5649e3c68aad48e20e950137c98913a68"
+      }
+    ],
+    "code_ref": {
+      "object_type": "Code",
+      "object_id": "code",
+      "content_version": "test:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "dependency_lock_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "image_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+    "sbom_refs": [
+      {
+        "record_type": "SBOM",
+        "record_id": "sbom",
+        "revision": 1
+      }
+    ],
+    "data_license_refs": [
+      {
+        "record_type": "DataLicense",
+        "record_id": "license",
+        "revision": 1
+      }
+    ],
+    "public_mapping_ref": {
+      "record_type": "PublicMapping",
+      "record_id": "mapping",
+      "revision": 1
+    },
+    "reproduction_steps": [
+      "reproduce"
+    ],
+    "result_tolerances": [],
+    "disclosures": [],
+    "check_report_refs": [
+      {
+        "record_type": "CheckReport",
+        "record_id": "check",
+        "revision": 1
+      }
+    ]
+  }
+}

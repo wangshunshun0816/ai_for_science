@@ -1230,3 +1230,5 @@ object/list[object] 不是遗漏后放任的数据口袋：例如 tuning_space�
 ## 5. 后续增量及现行覆盖
 
 §4 为起草时快照。现行覆盖见[整体出口](p1-2-r02-exit-matrix.md)，已批准规则见[首组签收](decisions/A0-R02-first-contracts-checklist.md)和[Q-04～Q-07 签收](decisions/A0-P1-2-Q04-Q07-checklist.md)。第十四批逐字段来源及约束见[报价交付](p1-2-batch14-delivery.md)。
+
+审计字段现行依据补录见 [审计与复审证据合同及统一出口](p1-2-audit-evidence-delivery.md) 的“字段依据及责任”。已有 A7 草稿严重度 blocking／non_blocking 沿用第七批合同，原表中的通用严重度及排队语义仍未获批准。AuditProfile 配置与 AuditReportRecord 权威信封、复用 ReauditTaskLink 的 ReauditTask 均按精确版本和写入权限登记；未加入缺依据的默认值或新的科研投影。

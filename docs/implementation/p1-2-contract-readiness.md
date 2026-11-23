@@ -212,3 +212,5 @@ A0 已验收第六批固定四题纯契约交付及整改。签收提交为 [`8e
 见[第十四批交付](p1-2-batch14-delivery.md)、[整体出口台账](p1-2-r02-exit-matrix.md)及[预算操作待审提案](decisions/A0-P1-2-budget-operations-proposal.md)。§12–§16 为各批历史快照，账户归属、固定 Sanity 工件、运行记录和 Usage 的现行限定签收见整体台账及对应验收记录。
 
 第十四批已[限定签收](decisions/A0-P1-2-batch14-acceptance.md)（24c5c0635db7aa34df4edf41fdebb02a540a46f5）。[第十五批](p1-2-batch15-delivery.md)仅核验数据政策与发送许可的只读约束。现行出口范围见[台账](p1-2-r02-exit-matrix.md)。
+
+现行后续状态补录。数字性质与固定枚举结果已由 A0 于 2026.11.23 限定签收，提交 4dec2fafd18ef948995a8fb51f65189654980f41，包含 N-R01、N-R02 整改。原发现、两次 CI 的实际 SHA、详细日志限制和 SQLite 跳过口径保留。 [审计与复审证据合同及统一出口](p1-2-audit-evidence-delivery.md)提供已定审计合同和统一执行索引。§12–§18 及原待决表为历史快照，当前批准按实际绑定签收执行。未定的新合同、方法与权限继续逐项阻断。

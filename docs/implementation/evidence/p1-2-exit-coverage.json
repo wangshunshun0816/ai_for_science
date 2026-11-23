@@ -1,0 +1,272 @@
+[
+  {
+    "id": "positive",
+    "fixture": "docs/implementation/p0-2/golden/positive.json",
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result",
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": "require_fixed_result",
+    "gap": "未贯通完整 G0/G1/G2 与入图",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "bounded-negative",
+    "fixture": "docs/implementation/p0-2/golden/bounded-negative.json",
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result",
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": "require_fixed_result",
+    "gap": "仅固定四题有限否定",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "incomplete-missing-q4",
+    "fixture": "docs/implementation/p0-2/golden/incomplete-missing-q4.json",
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result",
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": "require_fixed_result",
+    "gap": "未作为抽样不确定",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "error-audit-timeout",
+    "fixture": "docs/implementation/p0-2/golden/error-audit-timeout.json",
+    "coverage": "path_subset",
+    "entry": "check_audit_report",
+    "expected_source": "docs/implementation/p0-2/golden/error-audit-timeout.json#expected.submission_status",
+    "receiver": "require_audit_result",
+    "gap": "只核验服务错误报告，不含整个 G2 提交流程",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "rejected-number-mismatch",
+    "fixture": "docs/implementation/p0-2/golden/rejected-number-mismatch.json",
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result",
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": "require_fixed_result",
+    "gap": "结果接收拒绝，未代替完整 G0",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "rejected-overbroad-scope",
+    "fixture": "docs/implementation/p0-2/golden/rejected-overbroad-scope.json",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": null,
+    "gap": "未把原变体贯通正式提交链",
+    "result": "not_executed"
+  },
+  {
+    "id": "rejected-duplicate-q3",
+    "fixture": "docs/implementation/p0-2/golden/rejected-duplicate-q3.json",
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result",
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": "require_fixed_result",
+    "gap": "十条重复行与错误分母拒绝，未代替完整提交",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "recovery-collector-crash",
+    "fixture": "docs/implementation/p0-2/golden/recovery-collector-crash.json",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": null,
+    "gap": "纯契约无法证明真实恢复与对账",
+    "result": "not_executed"
+  },
+  {
+    "id": "recovery-idempotent-submission",
+    "fixture": "docs/implementation/p0-2/golden/recovery-idempotent-submission.json",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": "原样例 expected 与附录 C 手算",
+    "receiver": null,
+    "gap": "未实现真实幂等事务",
+    "result": "not_executed"
+  },
+  {
+    "id": "candidate-revision",
+    "coverage": "path_subset",
+    "entry": "validate_object / content_id / require_approval",
+    "expected_source": "已有独立向量与手列精确目标",
+    "receiver": "正式接收守卫",
+    "gap": "仅记录已交付纯契约范围",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "audit-call-receive",
+    "coverage": "path_subset",
+    "entry": "check_audit_report / require_audit_result",
+    "expected_source": "已有独立向量与手列精确目标",
+    "receiver": "正式接收守卫",
+    "gap": "仅记录已交付纯契约范围",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "reaudit-exact-chain",
+    "coverage": "path_subset",
+    "entry": "check_reaudit_task",
+    "expected_source": "已有独立向量与手列精确目标",
+    "receiver": "正式接收守卫",
+    "gap": "仅记录已交付纯契约范围",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "invalidation/implementation_error",
+    "coverage": "path_subset",
+    "entry": "check_invalidation_impact / require_unaffected_confirmation",
+    "expected_source": "tests/fixtures/invalidation/independent.json",
+    "receiver": "require_unaffected_confirmation",
+    "gap": "数值复现、I-R03 和资格恢复未覆盖",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "invalidation/data_contamination",
+    "coverage": "path_subset",
+    "entry": "check_invalidation_impact / require_unaffected_confirmation",
+    "expected_source": "tests/fixtures/invalidation/independent.json",
+    "receiver": "require_unaffected_confirmation",
+    "gap": "数值复现、I-R03 和资格恢复未覆盖",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "invalidation/protocol_invalidity",
+    "coverage": "path_subset",
+    "entry": "check_invalidation_impact / require_unaffected_confirmation",
+    "expected_source": "tests/fixtures/invalidation/independent.json",
+    "receiver": "require_unaffected_confirmation",
+    "gap": "数值复现、I-R03 和资格恢复未覆盖",
+    "result": "behavior_passed"
+  },
+  {
+    "id": "vector/AuditProfile",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/AuditProfile.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/AuditQuery",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/AuditQuery.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/AuditReportRecord",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/AuditReportRecord.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/ReauditTask",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ReauditTask.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/AuditReadResult",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/AuditReadResult.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/CandidateRecord",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/CandidateRecord.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/ClaimRecord",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ClaimRecord.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/EvidenceEvent",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/EvidenceEvent.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/ApprovalSubject",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ApprovalSubject.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "vector/ReleaseManifestBody",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ReleaseManifestBody.json",
+    "receiver": null,
+    "gap": "整对象规范字节覆盖与行为分开登记",
+    "result": "not_executed"
+  },
+  {
+    "id": "sampling-inconclusive",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": null,
+    "receiver": null,
+    "gap": "缺独立方法或批准适用规则",
+    "result": "not_executed"
+  },
+  {
+    "id": "numerical-replication",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": null,
+    "receiver": null,
+    "gap": "缺独立方法或批准适用规则",
+    "result": "not_executed"
+  },
+  {
+    "id": "scope-change",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": null,
+    "receiver": null,
+    "gap": "缺独立方法或批准适用规则",
+    "result": "not_executed"
+  },
+  {
+    "id": "eligibility-restoration",
+    "coverage": "not_covered",
+    "entry": null,
+    "expected_source": null,
+    "receiver": null,
+    "gap": "缺独立方法或批准适用规则",
+    "result": "not_executed"
+  }
+]

@@ -1,0 +1,1 @@
+{"profile_ref":{"record_id":"profile","record_type":"AuditProfile","revision":1},"report_ref":{"record_id":"report","record_type":"AuditReport","revision":1},"target_ref":{"content_version":"candidate:v1:454d422c23bb3b8f95db5986e997de3caa8fb106c5b9ef11caa5f23f51486f7a","object_id":"gold-candidate","object_type":"CandidateHypothesis"},"task_kind":"candidate_review"}

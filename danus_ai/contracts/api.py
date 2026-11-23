@@ -3,6 +3,13 @@
 from typing import Literal, get_args
 
 from .approval_conflicts import ApprovalDisposition, ApprovalEvidence, ApprovalReview
+from .audit_evidence import (
+    AuditProfile,
+    AuditQuery,
+    AuditReadResult,
+    AuditReportRecord,
+    ReauditTask,
+)
 from .base import StrictContract
 from .budget_preflight import ReserveFacts, ReservePreflightResult, ReserveRequest
 from .budget_quote import QuoteBasis, QuoteBasisScope, QuoteEstimate, QuoteRequest
@@ -174,6 +181,7 @@ class EngineeringCheck(StrictContract):
 
 
 _CALLER_MODELS: tuple[type[StrictContract], ...] = (
+    AuditQuery,
     NumericRequest,
     FixedResultRequest,
     InvalidationQuery,
@@ -196,6 +204,9 @@ _CALLER_MODELS: tuple[type[StrictContract], ...] = (
     Scope,
 )
 _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
+    AuditProfile,
+    AuditReportRecord,
+    ReauditTask,
     NumericEvidence,
     FixedObservationInput,
     InvalidationReport,
@@ -298,6 +309,7 @@ _SERVICE_MODELS: tuple[type[StrictContract], ...] = (
     EngineeringCheck,
 )
 _OUTPUT_MODELS: tuple[type[StrictContract], ...] = (
+    AuditReadResult,
     NumericResult,
     FixedResult,
     InvalidationImpact,
@@ -400,6 +412,25 @@ _TRANSITIONS: dict[str, type[StrictContract]] = {
 def schema_capabilities() -> dict[str, object]:
     return {
         "objects": {name: _access(model) for name, (model, _) in schema_registry().items()},
+        "audit_evidence": {
+            "read_checks": [
+                "check_audit_report",
+                "require_audit_result",
+                "check_reaudit_task",
+                "check_release_evidence",
+            ],
+            "material_contracts": ["CandidateHypothesis"],
+            "required_current_authority": True,
+            "result_qualification": "evidence_checked_only",
+            "unsupported": [
+                "generic_priority",
+                "generic_deadline",
+                "generic_remediation_policy",
+                "unresolved_material_contracts",
+                "real_queue",
+                "release_authorization",
+            ],
+        },
         "validate_transition": {
             operation: model.__name__ for operation, model in _TRANSITIONS.items()
         },

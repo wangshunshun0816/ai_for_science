@@ -1,6 +1,12 @@
 """Public I-SCHEMA functions for the supported R02 subset."""
 
 from .api import content_id, validate_object, validate_transition
+from .audit_evidence import (
+    check_audit_report,
+    check_reaudit_task,
+    check_release_evidence,
+    require_audit_result,
+)
 from .base import AuthoritativeRecord, DraftContract, StrictContract
 from .canonicalization import (
     canonicalize,
@@ -22,6 +28,10 @@ from .scope import scope_comparable, scope_contains, scope_overlaps
 from .selection_review import SelectionReview
 
 __all__ = [
+    "check_audit_report",
+    "require_audit_result",
+    "check_reaudit_task",
+    "check_release_evidence",
     "calculate_fixed_result",
     "require_fixed_result",
     "verify_numeric",

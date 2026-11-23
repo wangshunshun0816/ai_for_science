@@ -1116,6 +1116,129 @@
         "title": "AuditPosition",
         "type": "object"
       },
+      "AuditProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "lineage_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "model_profile_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "required_materials": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/RecordLocator"
+                },
+                {
+                  "$ref": "#/components/schemas/ScientificRef"
+                },
+                {
+                  "$ref": "#/components/schemas/HistoricalRef"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Required Materials",
+            "type": "array"
+          },
+          "task_kind": {
+            "enum": [
+              "candidate_review",
+              "protocol_review",
+              "empirical_review"
+            ],
+            "title": "Task Kind",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "task_kind",
+          "model_profile_ref",
+          "lineage_ref",
+          "required_materials"
+        ],
+        "title": "AuditProfile",
+        "type": "object"
+      },
+      "AuditQuery": {
+        "additionalProperties": false,
+        "properties": {
+          "profile_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "report_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "target_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "task_kind": {
+            "enum": [
+              "candidate_review",
+              "protocol_review",
+              "empirical_review"
+            ],
+            "title": "Task Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_ref",
+          "profile_ref",
+          "target_ref",
+          "task_kind"
+        ],
+        "title": "AuditQuery",
+        "type": "object"
+      },
+      "AuditReadResult": {
+        "additionalProperties": false,
+        "properties": {
+          "qualification": {
+            "const": "evidence_checked_only",
+            "title": "Qualification",
+            "type": "string"
+          },
+          "report_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "result": {
+            "enum": [
+              "error",
+              "blocking_issue",
+              "needs_evidence",
+              "no_blocking_issue_found"
+            ],
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_ref",
+          "result",
+          "qualification"
+        ],
+        "title": "AuditReadResult",
+        "type": "object"
+      },
       "AuditReport": {
         "additionalProperties": false,
         "properties": {
@@ -1166,6 +1289,114 @@
           "reviewed_refs"
         ],
         "title": "AuditReport",
+        "type": "object"
+      },
+      "AuditReportRecord": {
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "else": {
+              "properties": {
+                "draft": {
+                  "type": "object"
+                },
+                "error_ref": {
+                  "type": "null"
+                }
+              }
+            },
+            "if": {
+              "properties": {
+                "result": {
+                  "const": "error"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "draft": {
+                  "type": "null"
+                },
+                "error_ref": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "description": "R12-owned envelope. Exact assignment, current authorization, independent immutable bodies and material coverage require runtime checks.",
+        "properties": {
+          "draft": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuditReport"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error_ref": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RecordLocator"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "profile_ref": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "error",
+              "blocking_issue",
+              "needs_evidence",
+              "no_blocking_issue_found"
+            ],
+            "title": "Result",
+            "type": "string"
+          },
+          "target_ref": {
+            "$ref": "#/components/schemas/ScientificRef"
+          },
+          "task_kind": {
+            "enum": [
+              "candidate_review",
+              "protocol_review",
+              "empirical_review"
+            ],
+            "title": "Task Kind",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "task_kind",
+          "target_ref",
+          "profile_ref",
+          "result",
+          "draft",
+          "error_ref"
+        ],
+        "title": "AuditReportRecord",
         "type": "object"
       },
       "BaselineInputs": {
@@ -7101,6 +7332,44 @@
         "title": "QuoteRequest",
         "type": "object"
       },
+      "ReauditTask": {
+        "additionalProperties": false,
+        "description": "Explicitly limited R19 historical projection, not a queue command.",
+        "properties": {
+          "affected_refs": {
+            "items": {
+              "$ref": "#/components/schemas/ClaimEvidenceRef"
+            },
+            "title": "Affected Refs",
+            "type": "array"
+          },
+          "locator": {
+            "$ref": "#/components/schemas/RecordLocator"
+          },
+          "project_id": {
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          },
+          "tenant_id": {
+            "minLength": 1,
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/RecordLocator"
+          }
+        },
+        "required": [
+          "locator",
+          "tenant_id",
+          "project_id",
+          "trigger",
+          "affected_refs"
+        ],
+        "title": "ReauditTask",
+        "type": "object"
+      },
       "ReauditTaskLink": {
         "additionalProperties": false,
         "description": "R19 trigger and affected-version projection. No queue state or scheduling authority.",
@@ -11012,6 +11281,27 @@
   "openapi": "3.1.0",
   "paths": {},
   "x-r02-capabilities": {
+    "audit_evidence": {
+      "material_contracts": [
+        "CandidateHypothesis"
+      ],
+      "read_checks": [
+        "check_audit_report",
+        "require_audit_result",
+        "check_reaudit_task",
+        "check_release_evidence"
+      ],
+      "required_current_authority": true,
+      "result_qualification": "evidence_checked_only",
+      "unsupported": [
+        "generic_priority",
+        "generic_deadline",
+        "generic_remediation_policy",
+        "unresolved_material_contracts",
+        "real_queue",
+        "release_authorization"
+      ]
+    },
     "content_id": {
       "calculate": [
         "CandidateDraft",
@@ -11082,6 +11372,10 @@
       "AttemptTransitionCheck": "service_owned",
       "AuditCheckpoint": "service_owned",
       "AuditEntry": "service_owned",
+      "AuditProfile": "service_owned",
+      "AuditQuery": "caller_input",
+      "AuditReadResult": "output_only",
+      "AuditReportRecord": "service_owned",
       "CandidateDraft": "caller_input",
       "CandidateRecord": "service_owned",
       "CheckSuite": "service_owned",
@@ -11161,6 +11455,7 @@
       "QuoteBasisScope": "service_owned",
       "QuoteEstimate": "output_only",
       "QuoteRequest": "caller_input",
+      "ReauditTask": "service_owned",
       "ReauditTaskLink": "service_owned",
       "ReferenceRequest": "caller_input",
       "ReleaseManifestBody": "service_owned",
@@ -11343,6 +11638,18 @@
     },
     "AuditEntry": {
       "$ref": "#/components/schemas/AuditEntry"
+    },
+    "AuditProfile": {
+      "$ref": "#/components/schemas/AuditProfile"
+    },
+    "AuditQuery": {
+      "$ref": "#/components/schemas/AuditQuery"
+    },
+    "AuditReadResult": {
+      "$ref": "#/components/schemas/AuditReadResult"
+    },
+    "AuditReportRecord": {
+      "$ref": "#/components/schemas/AuditReportRecord"
     },
     "CandidateDraft": {
       "$ref": "#/components/schemas/CandidateDraft"
@@ -11580,6 +11887,9 @@
     },
     "QuoteRequest": {
       "$ref": "#/components/schemas/QuoteRequest"
+    },
+    "ReauditTask": {
+      "$ref": "#/components/schemas/ReauditTask"
     },
     "ReauditTaskLink": {
       "$ref": "#/components/schemas/ReauditTaskLink"

@@ -40,3 +40,5 @@ Ubuntu 默认收集本包 15 项且专项通过。默认复跑 608 通过、18 �
 2026-11-20 确认整改提交 `997b262c5724f715bd40f620eb100bf3ed0cd280` 已同步 GitHub main，定向复跑 29 项通过。默认收集数字专项 43 项（含新增 28 项）及 636 通过、18 项 SQLite 跳过采用暂停前同一提交的实测。整改 CI 尚无可核实运行链接，公开 API 当前限流，实际运行 SHA、结果、步骤及详细日志继续待补。原 CI 仅覆盖原交付。[取证限制与复跑](evidence/p1-2-numeric-independent-review.md#整改提交定向复验与-ci-待补证据)
 
 [整改 CI 45097230926](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926) 已核验在 `997b262c5724f715bd40f620eb100bf3ed0cd280` 成功，公开作业七个步骤均成功。详细日志未取得，29 项定向复验与测试计数来自本地记录，SQLite 专项跳过。真实适配器及人工验收维持原边界。[完整证据](evidence/p1-2-numeric-independent-review.md#整改-ci-最终核验)
+
+数字性质与固定枚举结果已由 A0 于 2026.11.23 限定签收，提交 4dec2fafd18ef948995a8fb51f65189654980f41，包含 N-R01、N-R02 整改。原发现、两次 CI 的实际 SHA、详细日志限制和 SQLite 跳过口径保留。 见[正式签收](decisions/A0-P1-2-numeric-acceptance.md)。本包复用既有结果和接收守卫，新增覆盖索引见 [审计与复审证据合同及统一出口](p1-2-audit-evidence-delivery.md)。
