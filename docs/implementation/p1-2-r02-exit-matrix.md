@@ -104,3 +104,5 @@ I-R01 整改在[对应 SHA 的远端 CI](https://github.com/wangshunshun0816/ai_
 数字性质与固定枚举结果 N-R01、N-R02 已整改并通过 Ubuntu 完整检查、Windows 同锁专项和原独立向量；当前仅有本地整改证据。整改 CI 和人工验收待登记。固定四题和来源核验仍按限定子集登记，通用统计、计量、真实来源与锁定适配器和科研接受资格仍有各自验收条件。无新增存储证据。[整改证据](evidence/p1-2-numeric-independent-review.md#n-r01n-r02-整改与复验)
 
 2026-11-20 整改 SHA 已同步，N-R01／N-R02 定向复跑 29 项通过。整改远端 CI 因缺运行链接且 API 限流仍待核实，人工验收保持待填写；来源及固定四题出口继续按已证实子集登记。服务认证、I-R03 及其他整体出口缺项维持原要求。[当前证据](evidence/p1-2-numeric-independent-review.md#整改提交定向复验与-ci-待补证据)
+
+[整改 CI 45097230926](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926) 已核验在 `997b262c5724f715bd40f620eb100bf3ed0cd280` 成功，公开作业七个步骤均成功。详细日志未取得，29 项定向复验与测试计数来自本地记录，SQLite 专项跳过。真实适配器及人工验收维持原边界。[完整证据](evidence/p1-2-numeric-independent-review.md#整改-ci-最终核验) 本次仅补齐两项整改的远端工程 CI 证据。

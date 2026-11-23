@@ -48,3 +48,11 @@ Ubuntu CPython 3.12.16 的 scripts/verify.sh 完整通过，包含锁定安装�
 2026-11-20 在同一整改提交上，以 .venv/bin/python -m pytest -q -p no:cacheprovider tests/contracts/test_numeric_results.py -k 'authority_precedes_observation_reads or exact_applicable_source or observation_lock_cannot_move_selected_attempt' 再次定向复跑，29 项通过、14 项未选中。计算及接收入口的 N-R01 回归 22 项、N-R02 回归 6 项和原两臂绑定不一致 1 项共同覆盖合法对照、逐条拒绝、零次聚合锚点及正文读取、非原文拒绝和位置适用性。
 
 暂停前的同一提交本地默认收集 654 项，其中数字专项 43 项，包括新增 N-R01 的 22 项及 N-R02 的 6 项；Ubuntu 默认复跑 636 项通过、18 项 SQLite 专项跳过。18 项跳过均位于 tests/storage/test_candidate_slice.py，未设置 DANUS_P13_TEST。2026-11-20 未重复完整测试或 Windows 对照，沿用上述同一提交的实际记录。真实适配器认证、锁定授权及独立原文事实来源仍按服务阶段验收，无新增存储证据。
+
+## 整改 CI 最终核验
+
+2026-11-23 核验 [整改 CI 45097230926](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926) 的实际 SHA 为 `997b262c5724f715bd40f620eb100bf3ed0cd280`，最终 Success。[公开作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926/job/137439638665) 的 Set up job、Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build、Post Checkout、Complete job 七个步骤均为 success。Checkout 有 Node.js 20 弃用并强制运行于 Node.js 24 的警告。
+
+详细日志未取得。步骤 5 的日志返回 HTTP 404，作业日志 API 返回 HTTP 403。GitHub 连接器连续返回认证重试提示，证据采用公开运行和作业页面。检查构建步骤成功可见，具体测试名称、数量、SQLite 跳过数和构建输出未经远端详细日志逐项复核。本地 29 项定向复验、默认收集 43 项数字专项（含 28 项新增回归）及 636 通过、18 项 SQLite 跳过保留为本地实测。Windows 43 项及 23 组双端向量沿用既有记录，本轮未重复执行。
+
+原 CI 44236133594 只覆盖原提交 835263bdae9a7d42962fd42f8d9faa0f41885104；本次整改运行覆盖 `997b262c5724f715bd40f620eb100bf3ed0cd280`。工作流未启用 SQLite 专项，无新增存储验收证据。真实来源认证、锁定事实与读取授权适配器仍按服务阶段验收，人工验收待 A0 填写。

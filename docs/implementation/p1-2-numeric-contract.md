@@ -38,3 +38,5 @@ Ubuntu 默认收集本包 15 项且专项通过。默认复跑 608 通过、18 �
 独立锁定元数据授权和两臂读取权限均先于聚合锚点及正文读取。external_reported 增加强制的原文目标、精确版本及独立位置事实。计算／接收拒绝路径零次读取受限聚合，合法原文及固定四题对照通过。Ubuntu 完整检查 636 通过、18 项 SQLite 专项跳过，Windows 同锁数字专项 43 通过，23 组向量与两份 Schema 无漂移。真实适配器认证及其他合同边界保持待验收。原 CI 44236133594 仅覆盖原交付 SHA，整改 CI 待核验。[复现与复验](evidence/p1-2-numeric-independent-review.md#n-r01n-r02-整改与复验)
 
 2026-11-20 确认整改提交 `997b262c5724f715bd40f620eb100bf3ed0cd280` 已同步 GitHub main，定向复跑 29 项通过。默认收集数字专项 43 项（含新增 28 项）及 636 通过、18 项 SQLite 跳过采用暂停前同一提交的实测。整改 CI 尚无可核实运行链接，公开 API 当前限流，实际运行 SHA、结果、步骤及详细日志继续待补。原 CI 仅覆盖原交付。[取证限制与复跑](evidence/p1-2-numeric-independent-review.md#整改提交定向复验与-ci-待补证据)
+
+[整改 CI 45097230926](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926) 已核验在 `997b262c5724f715bd40f620eb100bf3ed0cd280` 成功，公开作业七个步骤均成功。详细日志未取得，29 项定向复验与测试计数来自本地记录，SQLite 专项跳过。真实适配器及人工验收维持原边界。[完整证据](evidence/p1-2-numeric-independent-review.md#整改-ci-最终核验)
