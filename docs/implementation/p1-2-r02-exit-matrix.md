@@ -108,3 +108,5 @@ I-R01 整改在[对应 SHA 的远端 CI](https://github.com/wangshunshun0816/ai_
 [整改 CI 45097230926](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45097230926) 已核验在 `997b262c5724f715bd40f620eb100bf3ed0cd280` 成功，公开作业七个步骤均成功。详细日志未取得，29 项定向复验与测试计数来自本地记录，SQLite 专项跳过。真实适配器及人工验收维持原边界。[完整证据](evidence/p1-2-numeric-independent-review.md#整改-ci-最终核验) 本次仅补齐两项整改的远端工程 CI 证据。
 
 数字性质与固定枚举结果已由 A0 于 2026.11.23 限定签收，提交 4dec2fafd18ef948995a8fb51f65189654980f41，包含 N-R01、N-R02 整改。原发现、两次 CI 的实际 SHA、详细日志限制和 SQLite 跳过口径保留。 [审计与复审证据合同及统一出口](p1-2-audit-evidence-delivery.md)与[29 行实际出口结果](evidence/p1-2-exit-coverage.json)登记 12 行行为子路径、10 行序列化、7 行未覆盖。新合同 AuditProfile、AuditReportRecord、ReauditTask 已注册，业务成功范围限已证实的候选材料及单目标复审。旧表“缺直接平台证据”的候选、论断事件、批准与发布整对象，现有[十组双端向量](evidence/p1-2-audit-ubuntu.json)，但仅补字节覆盖，不扩大原签收。
+
+审计与复审本包独立复核发现 A-R01、A-R02，配置精确绑定及原重复样例执行证据保持开放。29 行仍分为 12 行行为子路径、10 行序列化、7 行未覆盖，重复变体一行另有输入追踪限制。本包 CI 尚待推送和运行，不以原数字 CI 代替。 [独立复核](evidence/p1-2-audit-independent-review.md)
