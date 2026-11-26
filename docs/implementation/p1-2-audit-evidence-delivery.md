@@ -80,3 +80,5 @@ Windows CPython 3.12.14 以同一 uv.lock 离线同步隔离环境，57 项审�
 现行清单为 31 行：11 行行为子路径、12 行序列化、8 行未覆盖。[实际结果](evidence/p1-2-exit-coverage-remediation.json)。原 29 行和原发现作为历史保留。Ubuntu 完整检查 715 通过、18 项 SQLite 跳过，Windows 同锁专项 79 通过，12 组向量及两份 Schema 一致。[整改证据](evidence/p1-2-audit-independent-review.md#a-r01a-r02-整改与复验2026-11-26)
 
 发布报告／快照正文适用性仍缺，真实来源认证、完整审计材料和复审队列继续按原边界阻断。旧提交 28d113e 尚无已核实 CI，整改须有自身新 CI，人工验收另行进行。
+
+本包整改 [CI 45797027874](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45797027874) 已核验在 `7d8eb31e81e29c561c43e75286478a9d5f3c49c8` 成功，七个公开步骤均成功，详细日志未取得。新增专项默认收集、本轮 79 项通过与 31 行准确分类为本地证据；旧交付无 CI 证据的事实保留。审计超时完整链与发布正文适用性继续未关闭。[证据范围](evidence/p1-2-audit-independent-review.md#整改-ci-与定向复验)

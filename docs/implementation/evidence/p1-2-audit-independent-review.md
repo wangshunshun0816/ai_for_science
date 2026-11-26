@@ -97,3 +97,13 @@ AuditProfile 和服务端 AuditAssignment 的 model_profile_ref 改为既有 Mod
 Ubuntu CPython 3.12.16 完整 scripts/verify.sh 的锁定安装、静态检查、导入边界、生成物和构建通过，715 项通过／18 项 SQLite 专项跳过。Windows CPython 3.12.14 使用相同 uv.lock 的离线隔离环境，79 项专项通过。12 组整对象规范 UTF-8 和完整 SHA-256 两端逐项一致，两份 Schema 均由同一类型源生成并逐字节检查。配置字段变化的向量预期用固定 JSON 和 Python 标准库编制，并分别以 hashlib 与 OpenSSL 核算；未用产品 canonicalize 或模型输出生成自身预期。[Ubuntu](p1-2-audit-remediation-ubuntu.json) · [Windows](p1-2-audit-remediation-windows.json) · [完整工程日志](p1-2-audit-remediation-verify.log)
 
 原九件、手算、设计基线和 uv.lock 保留原字节。发布守卫未改，仍仅证明精确引用清单与 manifest 正文关联；报告／证据快照完整正文适用性缺项保留。复审优先级、多目标、真实执行／入队、A7 方法资格、真实快照和事实认证仍未关闭。本包旧提交 28d113e04b2d97f0006bfd8cbc2506265748f0c6 尚无已核实 CI，新整改也必须核验自身 SHA 的新运行，原数字 CI 不作为本包证据。
+
+## 整改 CI 与定向复验
+
+2026-11-26 先核对用户所给 45097230926，其成功运行实际绑定数字整改提交 997b262c5724f715bd40f620eb100bf3ed0cd280。随后按本包整改 SHA 查询 Actions API，找到 [45797027874](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45797027874)，实际 SHA 为 `7d8eb31e81e29c561c43e75286478a9d5f3c49c8`，最终 Success。[公开作业](https://github.com/wangshunshun0816/ai_for_science/actions/runs/45797027874/job/139830230321) 的 Set up job、Checkout、Install pinned tooling、Install pinned Python、Locked local checks and build、Post Checkout、Complete job 七个步骤均成功。Checkout 有 Node.js 20 弃用且强制在 Node.js 24 运行的警告。
+
+本包新运行的步骤 5 详细日志返回 HTTP 404，作业日志 API 返回 HTTP 403，详细日志未取得。远端可证实运行与步骤成功。对应工作流运行 verify.sh，脚本包含默认 pytest 和构建；单项用例名称、测试数量及跳过数未从远端详细日志核验。旧交付 28d113e04b2d97f0006bfd8cbc2506265748f0c6 未取得 CI 证据的事实保留，不要求补跑旧版。
+
+本轮 Ubuntu 默认收集 733 项，其中 test_audit_evidence.py 66 项、test_exit_coverage.py 13 项，新增整改专项在默认路径中。两文件定向复跑 79 项通过。两入口 A-R01 覆盖实际模型／谱系错配、同修订配置／谱系替换、旧记录定位拒绝、缺有效性／撤销／到期、越权零次配置读取及合法新配置科学版本／谱系／审计修订；A-R02 的 q99 和冲突预测内存变体不再报告原行为通过，合法十条 q3 对照通过。
+
+本地 coverage_report 重新执行并与已保存结果相等，清单为 31 行：11 行行为子路径、12 行序列化、8 行未覆盖。序列化及未覆盖行均为 not_executed，整对象字节专项另行验证。审计超时完整提交链仍未覆盖。12 组独立向量与两份 Schema 重新核对现行结果，均匹配既有 Ubuntu／Windows 证据。本轮未重跑全量或 Windows 专项，715 通过、18 项 SQLite 跳过及 Windows 79 项沿用整改交付的本地实测；工作流未启用 SQLite 专项，无新增存储证据。发布报告／证据快照正文适用性、真实来源与服务认证、完整复审调度及其他工作卡缺项维持原边界。
