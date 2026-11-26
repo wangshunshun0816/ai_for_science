@@ -69,3 +69,31 @@
 声明分类确为 12 行 path_subset、10 行 serialization_only、7 行 not_covered。十行序列化条目在 coverage_report 中的 result 为 not_executed，其实际字节验证在 test_independent_audit_vectors_and_service_input_boundary 及跨平台文件中单独执行。不能将这些行合并为行为通过。
 
 12 行行为条目中，重复 q3 一行受 A-R02 限制。其余正面／有限否定是结果计算和接收子路径，超时仅错误报告子路径，均未承诺完整 G0/G1/G2 或入图。七行未覆盖为过宽 Scope 原变体、收集崩溃恢复、提交幂等、抽样不确定、数值复现、Scope 变更及资格恢复，保持未关闭。原九件、手算、设计基线及产品代码无改动。
+
+## A-R01、A-R02 整改与复验（2026-11-26）
+
+原复现及证据提交 247b44d69687c703fe7b382574448c5b0d760372 保留。先新增回归再修复，整改前新增的配置错配／正文替换、旧定位形状及原变体内容消费共 17 项全部失败。整改后两入口保留合法配套配置和精确新修订通过的对照。
+
+### A-R01 处置
+
+AuditProfile 和服务端 AuditAssignment 的 model_profile_ref 改为既有 ModelProfile.ref 使用的 ScientificRef，ModelLineage 仍是精确 RecordLocator。没有从旧记录定位推定科学版本，也没有创建新的配置 ID 或投影规则。旧定位载荷显式结构拒绝。两份生成物的唯一合同形状变化为 AuditProfile.model_profile_ref 从 RecordLocator 指向 ScientificRef；尚未签收的原审计形状需由提供方重新给出既有科学引用，无静默迁移。
+
+服务端 AuditReader 复用 A 组 QualificationReader 的 execution_validity、execution_version 和 execution_body。先逐项核验当前读权限，再对两种精确目标核验当前期限、撤销与归属。独立快照的类型、精确定位、所有权与实际正文逐项相等，核对 ModelLineage.model_profile_ref 及 provider／base_model／version 与 ModelProfile 完全对应，并确认 task_kind 在配置适用列表内。提示和工具引用按快照中的精确引用核验读取权限。本次不授予正式 A7 评测资格，也不引入新阈值、权限或服务认证。
+
+回归覆盖计算侧审计读取与接收复算两入口：实际模型／谱系错配、组件错配、同修订配置和谱系正文替换、缺有效性事实、撤销与恰到期均拒绝。配置或谱系无权时两种配置快照／正文、聚合材料及审计记录的受限读取全部为零。缺有效性、撤销和到期先于配置快照／正文读取。精确新 ModelProfile 科学版本与新谱系修订，配套新 AuditProfile／AuditReport 修订及独立依据时，两入口通过，原配置和报告正文保留。
+
+### A-R02 处置及其他清单行检查
+
+正式结果入口的绑定与四题独立标签沿用已有固定正面材料；原变体的 evaluator_only_rows、append_evaluator_only_rows 逐条读取，通过显式构造 TrustedObservation 输入既有精确运行／尝试绑定、原始题号和两臂预测。原始字节文件未修改。标签从锁定的正面依据取得，未采用变体自报标签重定义真值。原报告错配仍消费原 report_override。
+
+合法十条重复 q3 计一次，固定分母为四，错误宣称的分母按实际收到的行数送入接收入口并拒绝。在内存将原追加行替换为 q99 或冲突预测，均不再报告原行为通过，q99 触发既有枚举拒绝，冲突使独立的“valid、0.25”期望失败。不是通过清空输入、补题或重建 q3 来通过。
+
+对其他行作相同核对：缺 q4 改为消费原变体的实际逐行内容；正面和有限否定使用原文件的观测与手算字段；数字错配使用原变体 report_override。审计超时原文件仅有自然语言观察，原执行器代用另一个合成 error 报告不能证明它贯通完整 G2，因此该行降为 not_covered。独立 error 合同正反例仍保留。候选改版、三类明确失效、审计调用接收和单目标复审复用原独立材料与正式入口，范围仍为子路径。
+
+现清单 31 行，11 行 path_subset、12 行 serialization_only、8 行 not_covered。原 29 行中行为从 12 降为 11，未覆盖从 7 增为 8；新增两行是 ModelProfile 和 ModelLineage 独立整对象字节证据。序列化行在清单报告中仍为 not_executed，其字节验证由专项执行，不混记为行为通过。[更新后清单结果](p1-2-exit-coverage-remediation.json)
+
+### 实测、独立预期与剩余边界
+
+Ubuntu CPython 3.12.16 完整 scripts/verify.sh 的锁定安装、静态检查、导入边界、生成物和构建通过，715 项通过／18 项 SQLite 专项跳过。Windows CPython 3.12.14 使用相同 uv.lock 的离线隔离环境，79 项专项通过。12 组整对象规范 UTF-8 和完整 SHA-256 两端逐项一致，两份 Schema 均由同一类型源生成并逐字节检查。配置字段变化的向量预期用固定 JSON 和 Python 标准库编制，并分别以 hashlib 与 OpenSSL 核算；未用产品 canonicalize 或模型输出生成自身预期。[Ubuntu](p1-2-audit-remediation-ubuntu.json) · [Windows](p1-2-audit-remediation-windows.json) · [完整工程日志](p1-2-audit-remediation-verify.log)
+
+原九件、手算、设计基线和 uv.lock 保留原字节。发布守卫未改，仍仅证明精确引用清单与 manifest 正文关联；报告／证据快照完整正文适用性缺项保留。复审优先级、多目标、真实执行／入队、A7 方法资格、真实快照和事实认证仍未关闭。本包旧提交 28d113e04b2d97f0006bfd8cbc2506265748f0c6 尚无已核实 CI，新整改也必须核验自身 SHA 的新运行，原数字 CI 不作为本包证据。

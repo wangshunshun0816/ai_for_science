@@ -4,14 +4,14 @@
 
 ## 字段依据及责任
 
-所有表内字段显式必填，无隐式默认值。定位为完整 RecordLocator，科研材料引用为完整 ScientificRef，历史引用沿用已有 HistoricalRef。tenant_id、project_id 由受信服务填写。列表保持原顺序及重复项，逐项校验，未新增去重或汇总规则。新记录的正文完整摘要只用于既有不可变版本核验，不分配新的科研内容 ID。
+所有表内字段显式必填，无隐式默认值。权威记录定位为完整 RecordLocator，模型配置与科研材料引用为完整 ScientificRef，历史引用沿用已有 HistoricalRef。tenant_id、project_id 由受信服务填写。列表保持原顺序及重复项，逐项校验，未新增去重或汇总规则。新记录的正文完整摘要只用于既有不可变版本核验，不分配新的科研内容 ID。
 
 | 合同及精确字段 | 类型、null 与来源 | 写入、版本及权限 |
 | --- | --- | --- |
 | AuditProfile.locator | AuditProfile 精确记录定位，不可空。大方案 §6.4、角色 §4.6。 | 审计配置管理服务持有，按独立记录版本核验。 |
 | AuditProfile.tenant_id、project_id | 非空文本，沿用项目归属。 | 控制服务附加，普通调用方不可自报权威记录。 |
 | AuditProfile.task_kind | candidate_review、protocol_review、empirical_review 三值，不可空。角色 §4.6。 | 配置服务写，不允许任务类型互换。结构可解析不等于每种材料已支持。 |
-| AuditProfile.model_profile_ref、lineage_ref | ModelProfile、ModelLineage 精确记录，不可空。角色 §4.6。 | 服务持有，与独立任务配置逐项匹配，权限先于受限读取。实际模型质量和资格评测另验，本包未重复执行 A 组完整执行资格核验。 |
+| AuditProfile.model_profile_ref、lineage_ref | ModelProfile 为既有 ScientificRef，ModelLineage 为精确 RecordLocator，均不可空。角色 §4.6；A-R01 整改。 | 服务持有，与独立任务配置逐项匹配，权限先于受限读取。实际模型质量和资格评测另验，本包未重复执行 A 组完整执行资格核验。 |
 | AuditProfile.required_materials | 非空精确引用列表，沿用 Ref。角色 §4.6 冻结审计包。 | 与独立任务材料清单逐项精确匹配，不从待检报告反推。 |
 | AuditReportRecord.locator、tenant_id、project_id | AuditReport 记录定位及服务归属，不可空。 | R12 持有，经独立完整正文摘要核验。 |
 | AuditReportRecord.task_kind、target_ref、profile_ref | 三类审计任务、精确科研目标和 AuditProfile 定位，不可空。角色 §4.6。 | R12 绑定，不因同科学哈希而替换精确对象。候选、协议／预注册、提交的任务类型不可混用。 |
@@ -70,3 +70,13 @@ Windows CPython 3.12.14 以同一 uv.lock 离线同步隔离环境，57 项审�
 | P1-2 其他合同与整体出口 | 收尾计划及台账继续列明 Budget／BudgetEvent、学习／参数／评测、数学引用等 | 未因本包注册类型或预期阻断而记为完成。 |
 
 独立复核已登记 A-R01 配置／谱系实际正文与引用桥接缺口、A-R02 重复样例输入追踪缺陷，均待整改。本轮 57 项专项通过不能关闭这两项。发布报告及快照正文适用性仍缺证据。本包尚无对应远端运行，用户确认须先手动推送后运行。 [独立复核](evidence/p1-2-audit-independent-review.md)
+
+## A-R01、A-R02 整改后的现行交付
+
+2026-11-26 复用 A 组精确配置科学引用、谱系定位、独立版本／正文和当前有效性守卫，拒绝配置／谱系错配及同修订替换。旧 ModelProfile 记录定位形状拒绝，要求显式提供已有 ModelProfile.ref，不自动转换。合法新配置科学版本与新谱系、审计配置及报告修订两入口通过；未授予真实审计资格。
+
+执行器消费原变体逐行内容，q99 和冲突内存变体不再报告原预期通过，原十条重复 q3 合法。审计超时行因未贯通实际 G2 提交而降为未覆盖；其他已定分支沿用已有入口与独立材料。
+
+现行清单为 31 行：11 行行为子路径、12 行序列化、8 行未覆盖。[实际结果](evidence/p1-2-exit-coverage-remediation.json)。原 29 行和原发现作为历史保留。Ubuntu 完整检查 715 通过、18 项 SQLite 跳过，Windows 同锁专项 79 通过，12 组向量及两份 Schema 一致。[整改证据](evidence/p1-2-audit-independent-review.md#a-r01a-r02-整改与复验2026-11-26)
+
+发布报告／快照正文适用性仍缺，真实来源认证、完整审计材料和复审队列继续按原边界阻断。旧提交 28d113e 尚无已核实 CI，整改须有自身新 CI，人工验收另行进行。

@@ -14,9 +14,6 @@ from tests.contracts.test_audit_evidence import (
     test_audit_call_receive_and_precise_result as verify_audit_call_receive_and_precise_result,
 )
 from tests.contracts.test_audit_evidence import (
-    test_audit_results_have_independent_meanings as verify_audit_results_have_independent_meanings,
-)
-from tests.contracts.test_audit_evidence import (
     test_reaudit_exact_chain_and_unsupported_scheduling as verify_reaudit,
 )
 from tests.contracts.test_candidate_revision_golden import verify_golden
@@ -46,42 +43,46 @@ def run_case(case: dict[str, Any]) -> dict[str, str]:
         "rejected-duplicate-q3",
     }:
         r = Reader()
-        name = "bounded-negative" if key == "bounded-negative" else "positive"
-        q, expected = fixed(name, r, missing=key == "incomplete-missing-q4")
-        if key == "rejected-duplicate-q3":
-            assert r.lock is not None
-            base = deepcopy(r.body)
-            row = deepcopy(base["method_rows"][2])
-            for n in range(5, 15):
-                row["source_row_ref"]["row_number"] = n
-                base["method_rows"].append(deepcopy(row))
-            r.put(base, "R08")
+        q, _ = fixed("positive", r)
+        path = ROOT / ("docs/implementation/p0-2/golden/" + key + ".json")
+        raw = json.loads(path.read_bytes())
+        positive = json.loads((ROOT / "docs/implementation/p0-2/golden/positive.json").read_bytes())
+        inputs = raw["input"]
+        if key not in {"positive", "bounded-negative"}:
+            assert inputs["base_fixture_ref"] == positive["fixture_id"]
+        rows = deepcopy(inputs.get("evaluator_only_rows", positive["input"]["evaluator_only_rows"]))
+        rows.extend(deepcopy(inputs.get("append_evaluator_only_rows", [])))
+        body = deepcopy(r.body)
+        for arm in ("baseline", "method"):
+            binding = body[arm]
+            body[arm + "_rows"] = [
+                {
+                    "binding": binding,
+                    "source_row_ref": {"artifact_digest": "f" * 64, "row_number": index},
+                    "row": {"item_id": row["sample_id"], "prediction": row[arm]},
+                }
+                for index, row in enumerate(rows, 1)
+            ]
+        r.put(body, "R08")
         v = calculate_fixed_result(q, CTX, r)
         require_fixed_result(q, v, CTX, r)
         if key in {"positive", "bounded-negative"}:
+            expected = raw["expected"]["expected_stats"]
             assert v.effect == expected["effect"]
             assert v.baseline_accuracy == expected["baseline_accuracy"]
             assert v.method_accuracy == expected["method_accuracy"]
         elif key == "incomplete-missing-q4":
-            assert v.status == "incomplete"
+            assert v.status == raw["expected"]["scientific_validity"] == "incomplete"
             assert v.effect is v.baseline_accuracy is v.method_accuracy is None
         else:
-            path = ROOT / ("docs/implementation/p0-2/golden/" + key + ".json")
-            raw = json.loads(path.read_bytes())
             if key == "rejected-number-mismatch":
-                payload = v.model_copy(update=raw["input"]["report_override"])
+                payload = v.model_copy(update=inputs["report_override"])
             else:
-                assert len(raw["input"]["append_evaluator_only_rows"]) == 10
+                assert v.status == "valid"
                 assert v.denominator == 4 and v.effect == "0.25"
-                payload = v.model_copy(update={"denominator": 14})
+                payload = v.model_copy(update={"denominator": len(rows)})
             with pytest.raises((ContractBlocked, ValidationError)):
                 require_fixed_result(q, payload, CTX, r)
-    elif key == "error-audit-timeout":
-        raw = json.loads(
-            (ROOT / "docs/implementation/p0-2/golden/error-audit-timeout.json").read_bytes()
-        )
-        assert raw["expected"]["submission_status"] == "error"
-        verify_audit_results_have_independent_meanings("error")
     elif key == "candidate-revision":
         verify_golden()
     elif key.startswith("invalidation/"):
@@ -113,3 +114,25 @@ def coverage_report() -> list[dict[str, Any]]:
 
 if __name__ == "__main__":
     print(json.dumps(coverage_report(), ensure_ascii=False, indent=2))
+
+
+@pytest.mark.parametrize("fault", ["unknown", "conflict"])
+def test_original_duplicate_variant_rows_are_consumed(
+    monkeypatch: pytest.MonkeyPatch, fault: str
+) -> None:
+    path = ROOT / "docs/implementation/p0-2/golden/rejected-duplicate-q3.json"
+    raw = json.loads(path.read_bytes())
+    for row in raw["input"]["append_evaluator_only_rows"]:
+        if fault == "unknown":
+            row["sample_id"] = "q99"
+        else:
+            row["method"] = 0
+    original = Path.read_bytes
+
+    def read_bytes(p: Path) -> bytes:
+        return json.dumps(raw).encode() if p == path else original(p)
+
+    monkeypatch.setattr(Path, "read_bytes", read_bytes)
+    case = next(c for c in MANIFEST if c["id"] == "rejected-duplicate-q3")
+    with pytest.raises((AssertionError, ContractBlocked, ValidationError)):
+        run_case(case)

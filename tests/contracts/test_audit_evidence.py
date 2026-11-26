@@ -28,7 +28,14 @@ from danus_ai.contracts.audit_evidence import (
 )
 from danus_ai.contracts.export_schema import schema_bytes
 from danus_ai.contracts.guards import ContractBlocked, ReferenceState, RequestContext
-from danus_ai.contracts.messages import authorize_delegated_request
+from danus_ai.contracts.messages import TrustedRequestContext, authorize_delegated_request
+from danus_ai.contracts.qualification import (
+    EvidenceBody,
+    EvidenceRef,
+    EvidenceValidity,
+    ModelLineage,
+    ModelProfile,
+)
 from danus_ai.contracts.references import RecordLocator, ScientificRef
 from tests.contracts.test_batch5 import NOW
 from tests.contracts.test_invalidation import Source, loc
@@ -64,7 +71,7 @@ class AuditSource(Source):
         self.assignment: AuditAssignment | None = AuditAssignment(
             self.audit_query,
             self.owner,
-            RecordLocator.model_validate(DATA["AuditProfile"]["model_profile_ref"]),
+            ScientificRef.model_validate(DATA["AuditProfile"]["model_profile_ref"]),
             RecordLocator.model_validate(DATA["AuditProfile"]["lineage_ref"]),
             tuple(
                 ScientificRef.model_validate(ref)
@@ -81,6 +88,50 @@ class AuditSource(Source):
             sha256((ROOT / "CandidateRecord.json").read_bytes()).hexdigest(),
         )
         self.release_binding: ReleaseEvidenceBinding | None = None
+        assert self.assignment is not None
+        self.model_profile = ModelProfile.model_validate(DATA["ModelProfile"])
+        self.model_lineage = ModelLineage.model_validate(DATA["ModelLineage"])
+        self.configuration_snapshots: list[EvidenceBody] = [
+            self.model_profile.model_copy(deep=True),
+            self.model_lineage.model_copy(deep=True),
+        ]
+        self.configuration_reads: list[str] = []
+        self.configuration_missing = False
+        self.configuration_revoked = False
+        self.configuration_expires = NOW + timedelta(seconds=1)
+
+    def execution_validity(
+        self, ctx: TrustedRequestContext, ref: EvidenceRef, /
+    ) -> EvidenceValidity | None:
+        if self.configuration_missing:
+            return None
+        return EvidenceValidity(
+            ref,
+            ctx.tenant_id,
+            ctx.project_id,
+            self.configuration_expires,
+            self.configuration_revoked,
+        )
+
+    def execution_version(
+        self, ctx: TrustedRequestContext, ref: EvidenceRef, /
+    ) -> EvidenceBody | None:
+        self.configuration_reads.append("snapshot")
+        for item in self.configuration_snapshots:
+            bound = item.ref if isinstance(item, ModelProfile) else item.locator
+            if bound == ref:
+                return item
+        return None
+
+    def execution_body(
+        self, ctx: TrustedRequestContext, ref: EvidenceRef, /
+    ) -> EvidenceBody | None:
+        self.configuration_reads.append("body")
+        for item in (self.model_profile, self.model_lineage):
+            bound = item.ref if isinstance(item, ModelProfile) else item.locator
+            if bound == ref:
+                return item
+        return None
 
     def audit_material_version(
         self, ctx: RequestContext, ref: ScientificRef, /
@@ -330,7 +381,7 @@ def cross_platform_vectors() -> dict[str, Any]:
 
 
 def test_independent_audit_vectors_and_service_input_boundary() -> None:
-    assert len(cross_platform_vectors()["vectors"]) == 10
+    assert len(cross_platform_vectors()["vectors"]) == 12
     for name in ("AuditProfile", "AuditReportRecord", "ReauditTask", "AuditReadResult"):
         with pytest.raises(ContractBlocked):
             validate_object(name, DATA[name])
@@ -409,3 +460,132 @@ def test_unapproved_audit_material_and_reaudit_branches_remain_blocked() -> None
     legacy.put(legacy.task, body)
     with pytest.raises(ContractBlocked, match="REAUDIT_MULTI_TARGET_SPEC_UNRESOLVED"):
         check_reaudit_task(legacy.task, legacy.query(), legacy.authorized, NOW, legacy)
+
+
+@pytest.mark.parametrize("entry", ["call", "receive"])
+@pytest.mark.parametrize(
+    "fault",
+    [
+        "lineage_model",
+        "lineage_components",
+        "profile_replacement",
+        "lineage_replacement",
+        "missing",
+        "revoked",
+        "expired",
+    ],
+)
+def test_configuration_real_body_regression(entry: str, fault: str) -> None:
+    source = AuditSource()
+    report = check_audit_report(source.audit_query, source.auth, NOW, source)
+    source.configuration_reads.clear()
+    if fault == "lineage_model":
+        source.model_lineage.model_profile_ref = source.model_profile.ref.model_copy(
+            update={"object_id": "unrelated"}
+        )
+        source.configuration_snapshots[1] = source.model_lineage.model_copy(deep=True)
+    elif fault == "lineage_components":
+        source.model_lineage.provider = "different-provider"
+        source.configuration_snapshots[1] = source.model_lineage.model_copy(deep=True)
+    elif fault == "profile_replacement":
+        source.model_profile.task_kinds = []
+    elif fault == "lineage_replacement":
+        source.model_lineage.version = "tampered"
+    elif fault == "missing":
+        source.configuration_missing = True
+    elif fault == "revoked":
+        source.configuration_revoked = True
+    else:
+        source.configuration_expires = NOW
+    with pytest.raises(ContractBlocked):
+        if entry == "call":
+            check_audit_report(source.audit_query, source.auth, NOW, source)
+        else:
+            require_audit_result(source.audit_query, report, source.auth, NOW, source)
+    if fault in {"missing", "revoked", "expired"}:
+        assert source.configuration_reads == []
+
+
+def test_old_record_locator_profile_is_not_silently_converted() -> None:
+    body = deepcopy(DATA["AuditProfile"])
+    body["model_profile_ref"] = loc("ModelProfile", "model").model_dump()
+    with pytest.raises(ValidationError):
+        validate_object("AuditProfile", body, trusted=True)
+
+
+@pytest.mark.parametrize("entry", ["call", "receive"])
+@pytest.mark.parametrize("ref_name", ["profile", "lineage"])
+def test_configuration_denial_opens_no_snapshots_or_bodies(entry: str, ref_name: str) -> None:
+    source = AuditSource()
+    result = check_audit_report(source.audit_query, source.auth, NOW, source)
+    source.configuration_reads.clear()
+    source.material_reads.clear()
+    source.anchor_reads.clear()
+    source.body_reads.clear()
+    assert source.assignment is not None
+    if ref_name == "profile":
+        source.unavailable = source.assignment.model_profile_ref
+    else:
+        source.denied.add(source.key(source.assignment.lineage_ref))
+    with pytest.raises(ContractBlocked):
+        if entry == "call":
+            check_audit_report(source.audit_query, source.auth, NOW, source)
+        else:
+            require_audit_result(source.audit_query, result, source.auth, NOW, source)
+    assert source.configuration_reads == source.material_reads == []
+    assert source.anchor_reads == source.body_reads == []
+
+
+def test_configuration_new_exact_revision_and_scientific_version_are_supported() -> None:
+    source = AuditSource()
+    assert source.assignment is not None
+    new_ref = source.model_profile.ref.model_copy(
+        update={"content_version": "model:v1:" + "2" * 64}
+    )
+    new_lineage = source.model_lineage.locator.model_copy(update={"revision": 2})
+    source.model_profile.ref = new_ref
+    source.model_profile.model_version = "v2"
+    source.model_lineage.locator = new_lineage
+    source.model_lineage.model_profile_ref = new_ref
+    source.model_lineage.version = "v2"
+    source.configuration_snapshots = [
+        source.model_profile.model_copy(deep=True),
+        source.model_lineage.model_copy(deep=True),
+    ]
+    old_profile = source.profile
+    old_report = source.report_ref
+    profile = deepcopy(source.bodies[source.key(old_profile)])
+    report = deepcopy(source.bodies[source.key(old_report)])
+    source.profile = old_profile.model_copy(update={"revision": 2})
+    source.report_ref = old_report.model_copy(update={"revision": 2})
+    source.audit_query = source.audit_query.model_copy(
+        update={"profile_ref": source.profile, "report_ref": source.report_ref}
+    )
+    source.assignment = replace(
+        source.assignment,
+        query=source.audit_query,
+        model_profile_ref=new_ref,
+        lineage_ref=new_lineage,
+    )
+    profile["locator"] = source.profile.model_dump()
+    profile["model_profile_ref"] = new_ref.model_dump()
+    profile["lineage_ref"] = new_lineage.model_dump()
+    report["locator"] = source.report_ref.model_dump()
+    report["profile_ref"] = source.profile.model_dump()
+    source.put(source.profile, profile)
+    source.put(source.report_ref, report)
+    assert source.bodies[source.key(old_profile)] == DATA["AuditProfile"]
+    assert source.bodies[source.key(old_report)] == DATA["AuditReportRecord"]
+    result = check_audit_report(source.audit_query, source.auth, NOW, source)
+    require_audit_result(source.audit_query, result, source.auth, NOW, source)
+    assert result.result == "no_blocking_issue_found"
+
+
+def test_configuration_scientific_location_and_snapshot_owner_are_exact() -> None:
+    source = AuditSource()
+    source.configuration_snapshots[0] = source.model_profile.model_copy(
+        update={"tenant_id": "different-tenant"}
+    )
+    with pytest.raises(ContractBlocked, match="EXECUTION_QUALIFICATION_VERSION_MISMATCH"):
+        check_audit_report(source.audit_query, source.auth, NOW, source)
+    assert source.configuration_reads == ["snapshot"]

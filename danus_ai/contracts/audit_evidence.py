@@ -25,6 +25,13 @@ from .invalidation import (
 from .messages import AuthorizedDelegation, authorize_delegated_request
 from .planning import Ref, require_type
 from .projections import validate_candidate_version
+from .qualification import (
+    EvidenceBody,
+    EvidenceRef,
+    ModelLineage,
+    ModelProfile,
+    QualificationReader,
+)
 from .references import RecordLocator, ScientificRef, Text
 from .role_outputs import AuditReport
 from .signing import ReleaseManifestBody
@@ -38,7 +45,7 @@ class AuditProfile(AuthoritativeRecord):
     tenant_id: Text
     project_id: Text
     task_kind: AuditKind
-    model_profile_ref: RecordLocator
+    model_profile_ref: ScientificRef
     lineage_ref: RecordLocator
     required_materials: Annotated[list[Ref], Field(min_length=1)]
 
@@ -149,7 +156,7 @@ class AuditAssignment:
 
     query: AuditQuery
     owner: tuple[str, str]
-    model_profile_ref: RecordLocator
+    model_profile_ref: ScientificRef
     lineage_ref: RecordLocator
     material_refs: tuple[Ref, ...]
     expires_at: datetime
@@ -176,7 +183,7 @@ class ReleaseEvidenceBinding:
     report_refs: tuple[RecordLocator, ...]
 
 
-class AuditReader(InvalidationReader, Protocol):
+class AuditReader(InvalidationReader, QualificationReader, Protocol):
     def audit_material_version(
         self, ctx: RequestContext, ref: ScientificRef, /
     ) -> AuditMaterialVersion | None: ...
@@ -218,6 +225,56 @@ def _current_reader(
     return _ImpactReader(port, auth, at, "read")
 
 
+def _check_audit_configuration(
+    assignment: AuditAssignment,
+    auth: AuthorizedDelegation,
+    at: datetime,
+    port: AuditReader,
+    reader: _ImpactReader,
+) -> None:
+    context = auth.grant.context
+    refs: list[EvidenceRef] = [assignment.model_profile_ref, assignment.lineage_ref]
+    for ref in refs:
+        validity = port.execution_validity(context, ref)
+        if (
+            validity is None
+            or validity.ref != ref
+            or (validity.tenant_id, validity.project_id) != reader.owner
+        ):
+            raise ContractBlocked("EXECUTION_QUALIFICATION_EVIDENCE_UNAVAILABLE")
+        if validity.revoked or validity.expires_at.utcoffset() is None or at >= validity.expires_at:
+            raise ContractBlocked("EXECUTION_QUALIFICATION_EVIDENCE_INACTIVE")
+    snapshots: list[EvidenceBody] = []
+    for ref, shape in zip(refs, (ModelProfile, ModelLineage), strict=True):
+        snapshot = port.execution_version(context, ref)
+        if not isinstance(snapshot, shape):
+            raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_UNAVAILABLE")
+        snapshot = shape.model_validate(snapshot.model_dump())
+        bound = snapshot.ref if isinstance(snapshot, ModelProfile) else snapshot.locator
+        if bound != ref or (snapshot.tenant_id, snapshot.project_id) != reader.owner:
+            raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_MISMATCH")
+        snapshots.append(snapshot)
+    profile_snapshot = snapshots[0]
+    assert isinstance(profile_snapshot, ModelProfile)
+    for ref in [profile_snapshot.prompt_ref, *profile_snapshot.tools]:
+        require_reference(reader.ctx, ref, port)
+    profile = port.execution_body(context, assignment.model_profile_ref)
+    lineage = port.execution_body(context, assignment.lineage_ref)
+    if not isinstance(profile, ModelProfile) or not isinstance(lineage, ModelLineage):
+        raise ContractBlocked("EXECUTION_QUALIFICATION_BODY_UNAVAILABLE")
+    profile = ModelProfile.model_validate(profile.model_dump())
+    lineage = ModelLineage.model_validate(lineage.model_dump())
+    if [profile, lineage] != snapshots:
+        raise ContractBlocked("EXECUTION_QUALIFICATION_VERSION_BODY_MISMATCH")
+    if (
+        lineage.model_profile_ref != profile.ref
+        or (lineage.provider, lineage.base_model, lineage.version)
+        != (profile.provider, profile.base_model, profile.model_version)
+        or assignment.query.task_kind not in profile.task_kinds
+    ):
+        raise ContractBlocked("EXECUTION_MODEL_VERSION_MISMATCH")
+
+
 def check_audit_report(
     query: AuditQuery, auth: AuthorizedDelegation, at: datetime, port: AuditReader
 ) -> AuditReadResult:
@@ -246,6 +303,7 @@ def check_audit_report(
     for ref in assignment.material_refs:
         if not isinstance(ref, ScientificRef) or ref.object_type != "CandidateHypothesis":
             raise ContractBlocked("AUDIT_MATERIAL_SPEC_UNRESOLVED")
+    _check_audit_configuration(assignment, auth, at, port, reader)
     # All material access has been checked before any material snapshot or body.
     for ref in assignment.material_refs:
         assert isinstance(ref, ScientificRef)

@@ -9,9 +9,9 @@
     "project_id": "project",
     "task_kind": "candidate_review",
     "model_profile_ref": {
-      "record_type": "ModelProfile",
-      "record_id": "model",
-      "revision": 1
+      "object_type": "ModelProfile",
+      "object_id": "model",
+      "content_version": "model:v1:1111111111111111111111111111111111111111111111111111111111111111"
     },
     "lineage_ref": {
       "record_type": "ModelLineage",
@@ -301,5 +301,43 @@
         "revision": 1
       }
     ]
+  },
+  "ModelProfile": {
+    "ref": {
+      "object_type": "ModelProfile",
+      "object_id": "model",
+      "content_version": "model:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "provider": "fixture",
+    "base_model": "fixture-model",
+    "model_version": "v1",
+    "prompt_ref": {
+      "object_type": "Prompt",
+      "object_id": "prompt",
+      "content_version": "prompt:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "tools": [],
+    "task_kinds": [
+      "candidate_review"
+    ]
+  },
+  "ModelLineage": {
+    "locator": {
+      "record_type": "ModelLineage",
+      "record_id": "lineage",
+      "revision": 1
+    },
+    "tenant_id": "tenant",
+    "project_id": "project",
+    "model_profile_ref": {
+      "object_type": "ModelProfile",
+      "object_id": "model",
+      "content_version": "model:v1:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    "provider": "fixture",
+    "base_model": "fixture-model",
+    "version": "v1"
   }
 }

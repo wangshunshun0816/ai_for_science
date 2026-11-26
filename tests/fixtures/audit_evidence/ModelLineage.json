@@ -1,0 +1,1 @@
+{"base_model":"fixture-model","locator":{"record_id":"lineage","record_type":"ModelLineage","revision":1},"model_profile_ref":{"content_version":"model:v1:1111111111111111111111111111111111111111111111111111111111111111","object_id":"model","object_type":"ModelProfile"},"project_id":"project","provider":"fixture","tenant_id":"tenant","version":"v1"}

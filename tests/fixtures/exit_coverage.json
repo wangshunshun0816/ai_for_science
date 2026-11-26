@@ -29,11 +29,11 @@
   {
     "id": "error-audit-timeout",
     "fixture": "docs/implementation/p0-2/golden/error-audit-timeout.json",
-    "coverage": "path_subset",
-    "entry": "check_audit_report",
+    "coverage": "not_covered",
+    "entry": null,
     "expected_source": "docs/implementation/p0-2/golden/error-audit-timeout.json#expected.submission_status",
-    "receiver": "require_audit_result",
-    "gap": "只核验服务错误报告，不含整个 G2 提交流程"
+    "receiver": null,
+    "gap": "原样例只描述 G2 超时观察；本轮未将实际观察贯通完整 G2 提交。另有独立 error 报告测试，不计此行完成。"
   },
   {
     "id": "rejected-number-mismatch",
@@ -60,7 +60,7 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "十条重复行与错误分母拒绝，未代替完整提交"
+    "gap": "显式消费原变体每条追加观测，验证四题分母与错误分母拒绝；未代替完整提交"
   },
   {
     "id": "recovery-collector-crash",
@@ -239,5 +239,21 @@
     "expected_source": null,
     "receiver": null,
     "gap": "缺独立方法或批准适用规则"
+  },
+  {
+    "id": "vector/ModelProfile",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ModelProfile.json",
+    "receiver": null,
+    "gap": "配置业务核验另在专项执行，整对象字节单列"
+  },
+  {
+    "id": "vector/ModelLineage",
+    "coverage": "serialization_only",
+    "entry": "schema_registry",
+    "expected_source": "tests/fixtures/audit_evidence/ModelLineage.json",
+    "receiver": null,
+    "gap": "配置业务核验另在专项执行，整对象字节单列"
   }
 ]

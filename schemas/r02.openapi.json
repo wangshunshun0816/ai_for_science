@@ -1126,7 +1126,7 @@
             "$ref": "#/components/schemas/RecordLocator"
           },
           "model_profile_ref": {
-            "$ref": "#/components/schemas/RecordLocator"
+            "$ref": "#/components/schemas/ScientificRef"
           },
           "project_id": {
             "minLength": 1,
