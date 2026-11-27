@@ -46,6 +46,18 @@ class Reader(SyntheticReader):
     def __init__(self) -> None:
         super().__init__()
         self.gates = {}
+        self.submissions: dict[str, ClaimSubmission] = {}
+        self.reports: dict[str, EvidenceReport] = {}
+        self.denied: RecordLocator | None = None
+        self.body_reads = 0
+
+    def submission(self, ctx: RequestContext, ref: RecordLocator) -> ClaimSubmission | None:
+        self.body_reads += 1
+        return self.submissions.get(ref.model_dump_json())
+
+    def evidence_report(self, ctx: RequestContext, ref: RecordLocator) -> EvidenceReport | None:
+        self.body_reads += 1
+        return self.reports.get(ref.model_dump_json())
 
     usage_reads = 0
     usage_subject = locator("InvocationRecord")
@@ -74,11 +86,11 @@ class Reader(SyntheticReader):
             amount=0,
         )
 
-    def record(self, ctx: RequestContext, ref: RecordLocator) -> RecordFact:
+    def record(self, ctx: RequestContext, ref: RecordLocator) -> RecordFact | None:
         writer = {"Attempt": "R08", "InvocationRecord": "R08", "Usage": self.usage_writer}.get(
             ref.record_type, "R13"
         )
-        return RecordFact(ref, ctx.tenant_id, ctx.project_id, writer, True)
+        return RecordFact(ref, ctx.tenant_id, ctx.project_id, writer, ref != self.denied)
 
     def run(self, ctx: RequestContext, ref: ScientificRef) -> RunFact | None:
         return self.run_fact
@@ -308,7 +320,39 @@ def test_report_outcomes_and_usage() -> None:
         audit_refs=[],
         repair_scope=None,
     )
+    reader.submissions[submission.locator.model_dump_json()] = submission
+    reader.reports[report.locator.model_dump_json()] = report
     check_submission_report(submission, report, ctx, reader)
+    for wrong in (
+        report.model_copy(
+            update={"submission_ref": submission.locator.model_copy(update={"record_id": "other"})}
+        ),
+        report.model_copy(
+            update={"submission_ref": submission.locator.model_copy(update={"revision": 2})}
+        ),
+        report.model_copy(update={"decision": "rejected"}),
+    ):
+        with pytest.raises(ContractBlocked, match="SUBMISSION_REPORT_MISMATCH"):
+            check_submission_report(submission, wrong, ctx, reader)
+    with pytest.raises(ContractBlocked, match="SUBMISSION_REPORT_BODY_MISMATCH"):
+        check_submission_report(
+            submission.model_copy(
+                update={"draft": draft.model_copy(update={"statement": "replaced"})}
+            ),
+            report,
+            ctx,
+            reader,
+        )
+    with pytest.raises(ContractBlocked, match="SUBMISSION_REPORT_BODY_MISMATCH"):
+        check_submission_report(
+            submission, report.model_copy(update={"repair_scope": "replaced"}), ctx, reader
+        )
+    reader.denied = report.locator
+    body_reads = reader.body_reads
+    with pytest.raises(ContractBlocked, match="SUBMISSION_RECORD_UNAVAILABLE"):
+        check_submission_report(submission, report, ctx, reader)
+    assert reader.body_reads == body_reads
+    reader.denied = None
     reads = reader.usage_reads
     assert reads == 3
     reader.usage_subject = locator("InvocationRecord").model_copy(update={"revision": 2})
@@ -327,6 +371,8 @@ def test_report_outcomes_and_usage() -> None:
     for decision in ("needs_evidence", "error", "rejected"):
         decided = submission.model_copy(update={"status": decision, "claim_ref": None})
         evidence = report.model_copy(update={"decision": decision})
+        reader.submissions[decided.locator.model_dump_json()] = decided
+        reader.reports[evidence.locator.model_dump_json()] = evidence
         if decision != "needs_evidence":
             with pytest.raises(ContractBlocked):
                 check_submission_report(decided, evidence, ctx, reader)

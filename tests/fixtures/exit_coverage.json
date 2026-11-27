@@ -6,7 +6,8 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "未贯通完整 G0/G1/G2 与入图"
+    "submission_entry": "check_submission_draft / check_submission_transition",
+    "gap": "已核对固定结果及 received → checking；缺适用 G2 审计材料和权威接受依据"
   },
   {
     "id": "bounded-negative",
@@ -15,7 +16,8 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "仅固定四题有限否定"
+    "submission_entry": "check_submission_draft / check_submission_transition",
+    "gap": "已核对固定四题有限否定及 received → checking；缺适用 G2 审计材料及有限否定接受依据"
   },
   {
     "id": "incomplete-missing-q4",
@@ -24,16 +26,17 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "未作为抽样不确定"
+    "submission_entry": "check_submission_draft / check_submission_transition / check_submission_report",
+    "gap": "缺 q4 经 needs_evidence 报告接收，无分数；抽样不确定仍待覆盖"
   },
   {
     "id": "error-audit-timeout",
     "fixture": "docs/implementation/p0-2/golden/error-audit-timeout.json",
-    "coverage": "not_covered",
-    "entry": null,
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result / check_submission_draft / check_submission_transition",
     "expected_source": "docs/implementation/p0-2/golden/error-audit-timeout.json#expected.submission_status",
-    "receiver": null,
-    "gap": "原样例只描述 G2 超时观察；本轮未将实际观察贯通完整 G2 提交。另有独立 error 报告测试，不计此行完成。"
+    "receiver": "check_submission_report",
+    "gap": "原样例 G2 超时观察经显式适配形成 error 报告；真实超时与认证留服务验收"
   },
   {
     "id": "rejected-number-mismatch",
@@ -42,16 +45,17 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "结果接收拒绝，未代替完整 G0"
+    "submission_entry": "check_submission_draft / check_submission_transition / check_submission_report",
+    "gap": "固定结果接收拒绝错误效应，并贯通 G0 fail 和拒绝报告；完整 G0 仍开放"
   },
   {
     "id": "rejected-overbroad-scope",
     "fixture": "docs/implementation/p0-2/golden/rejected-overbroad-scope.json",
-    "coverage": "not_covered",
-    "entry": null,
+    "coverage": "path_subset",
+    "entry": "calculate_fixed_result / require_fixed_result / check_submission_draft / check_submission_transition",
     "expected_source": "原样例 expected 与附录 C 手算",
-    "receiver": null,
-    "gap": "未把原变体贯通正式提交链"
+    "receiver": "check_submission_report",
+    "gap": "固定四题精确 Scope 不符，保留原正文及引用并接收拒绝报告；通用 Scope 映射仍开放"
   },
   {
     "id": "rejected-duplicate-q3",
@@ -60,7 +64,8 @@
     "entry": "calculate_fixed_result / require_fixed_result",
     "expected_source": "原样例 expected 与附录 C 手算",
     "receiver": "require_fixed_result",
-    "gap": "显式消费原变体每条追加观测，验证四题分母与错误分母拒绝；未代替完整提交"
+    "submission_entry": "check_submission_draft / check_submission_transition / check_submission_report",
+    "gap": "原追加观测逐行进入去重，保留四题分母，拒绝原变体报告的 14 并接收拒绝报告"
   },
   {
     "id": "recovery-collector-crash",

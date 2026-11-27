@@ -191,6 +191,8 @@ class SubmissionReader(ReadOnlyPort, Protocol):
 
     def run(self, ctx: RequestContext, ref: ScientificRef) -> RunFact | None: ...
     def record(self, ctx: RequestContext, ref: RecordLocator) -> RecordFact | None: ...
+    def submission(self, ctx: RequestContext, ref: RecordLocator) -> ClaimSubmission | None: ...
+    def evidence_report(self, ctx: RequestContext, ref: RecordLocator) -> EvidenceReport | None: ...
     def gate(self, ctx: RequestContext, ref: RecordLocator) -> GateExecution | None: ...
     def observations(
         self, ctx: RequestContext, binding: ObservationBinding
@@ -237,15 +239,19 @@ def check_submission_draft(
     draft = ClaimSubmissionDraft.model_validate(draft)
     if ctx.role != "A5":
         raise ContractBlocked("SUBMISSION_ROLE_FORBIDDEN")
-    return _check_draft_references(draft, ctx, port)
+    runs, scope_matches = _check_draft_references(draft, ctx, port)
+    if not scope_matches:
+        raise ContractBlocked("SUBMISSION_RUN_MISMATCH")
+    return runs
 
 
 def _check_draft_references(
     draft: ClaimSubmissionDraft, ctx: RequestContext, port: SubmissionReader
-) -> dict[tuple[str, str], RunRequestRecord]:
+) -> tuple[dict[tuple[str, str], RunRequestRecord], bool]:
     for ref in [draft.scope_ref, draft.protocol_ref, draft.prereg_ref, *draft.premise_refs]:
         require_reference(ctx, ref, port)
     runs = {}
+    scope_matches = True
     for ref in draft.run_ids:
         require_reference(ctx, ref, port)
         fact = port.run(ctx, ref)
@@ -259,11 +265,12 @@ def _check_draft_references(
             or not run.deterministic
             or run.mode_inputs.protocol_ref != draft.protocol_ref
             or run.prereg_ref != draft.prereg_ref
-            or fact.scope_ref != draft.scope_ref
         ):
             raise ContractBlocked("SUBMISSION_RUN_MISMATCH")
+        require_reference(ctx, fact.scope_ref, port)
+        scope_matches &= fact.scope_ref == draft.scope_ref
         runs[(ref.object_id, ref.content_version)] = run
-    return runs
+    return runs, scope_matches
 
 
 def _record(
@@ -297,7 +304,12 @@ def check_submission_report(
         raise ContractBlocked("SUBMISSION_REPORT_MISMATCH")
     _record(ctx, port, submission.locator, "R13")
     _record(ctx, port, report.locator)
-    runs = _check_draft_references(submission.draft, ctx, port)
+    if (
+        port.submission(ctx, submission.locator) != submission
+        or port.evidence_report(ctx, report.locator) != report
+    ):
+        raise ContractBlocked("SUBMISSION_REPORT_BODY_MISMATCH")
+    runs, scope_matches = _check_draft_references(submission.draft, ctx, port)
     if submission.claim_ref is not None:
         require_reference(ctx, submission.claim_ref, port)
     for basis in report.basis_refs:
@@ -334,7 +346,6 @@ def check_submission_report(
         results.setdefault(gate.gate, set()).add(gate.result)
 
     covered = set()
-    seen_runs = set()
     for binding in report.observation_bindings:
         key = (binding.run_ref.object_id, binding.run_ref.content_version)
         run = runs.get(key)
@@ -344,7 +355,6 @@ def check_submission_report(
             or binding.protocol_ref != submission.draft.protocol_ref
         ):
             raise ContractBlocked("OBSERVATION_BINDING_MISMATCH")
-        seen_runs.add(key)
         _record(ctx, port, binding.attempt_ref, "R08")
         require_reference(ctx, binding.policy_ref, port)
         inputs = port.observations(ctx, binding)
@@ -354,12 +364,17 @@ def check_submission_report(
         view = evaluate_fixed_four(binding, policy, rows)
         if view.status == "valid":
             covered.add(key)
+    if not scope_matches and (report.decision != "rejected" or results.get("G0") != {"fail"}):
+        raise ContractBlocked("SUBMISSION_RUN_MISMATCH")
     if report.decision == "accepted" and (
         results != {"G0": {"pass"}, "G1": {"pass"}, "G2": {"pass"}} or covered != runs.keys()
     ):
         raise ContractBlocked("SUBMISSION_ACCEPTANCE_EVIDENCE_MISMATCH")
-    if report.decision == "rejected" and not any("fail" in r for r in results.values()):
-        raise ContractBlocked("SUBMISSION_REJECTION_EVIDENCE_MISMATCH")
+    if report.decision == "rejected":
+        if any("error" in r for r in results.values()):
+            raise ContractBlocked("SUBMISSION_TERMINAL_CAUSE_UNRESOLVED")
+        if not any("fail" in r for r in results.values()):
+            raise ContractBlocked("SUBMISSION_REJECTION_EVIDENCE_MISMATCH")
     if report.decision == "needs_evidence" and (
         any(r.intersection({"fail", "error"}) for r in results.values())
         or (covered == runs.keys() and not any("needs_evidence" in r for r in results.values()))

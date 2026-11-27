@@ -10,6 +10,7 @@ from pydantic import ValidationError
 
 from danus_ai.contracts import calculate_fixed_result, require_fixed_result
 from danus_ai.contracts.guards import ContractBlocked
+from tests.contracts.fixed_submission_path import verify_submission_path
 from tests.contracts.test_audit_evidence import (
     test_audit_call_receive_and_precise_result as verify_audit_call_receive_and_precise_result,
 )
@@ -41,6 +42,8 @@ def run_case(case: dict[str, Any]) -> dict[str, str]:
         "incomplete-missing-q4",
         "rejected-number-mismatch",
         "rejected-duplicate-q3",
+        "error-audit-timeout",
+        "rejected-overbroad-scope",
     }:
         r = Reader()
         q, _ = fixed("positive", r)
@@ -52,6 +55,10 @@ def run_case(case: dict[str, Any]) -> dict[str, str]:
             assert inputs["base_fixture_ref"] == positive["fixture_id"]
         rows = deepcopy(inputs.get("evaluator_only_rows", positive["input"]["evaluator_only_rows"]))
         rows.extend(deepcopy(inputs.get("append_evaluator_only_rows", [])))
+        assert r.lock is not None
+        assert all(
+            r.lock.policy.expected_labels.get(row["sample_id"]) == row["label"] for row in rows
+        )
         body = deepcopy(r.body)
         for arm in ("baseline", "method"):
             binding = body[arm]
@@ -74,15 +81,19 @@ def run_case(case: dict[str, Any]) -> dict[str, str]:
         elif key == "incomplete-missing-q4":
             assert v.status == raw["expected"]["scientific_validity"] == "incomplete"
             assert v.effect is v.baseline_accuracy is v.method_accuracy is None
-        else:
+        elif key in {"rejected-number-mismatch", "rejected-duplicate-q3"}:
             if key == "rejected-number-mismatch":
                 payload = v.model_copy(update=inputs["report_override"])
             else:
                 assert v.status == "valid"
                 assert v.denominator == 4 and v.effect == "0.25"
-                payload = v.model_copy(update={"denominator": len(rows)})
+                assert len(rows) == inputs["reported_evaluation_unit_count"]
+                payload = v.model_copy(
+                    update={"denominator": inputs["reported_evaluation_unit_count"]}
+                )
             with pytest.raises((ContractBlocked, ValidationError)):
                 require_fixed_result(q, payload, CTX, r)
+        verify_submission_path(positive["input"], raw, r, q, v)
     elif key == "candidate-revision":
         verify_golden()
     elif key.startswith("invalidation/"):

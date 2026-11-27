@@ -41,3 +41,5 @@ C 组 C-S01～C-S07 补充字段已[限定签收](p1-2-c-selection-lock-fields.m
 失效证据子集及 I-R01 审计整改已由 A0 于 2026.11.18 限定签收（aad0fe493090a2840e1ce6f799b7510fbf342467）。I-R03 权威适用映射仍待决定。原发现、原始及整改 CI 的日志限制和 SQLite 跳过证据保留。 见[限定签收](decisions/A0-P1-2-invalidation-acceptance.md)。[数字性质与固定枚举结果](p1-2-numeric-contract.md)已交付已定入口，数值推断、通用统计、计量等出口继续开放。
 
 数字性质与固定枚举结果已由 A0 于 2026.11.23 限定签收，提交 4dec2fafd18ef948995a8fb51f65189654980f41，包含 N-R01、N-R02 整改。原发现、两次 CI 的实际 SHA、详细日志限制和 SQLite 跳过口径保留。 [审计与复审证据合同及统一出口](p1-2-audit-evidence-delivery.md)补齐候选审计、单目标复审定位及已定发布引用子集。通用审计材料、完整队列合同、剩余 §5.1 对象及 D 组整体仍开放。
+
+A0 于 2026-11-26 限定签收前序审计子集及 A-R01／A-R02 整改，见[审计验收记录](decisions/A0-P1-2-audit-evidence-acceptance.md)。2026-11-27 授权的[固定四题提交与报告工作包](p1-2-fixed-submission-delivery.md)补终态拒绝、补证和审计错误报告接收，工程交付待人工签收。正面和有限否定仅至 checking，适用审计材料及接受依据待齐。
